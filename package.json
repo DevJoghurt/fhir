@@ -1,0 +1,45 @@
+{
+	"name": "fhir-framework",
+	"private": true,
+	"version": "0.0.1",
+	"description": "Build FHIR applications with Nuxt",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DevJoghurt/fhir.git"
+	},
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/module.mjs",
+			"require": "./dist/module.cjs"
+		}
+	},
+	"scripts": {
+		"build": "pnpm --filter './packages/**' prepack",
+		"build:stub": "pnpm dev:prepare",
+		"cleanup": "rimraf 'packages/**/node_modules' 'playground/node_modules' 'node_modules'",
+		"dev": "pnpm play",
+		"dev:prepare": "pnpm --filter './packages/**' prepack --stub && pnpm --filter './packages/ui-templates' build",
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --cache --fix",
+		"play": "nuxi dev playground",
+		"play:build": "nuxi build playground",
+		"play:generate": "nuxi generate playground",
+		"play:preview": "nuxi preview playground",
+		"typecheck": "tsc --noEmit",
+		"medplum": "docker compose -f ./medplum/docker-compose.yml up --force-recreate --build"
+	},
+	"resolutions": {
+		"@nhealth/ui": "workspace:*",
+        "nuxt": "3.13.2",
+		"@nuxt/kit": "3.13.2"
+	},
+	"devDependencies": {
+        "nuxt": "^3.13.2",
+        "vitest": "^2.1.1",
+        "rimraf": "^6.0.1",
+        "@nuxt/module-builder": "^0.8.4"
+	}
+}
