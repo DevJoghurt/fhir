@@ -7,7 +7,7 @@ export const app = createApp();
 
 const publicDir = './node_modules/@medplum/app/dist';
 
-const MEDPLUM_BASE_URL = 'http://localhost:5000/';
+const MEDPLUM_BASE_URL = 'http://localhost:8103/';
 const MEDPLUM_CLIENT_ID = '';
 const MEDPLUM_REGISTER_ENABLED = 'false';
 const GOOGLE_CLIENT_ID = '';
