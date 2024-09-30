@@ -7,6 +7,8 @@
       "start": "nuxi preview"
     },
     "dependencies": {
-      "nuxt": "*"
+      "nuxt": "*",
+      "@nhealth/fhir-ui": "workspace:*",
+      "@nhealth/fhir-core": "workspace:*"
     }
 }
