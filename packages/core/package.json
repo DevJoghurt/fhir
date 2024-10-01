@@ -1,7 +1,7 @@
 {
-	"name": "@nhealth/fhir-core",
+	"name": "@nhealth/fhir",
 	"version": "0.0.0",
-	"description": "Medplum integration for Nuxt",
+	"description": "Create FHIR applications with Nuxt based on Medplum Fhir server",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
@@ -30,7 +30,11 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "3.13.2",
-		"@medplum/core": "3.2.16"
+		"@nuxt/ui": "next",
+		"@medplum/core": "3.2.16",
+		"@medplum/fhirtypes": "3.2.16",
+		"tailwindcss": "4.0.0-alpha.24",
+		"defu": "^6.1.4"
 	},
 	"devDependencies": {
 		"@nuxt/module-builder": "0.8.4"

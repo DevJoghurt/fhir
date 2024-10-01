@@ -2,7 +2,9 @@ import {
 	defineNuxtModule,
 	createResolver,
 	addPlugin,
-	addImports
+	addImports,
+	hasNuxtModule,
+	installModule
   } from '@nuxt/kit'
 import { defu } from 'defu'
 
@@ -11,7 +13,7 @@ type ModuleOptions = {
 }
 
 const meta = {
-	name: 'fhir-core',
+	name: '@nhealth/fhir',
 	version: '0.1',
 	configKey: 'fhir',
 };
@@ -23,6 +25,11 @@ export default defineNuxtModule<ModuleOptions>({
 	},
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);
+
+		if(!hasNuxtModule('@nuxt/ui')){
+			installModule('@nuxt/ui')
+		}
+		nuxt.options.css.push(resolve('./runtime/tailwind.css'))
 
 		addPlugin(resolve('./runtime/plugins/medplum'));
 

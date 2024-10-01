@@ -36,8 +36,8 @@
 		"medplum": "docker compose -f ./medplum/docker-compose.yml up --force-recreate --build"
 	},
 	"resolutions": {
-		"@nhealth/fhir-ui": "workspace:*",
-		"@nhealth/fhir-core": "workspace:*",
+		"@nhealth/fhir": "workspace:*",
+		"@nhealth/app": "workspace:*",
         "nuxt": "3.13.2",
 		"@nuxt/kit": "3.13.2",
 		"@medplum/core": "3.2.16",

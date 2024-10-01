@@ -28,6 +28,10 @@ export function useMedplum(medplum?: MedplumClient) : MedplumContext {
 		loading: client.isLoading()
 	});
 
+	//TODO: Add event listener only client side and only once
+
+
+
 	const eventListener = () : void => {
 		medplumState.profile = client.getProfile() as ProfileResource
 		medplumState.loading = client.isLoading();
