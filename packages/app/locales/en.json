@@ -1,0 +1,24 @@
+{
+    "login": {
+        "title": "test"
+    },
+    "profile": {
+        "dropdownSignedInAs": "Signed in as",
+        "settings": "Settings",
+        "account": "Account",
+        "accountSettingsTitle": "Personal Information",
+        "accountSettingsDescription": "Change your personal informations and settings"
+    },
+    "auth": {
+        "pageLoginTitle": "Login",
+        "email": "Email",
+        "password": "Password",
+        "signInButton": "Sign In",
+        "signOutButton": "Sign Out",
+        "errorEmailEmpty": "Email is required",
+        "errorEmailInvalid": "Email is invalid",
+        "errorPasswordEmpty": "Password is required",
+        "errorWrongPassword": "Password is wrong",
+        "errorUserNotFound": "User not found"
+    }
+}

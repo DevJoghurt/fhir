@@ -1,0 +1,24 @@
+{
+    "login": {
+        "title": "test"
+    },
+    "profile": {
+        "dropdownSignedInAs": "Benutzer",
+        "settings": "Einstellungen",
+        "account": "Benutzer",
+        "accountSettingsTitle": "Persönliche Informationen",
+        "accountSettingsDescription": "Ändere hier deine persönlichen Informationen und Einstellungen"
+    },
+    "auth": {
+        "pageLoginTitle": "Anmelden",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "signInButton": "Anmelden",
+        "signOutButton": "Abmelden",
+        "errorEmailEmpty": "E-Mail darf nicht leer sein",
+        "errorEmailInvalid": "E-Mail ist ungültig",
+        "errorPasswordEmpty": "Passwort darf nicht leer sein",
+        "errorWrongPassword": "Das angegebene Passwort ist falsch",
+        "errorUserNotFound": "Der angegebene Benutzer konnte nicht gefunden werden"
+    }
+}

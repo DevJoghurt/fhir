@@ -8,7 +8,6 @@
     },
     "dependencies": {
       "nuxt": "*",
-      "@nhealth/fhir-ui": "workspace:*",
-      "@nhealth/fhir-core": "workspace:*"
+      "@nhealth/app": "workspace:*"
     }
 }

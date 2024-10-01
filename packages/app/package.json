@@ -1,0 +1,25 @@
+{
+	"name": "@nhealth/app",
+	"version": "0.0.0",
+	"description": "FHIR application layer for Nuxt based on Medplum Fhir server",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DevJoghurt/fhir.git",
+		"directory": "packages/ui"
+	},
+    "license": "MIT",
+    "type": "module",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./nuxt.config.ts",
+	"types": "./types.d.ts",
+	"scripts": {
+	},
+	"dependencies": {
+		"@nhealth/fhir": "workspace:*",
+		"@nuxtjs/i18n": "^8.5.5"
+	},
+	"devDependencies": {
+	}
+}
