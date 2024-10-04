@@ -4,13 +4,11 @@ import {
 	addPlugin,
 	addImports,
 	hasNuxtModule,
-	installModule
+	installModule,
+	addComponentsDir
   } from '@nuxt/kit'
 import { defu } from 'defu'
-
-type ModuleOptions = {
-	serverUrl: string;
-}
+import type { ModuleOptions } from './types'
 
 const meta = {
 	name: '@nhealth/fhir',
@@ -39,9 +37,17 @@ export default defineNuxtModule<ModuleOptions>({
 			from: resolve('./runtime/composables/useMedplum')
 		});
 
+		addComponentsDir({
+			path: resolve('./runtime/components'),
+			prefix: 'Fhir',
+			global: true
+		});
+
 		nuxt.options.runtimeConfig.public.fhir = defu(nuxt.options.runtimeConfig.public.fhir || {}, {
 			serverUrl: options.serverUrl
 		});
+
+		nuxt.options.alias['#fhir'] = resolve('./runtime/types.d.ts');
 
 	}
 });

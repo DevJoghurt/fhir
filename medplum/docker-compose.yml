@@ -2,7 +2,6 @@ services:
   postgres:
     image: postgres:12
     container_name: medplum-postgres
-    restart: always
     environment:
       - POSTGRES_USER=medplum
       - POSTGRES_PASSWORD=medplum
@@ -15,7 +14,6 @@ services:
   redis:
     image: redis:7
     container_name: medplum-redis
-    restart: always
     command: redis-server --requirepass medplum
     expose:
       - '6379'
