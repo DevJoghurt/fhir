@@ -23,7 +23,7 @@
 	"scripts": {
 		"build": "pnpm --filter \"./packages/**\" prepack",
 		"build:stub": "pnpm dev:prepare",
-		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/node_modules\"",
+		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/node_modules\" \"node_modules\"",
 		"dev": "pnpm play",
 		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub",
 		"lint": "eslint . --cache",
@@ -37,6 +37,7 @@
 	},
 	"resolutions": {
 		"@nhealth/fhir": "workspace:*",
+		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
         "nuxt": "3.13.2",
 		"@nuxt/kit": "3.13.2",

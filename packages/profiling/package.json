@@ -1,11 +1,11 @@
 {
-	"name": "@nhealth/fhir",
+	"name": "@nhealth/fhir-profiling",
 	"version": "0.0.0",
-	"description": "Create FHIR applications with Nuxt based on Medplum Fhir server",
+	"description": "FHIR profiling module for Nuxt based on sushi and fsh",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
-		"directory": "packages/ui"
+		"directory": "packages/fhir-profiling"
 	},
     "license": "MIT",
     "type": "module",
@@ -30,14 +30,13 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "3.13.2",
+		"@nuxt/schema": "3.13.2",
 		"@nuxt/ui": "next",
-		"@medplum/core": "3.2.16",
-		"@medplum/fhirtypes": "3.2.16",
-		"tailwindcss": "4.0.0-alpha.24",
-		"hookable": "^5.5.3",
-		"defu": "^6.1.4"
+		"fsh-sushi": "^3.11.1",
+		"fhir-package-loader": "^1.0.0",
+		"globby": "^14.0.2"
 	},
 	"devDependencies": {
-		"@nuxt/module-builder": "0.8.4"
+		"typescript": "^5.6.2"
 	}
 }
