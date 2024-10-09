@@ -58,19 +58,20 @@
         })
     })
 
-        watch(() => loading, (value) => {
-            console.log('loading', value)
-        })
+    watch(() => loading, (value) => {
+        console.log('loading', value)
+    })
 
-    const errorOutcome = ref(undefined) as Ref<OperationOutcome | undefined>
+    const errorOutcome = ref(undefined) as Ref<OperationOutcome | undefined>;
 
-    type AuthSchema = z.output<typeof schema>
+    type AuthSchema = z.output<typeof schema>;
 
 	async function onSubmit (event: FormSubmitEvent<AuthSchema>) {
-        const { email, password } = event.data
-        const {credentials, error } = await login(email, password)
+        const { email, password } = event.data;
+        const {credentials, error } = await login(email, password);
         if (error) {
-            errorOutcome.value = error
+            errorOutcome.value = error;
+            return;
         }
     }
 </script>

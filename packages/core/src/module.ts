@@ -5,9 +5,14 @@ import {
 	addImports,
 	hasNuxtModule,
 	installModule,
-	addComponentsDir
+	addComponentsDir,
+	addServerImportsDir,
+	addServerHandler
   } from '@nuxt/kit'
 import { defu } from 'defu'
+import { randomUUID } from 'node:crypto'
+import { writeFile, readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { ModuleOptions } from './types'
 
 const meta = {
@@ -25,25 +30,69 @@ export default defineNuxtModule<ModuleOptions>({
 		const { resolve } = createResolver(import.meta.url);
 
 		if(!hasNuxtModule('@nuxt/ui')){
-			installModule('@nuxt/ui')
+			installModule('@nuxt/ui');
 		}
-		nuxt.options.css.push(resolve('./runtime/tailwind.css'))
+		nuxt.options.css.push(resolve('./runtime/tailwind.css'));
 
-		addPlugin(resolve('./runtime/plugins/medplum'));
-
+		// add all app related things here
+		addPlugin(resolve('./runtime/app/plugins/medplum'));
 		addImports({
 			name: 'useMedplum',
 			as: 'useMedplum',
-			from: resolve('./runtime/composables/useMedplum')
+			from: resolve('./runtime/app/composables/useMedplum')
 		});
-
 		addComponentsDir({
-			path: resolve('./runtime/components'),
+			path: resolve('./runtime/app/components'),
 			prefix: 'Fhir',
 			global: true
 		});
 
-		nuxt.options.runtimeConfig.public.fhir = defu(nuxt.options.runtimeConfig.public.fhir || {}, {
+		// add all server related things here
+		addServerImportsDir(resolve('./runtime/server/utils'));
+		addServerHandler({
+		  handler: resolve('./runtime/server/api/session.delete'),
+		  route: '/api/_auth/session',
+		  method: 'delete',
+		});
+		addServerHandler({
+		  handler: resolve('./runtime/server/api/session.get'),
+		  route: '/api/_auth/session',
+		  method: 'get',
+		});
+
+		// START AUTH SESSION CONFIG based on nuxt-auth-utils
+		const runtimeConfig = nuxt.options.runtimeConfig;
+		const envSessionPassword = `${
+			runtimeConfig.nitro?.envPrefix || 'NUXT_'
+		}SESSION_PASSWORD`;
+
+		runtimeConfig.session = defu(runtimeConfig?.session || {}, {
+			name: 'fhir-session',
+			password: process.env[envSessionPassword] || '',
+			cookie: {
+				sameSite: 'lax',
+			},
+		});
+
+		// Generate the session password
+		if (nuxt.options.dev && !runtimeConfig.session.password) {
+			runtimeConfig.session.password = randomUUID().replace(/-/g, '');
+			// Add it to .env
+			const envPath = join(nuxt.options.rootDir, '.env');
+			const envContent = await readFile(envPath, 'utf-8').catch(() => '');
+			if (!envContent.includes(envSessionPassword)) {
+				await writeFile(
+				envPath,
+				`${
+					envContent ? envContent + '\n' : envContent
+				}${envSessionPassword}=${runtimeConfig.session.password}`,
+				'utf-8',
+				);
+			}
+		}
+		// END AUTH SESSION CONFIG based on nuxt-auth-utils
+
+		runtimeConfig.public.fhir = defu(runtimeConfig.public.fhir || {}, {
 			serverUrl: options.serverUrl
 		});
 

@@ -1,21 +1,32 @@
-import type { MedplumClient, ProfileResource, MedplumClientEventMap, LoginAuthenticationResponse } from '@medplum/core';
+import type {
+	MedplumClient,
+	ProfileResource,
+	MedplumClientEventMap,
+	LoginAuthenticationResponse
+} from '@medplum/core';
 import {
 	normalizeOperationOutcome,
   } from '@medplum/core';
-import type { OperationOutcome } from '@medplum/fhirtypes';
-import { useNuxtApp, callOnce, onMounted, reactive, toRefs, type Ref } from '#imports';
+import type {
+	OperationOutcome
+} from '@medplum/fhirtypes';
+import { useNuxtApp, callOnce, onMounted, reactive, toRefs, type Ref, useState, computed, useRequestFetch  } from '#imports';
+import type { UserSession } from '#fhir'
 
 type LoginReturn = Promise<{
 	credentials: LoginAuthenticationResponse | null;
-	error: OperationOutcome | null;
+	error: OperationOutcome | undefined;
 }>
 
-export interface MedplumContext {
+interface MedplumContext {
 	medplum: MedplumClient;
 	profile: Ref<ProfileResource>;
 	loading: Ref<boolean>;
 	login: (email: string, password: string) => LoginReturn;
 }
+
+const useSessionState = () => useState<UserSession>('fhir-session', () => ({}))
+const useAuthReadyState = () => useState('fhir-auth-ready', () => false)
 
 const EVENTS_TO_TRACK = [
 	'change',
@@ -36,6 +47,9 @@ export function useMedplum(medplum?: MedplumClient) : MedplumContext {
 		throw new Error('Medplum client not found');
 	}
 
+	const sessionState = useSessionState()
+	const authReadyState = useAuthReadyState()
+
 	const medplumState = reactive({
 		profile: client.getProfile() as ProfileResource,
 		loading: client.isLoading()
@@ -43,7 +57,7 @@ export function useMedplum(medplum?: MedplumClient) : MedplumContext {
 
 	const login = async (email: string, password: string) : LoginReturn => {
 		let credentials = null as LoginAuthenticationResponse | null
-		let error = null as OperationOutcome | null
+		let error = undefined as OperationOutcome | undefined
 		try {
             credentials = await client.startLogin({
 				email,

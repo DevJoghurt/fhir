@@ -1,3 +1,3 @@
 export type ModuleOptions = {
-	serverUrl: string;
+	serverUrl?: string;
 }

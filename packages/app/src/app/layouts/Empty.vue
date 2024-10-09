@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <UApp>
         <slot />
-    </div>
+    </UApp>
 </template>
 <script setup lang="ts">
     import { useHead } from '#imports'
