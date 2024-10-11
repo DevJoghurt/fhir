@@ -2,9 +2,9 @@
 	<div>
 		<TreeRoot
 			v-slot="{ flattenItems }"
-			class="list-none select-none w-56 bg-white text-blackA11 rounded-lg p-2 text-sm font-medium"
-			:items="transformedItems.children"
-			:get-key="(item) => item.title"
+			class="w-full list-none select-none w-56 bg-white text-blackA11 rounded-lg p-2 text-sm font-medium"
+			:items="transform(props.items)"
+			:get-key="(item) => item.id"
 			:default-expanded="['components']"
 		>
 			<h2 class="font-semibold !text-base text-blackA11 px-2 pt-1">
@@ -16,17 +16,17 @@
 				:key="item._id"
 				:style="{ 'padding-left': `${item.level - 0.5}rem` }"
 				v-bind="item.bind"
-				class="flex items-center py-1 px-2 my-0.5 rounded outline-none focus:ring-grass8 focus:ring-2 data-[selected]:bg-grass4"
+				class="flex items-center w-full py-1 px-2 my-0.5 rounded outline-none focus:ring-grass8 focus:ring-2 data-[selected]:bg-grass4"
 			>
 				<template v-if="item.hasChildren">
 					<Icon
 						v-if="!isExpanded"
-						name="lucide:folder"
+						name="lucide:circle-plus"
 						class="h-4 w-4"
 					/>
 					<Icon
 						v-else
-						name="lucide:folder-open"
+						name="lucide:circle-minus"
 						class="h-4 w-4"
 					/>
 				</template>
@@ -43,6 +43,7 @@
 	</div>
 </template>
 <script setup lang="ts">
+	import { defineProps, PropType } from '#imports'
 	import { TreeItem, TreeRoot } from 'radix-vue'
 	import { ElementDefinition } from '@medplum/fhirtypes'
 
@@ -55,7 +56,6 @@
 			id: 'root',
 			children: []
 		};
-		const data = [];
         const itemMap: { [key: string]: TreeItem }[] = [];
 
         items.forEach(item => {
@@ -65,16 +65,14 @@
             parts.forEach((part, index) => {
                 const id = parts.slice(0, index + 1).join('.');
                 if (!itemMap[id]) {
-                    const newItem: TreeItem = { id, title: part ,children: [] };
+                    const newItem: TreeItem = { title: part, ...item };
                     itemMap[id] = newItem;
+					current.children = current.children || [];
                     current.children.push(newItem);
                 }
                 current = itemMap[id];
             });
         });
-
-        return root;
+        return root.children;
     }
-
-	const transformedItems = transform(props.items);
 </script>

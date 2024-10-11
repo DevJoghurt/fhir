@@ -39,6 +39,7 @@
 		"@nuxt/ui": "next",
 		"@nuxt/content": "^2.13.2",
 		"@medplum/fhirtypes": "^3.2.17",
+		"radix-vue": "^1.9.7",
 		"fsh-sushi": "^3.11.1",
 		"fhir-package-loader": "^1.0.0",
 		"globby": "^14.0.2",

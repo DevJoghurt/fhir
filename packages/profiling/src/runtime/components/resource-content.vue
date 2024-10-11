@@ -7,9 +7,14 @@
 						<h1 class="text-lg font-thin">Resource Profile: {{ data[0].id }}</h1>
 					</template>
 					<UTabs :items="tabs" class="w-full">
-						<template #summary="{ label }">
+						<template #snapshot-table="{ label }">
 							<div>
 								<ResourceTree :items="data[0].snapshot.element" />
+							</div>
+						</template>
+						<template #differential-table="{ label }">
+							<div>
+								<ResourceTree :items="data[0].differential.element" />
 							</div>
 						</template>
 					</UTabs>
@@ -25,13 +30,10 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { TreeItem, TreeRoot } from 'radix-vue'
-
 	const tabs = [
 		{ label: 'Summary', slot: 'summary' },
 		{ label: 'Differential Table', slot: 'differential-table' },
 		{ label: 'Snapshot Table', slot: 'snapshot-table' },
 		{ label: 'Snapshot Table (Must)', slot: 'snapshot-table-must' },
 	];
-
 </script>
