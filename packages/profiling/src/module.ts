@@ -3,10 +3,11 @@ import {
 	createResolver,
 	hasNuxtModule,
 	installModule,
-	useLogger
+	useLogger,
+	addComponentsDir
   } from '@nuxt/kit';
-  import { join } from 'node:path';
   import { readFSHFiles, createFhirResources } from './sushi';
+  import { join } from 'node:path';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -36,7 +37,8 @@ export default defineNuxtModule<ModuleOptions>({
 		// get all fsh files in profiles/fsh folder for fhir sushi -> respecting nuxt layers
 		logger.info('Fhir Profiling: Reading FSH files');
 		const fshFiles = [] as string[];
-		for (const layer of nuxt.options._layers) {
+		let projectFolder = nuxt.options.srcDir;
+		for (const [i, layer] of nuxt.options._layers.entries()) {
 			const files = await readFSHFiles(layer.config);
 			if(options.verbose){
 				for (const file of files) {
@@ -44,11 +46,35 @@ export default defineNuxtModule<ModuleOptions>({
 				}
 			}
 			fshFiles.push(...files);
+			// Always use base layer as project folder
+			if(i===0) projectFolder = layer.config.rootDir;
 		}
+
 		// Create FHIR Implementation Guides
-		createFhirResources(fshFiles, {
-			outDir: join(nuxt.options.rootDir, 'export'),
+		await createFhirResources(fshFiles, {
+			rootDir: projectFolder,
+			outDir: projectFolder,
 			snapshot: true
+		});
+
+		if(!hasNuxtModule('@nuxt/content')){
+			installModule('@nuxt/content', {
+				documentDriven: true,
+				sources: {
+					// overwrite default source AKA `content` directory
+					content: {
+					  driver: 'fs',
+					  prefix: '/docs', // All contents inside this source will be prefixed with `/`
+					  base: join(projectFolder, 'fsh-generated')
+					}
+				}
+			});
+		}
+
+		addComponentsDir({
+			path: resolve('./runtime/components'),
+			global: true,
+			watch: true
 		});
 	}
 })

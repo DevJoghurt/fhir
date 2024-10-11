@@ -36,16 +36,19 @@
 		"medplum": "docker compose -f ./medplum/docker-compose.yml up --force-recreate --build"
 	},
 	"resolutions": {
+		"nhealth": "workspace:*",
 		"@nhealth/fhir": "workspace:*",
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
         "nuxt": "3.13.2",
+		"@nuxt/ui": "3.0.0-alpha.6",
 		"@nuxt/kit": "3.13.2",
 		"@medplum/core": "3.2.16",
 		"@medplum/fhirtypes": "3.2.16"
 	},
 	"devDependencies": {
         "nuxt": "3.13.2",
+		"nhealth": "*",
         "vitest": "2.1.1",
         "rimraf": "6.0.1",
         "@nuxt/module-builder": "0.8.4",

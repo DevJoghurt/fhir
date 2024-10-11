@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   future: {
 		compatibilityVersion: 4,
 	},
+  colorMode: {
+    preference: 'light'
+  },
   devtools: {
     enabled: true
   },

@@ -1,14 +1,23 @@
 import { globby } from 'globby';
-import type { NuxtConfigLayer } from '@nuxt/schema';
 import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve, join } from 'node:path';
+import { defu } from 'defu';
+import Markdown from './markdown';
 
-export async function readFSHFiles(layerConfig: NuxtConfigLayer['config']): Promise<string[]> {
+const profileFolder = 'profiles';
 
-	const files = await globby('profiles/fsh/**/*.fsh', {
-		cwd: layerConfig.rootDir,
+type ReadFSHFilesOptions = {
+	rootDir: string;
+};
+
+export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters'>
+
+export async function readFSHFiles(config: ReadFSHFilesOptions): Promise<string[]> {
+
+	const files = await globby(`${profileFolder}/fsh/**/*.fsh`, {
+		cwd: config.rootDir,
 		absolute: true,
 		deep: 2,
 	});
@@ -17,6 +26,7 @@ export async function readFSHFiles(layerConfig: NuxtConfigLayer['config']): Prom
 }
 
 type CreateFhirOptions = {
+	rootDir: string;
 	outDir: string;
 	snapshot: boolean;
 };
@@ -34,12 +44,12 @@ export async function createFhirResources(files: string[], opts: CreateFhirOptio
 
 	const docs = sushiImport.importText(rawFSH);
 
-	const config = {
-		FSHOnly: true,
+
+	const config = defineSushiConfig({
 		fhirVersion: ['4.0.1'],
 		canonical: 'http://example.com/fsh',
 		dependencies: [{packageId: "hl7.fhir.us.core", version: "3.1.0"}]
-	} as fshtypes.Configuration;
+	});
 
 	const tank = new sushiImport.FSHTank(docs, config);
 
@@ -47,10 +57,8 @@ export async function createFhirResources(files: string[], opts: CreateFhirOptio
 
 	await utils.loadExternalDependencies(defs, config);
 
-	 // Load custom resources. In current tank configuration (input/fsh), resources will be in input/
-	 if(config.parameters){
-		//TODO: fhirdefs.loadCustomResources(path.join(input, '..'), originalInput, config.parameters, defs);
-	 }
+	// Load custom resources. In current tank configuration (input/fsh), resources will be in input/
+	fhirdefs.loadCustomResources(join(opts.rootDir, profileFolder), join(opts.rootDir, profileFolder), config?.parameters || [], defs);
 
 	 // Check for StructureDefinition
 	 const structDef = defs.fishForFHIR('StructureDefinition', utils.Type.Resource);
@@ -75,4 +83,34 @@ export async function createFhirResources(files: string[], opts: CreateFhirOptio
 		 )}`
 	   );
 	 }
+
+	 createFhirDocs(opts.outDir);
+
+}
+
+export function createFhirDocs(dir: string) {
+
+	// Write out the markdown
+	const doc = new Markdown();
+	doc.meta({
+		title: 'FHIR Implementation Guide',
+		description: 'This is a generated FHIR Implementation Guide.'
+	});
+	doc.heading('FHIR Implementation Guide', 1);
+	doc.text('This is a generated FHIR Implementation Guide.');
+	doc.heading('Table of Contents', 2);
+	doc.text('This is a table of contents.');
+	doc.heading('Introduction', 2);
+	doc.text('This is an introduction.');
+	doc.component('ResourceContent')
+	const markdownFilePath = join(dir, 'fsh-generated', 'index.md');
+	console.log(doc.getDocument())
+	writeFileSync(markdownFilePath, doc.getDocument(), 'utf8');
+
+}
+
+export function defineSushiConfig(config: SushiConfiguration) {
+	return defu(config, {
+		FSHOnly: true
+	});
 }
