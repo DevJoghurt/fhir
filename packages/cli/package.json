@@ -1,0 +1,40 @@
+{
+	"name": "nhealth",
+	"version": "0.0.0",
+	"description": "Cli for the nhealth project",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DevJoghurt/fhir.git",
+		"directory": "packages/cli"
+	},
+    "license": "MIT",
+    "type": "module",
+	"bin": {
+		"nhealth": "./bin/nhealth.mjs"
+	},
+	"exports": {
+		".": "./dist/index.mjs",
+		"./cli": "./bin/nhealth.mjs"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"types": "./dist/index.d.ts",
+	"files": [
+		"bin",
+		"dist"
+	],
+	"scripts": {
+		"prepack": "unbuild",
+		"prepack:stub": "unbuild --stub"
+	},
+	"devDependencies": {
+		"@nuxt/kit": "3.13.2",
+		"@nhealth/fhir-profiling": "workspace:*",
+		"citty": "^0.1.6",
+		"consola": "^3.2.3",
+		"semver": "^7.6.3",
+		"std-env": "^3.7.0",
+		"unbuild": "^2.0.0"
+	}
+}

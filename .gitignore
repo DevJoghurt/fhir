@@ -15,6 +15,7 @@ tmp
 
 # Generated dirs
 dist
+fsh-generated
 .nuxt
 .nuxt-*
 .vercel
