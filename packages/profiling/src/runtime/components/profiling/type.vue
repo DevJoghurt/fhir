@@ -3,11 +3,11 @@
 		<div v-for="(type, index) in types" :key="index" class="mb-2">
 			<span class="type-code font-bold" v-if="!isValidUrl(type.code) && type.code!=='Extension'">{{ type.code }}</span>
 			<div v-else-if="!isValidUrl(type.code) && type.code==='Extension'">
-				<NuxtLink v-for="profile of type.profile" :to="profile" :external="true" class="type-code font-bold underline">{{ type.code }}</NuxtLink>
+				<NuxtLink v-for="profile of type.profile" :to="profile" :external="true" target="_blank" class="type-code font-bold underline">{{ type.code }}</NuxtLink>
 			</div>
 			<div v-else>
 				<div v-if="type.extension.length>0">
-					<NuxtLink v-for="ext of type.extension" :to="ext.url" :external="true" class="type-code font-bold underline">{{ ext.valueUrl }}</NuxtLink>
+					<NuxtLink v-for="ext of type.extension" :to="ext.url" :external="true" target="_blank" class="type-code font-bold underline">{{ ext.valueUrl }}</NuxtLink>
 				</div>
 			</div>
 		</div>

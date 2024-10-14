@@ -3,9 +3,9 @@
 		<TreeRoot
 			v-slot="{ flattenItems }"
 			class="w-full list-none select-none w-56 bg-white text-blackA11 rounded-lg p-2 text-sm font-medium"
-			:items="transform(props.items)"
+			:items="transform(resource)"
 			:get-key="(item) => item.id"
-			:default-expanded="[props.items[0].id]"
+			:default-expanded="defaultExpanded"
 		>
 			<h2 class="font-semibold !text-base text-blackA11 px-2 py-4 pt-1">
 			Directory Structure
@@ -73,11 +73,28 @@
 	import { TreeItem, TreeRoot } from 'radix-vue'
 	import { ElementDefinition, StructureDefinition } from '@medplum/fhirtypes'
 
-	const props = defineProps({
-		items: Array as PropType<ElementDefinition>,
-	});
+	const {
+		type = 'snapshot',
+		resource = {},
+	} = defineProps<{
+		type: 'differential' | 'snapshot',
+		resource: StructureDefinition
+	 }>()
 
-    const transform = (items: ElementDefinition[]): TreeItem => {
+	 // create default expandables
+	 const defaultExpanded = resource[type]?.element?.map((element) => element.id) || [];
+
+	 // transform the resource into a tree structure
+    const transform = (item: StructureDefinition): TreeItem => {
+		const items = [] as ElementDefinition[];
+
+		if (type === 'snapshot') {
+			items.push(...item?.snapshot?.element || []);
+		}
+		if (type === 'differential') {
+			items.push(...item?.differential?.element || []);
+		}
+
         const root: TreeItem = {
 			id: 'root',
 			children: []

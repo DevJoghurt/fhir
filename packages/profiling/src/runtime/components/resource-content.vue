@@ -4,20 +4,16 @@
 			<template #default="{ data }">
 				<UCard>
 					<template #header>
-						<h1 class="text-lg font-thin">Resource Profile: {{ data[0].id }}</h1>
+						<h1 class="text-lg font-thin">{{ data[0].id }}</h1>
 					</template>
-					<UTabs :items="tabs" class="w-full">
-						<template #snapshot-table="{ label }">
-							<div>
-								<ResourceTree :items="data[0].snapshot.element" />
-							</div>
-						</template>
-						<template #differential-table="{ label }">
-							<div>
-								<ResourceTree :items="data[0].differential.element" />
-							</div>
-						</template>
-					</UTabs>
+					<div class="flex justify-end px-4">
+						<UTabs v-model="currentTab" defaultValue="0" :items="tabs" size="sm" :content="false" class="w-64">
+						</UTabs>
+					</div>
+					<div>
+						<ResourceTree v-if="currentTab==='1'" type="differential" :resource="data[0]" />
+						<ResourceTree v-if="currentTab==='2'" type="snapshot" :resource="data[0]" />
+					</div>
 					<template #footer>
 
 					</template>
@@ -30,10 +26,18 @@
 	</div>
 </template>
 <script setup lang="ts">
+	import { ref, watch } from '#imports';
+
 	const tabs = [
-		{ label: 'Summary', slot: 'summary' },
-		{ label: 'Differential Table', slot: 'differential-table' },
-		{ label: 'Snapshot Table', slot: 'snapshot-table' },
-		{ label: 'Snapshot Table (Must)', slot: 'snapshot-table-must' },
+		{ label: 'Sum.', slot: 'summary' },
+		{ label: 'Dif.', slot: 'differential-table' },
+		{ label: 'Snap.', slot: 'snapshot-table' },
+		{ label: 'Snap. (Must)', slot: 'snapshot-table-must' },
 	];
+
+	const currentTab = ref(null);
+
+	watch(currentTab, () => {
+		console.log('Current tab:', currentTab.value);
+	});
 </script>
