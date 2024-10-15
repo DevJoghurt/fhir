@@ -1,4 +1,5 @@
 import { md } from "mdbox";
+import { writeFileSync } from 'node:fs';
 
 export type Component = 'ResourceTree' | 'ResourceContent';
 
@@ -38,7 +39,7 @@ class Markdown {
 	component(name: Component, props: Record<string, string> | null = null, slots: Record<"default" | string, string> | null = null) {
 		this.doc += `::${name}\n`;
 		if (props) {
-			this.doc += this.meta(props);
+			this.meta(props);
 		}
 		if (slots) {
 			for (const [key, value] of Object.entries(slots)) {
@@ -54,6 +55,10 @@ class Markdown {
 
 	getDocument() {
 		return this.doc;
+	}
+
+	save(path: string) {
+		writeFileSync(path, this.doc, 'utf8');
 	}
 
 }

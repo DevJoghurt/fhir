@@ -1,7 +1,7 @@
 import { globby } from 'globby';
 import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
 import Markdown from './markdown';
@@ -102,10 +102,11 @@ export function createFhirDocs(dir: string) {
 	doc.text('This is a table of contents.');
 	doc.heading('Introduction', 2);
 	doc.text('This is an introduction.');
-	doc.component('ResourceContent')
+	doc.component('ResourceContent', {
+		resource: 'structuredefinition-researchstudy'
+	});
 	const markdownFilePath = join(dir, 'fsh-generated', 'index.md');
-	console.log(doc.getDocument())
-	writeFileSync(markdownFilePath, doc.getDocument(), 'utf8');
+	doc.save(markdownFilePath);
 
 }
 

@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4">
-		<ContentQuery path="/docs/resources/structuredefinition-researchstudy">
+		<ContentQuery :path="`/docs/resources/${resource}`">
 			<template #default="{ data }">
 				<UCard>
 					<template #header>
@@ -28,7 +28,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref } from '#imports';
+	import { ref, defineProps } from '#imports';
 
 	const tabs = [
 		{ label: 'Sum.', slot: 'summary' },
@@ -38,4 +38,8 @@
 	];
 
 	const currentTab = ref('0');
+
+	defineProps<{
+		resource: string;
+	}>()
 </script>
