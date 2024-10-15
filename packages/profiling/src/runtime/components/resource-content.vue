@@ -11,8 +11,10 @@
 						</UTabs>
 					</div>
 					<div>
+						<ResourceSummary v-if="currentTab==='0'" :resource="data[0]" />
 						<ResourceTree v-if="currentTab==='1'" type="differential" :resource="data[0]" />
 						<ResourceTree v-if="currentTab==='2'" type="snapshot" :resource="data[0]" />
+						<ResourceTree v-if="currentTab==='3'" type="snapshot" filter="mustSupport" :resource="data[0]" />
 					</div>
 					<template #footer>
 
@@ -26,7 +28,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref, watch } from '#imports';
+	import { ref } from '#imports';
 
 	const tabs = [
 		{ label: 'Sum.', slot: 'summary' },
@@ -35,9 +37,5 @@
 		{ label: 'Snap. (Must)', slot: 'snapshot-table-must' },
 	];
 
-	const currentTab = ref(null);
-
-	watch(currentTab, () => {
-		console.log('Current tab:', currentTab.value);
-	});
+	const currentTab = ref('0');
 </script>
