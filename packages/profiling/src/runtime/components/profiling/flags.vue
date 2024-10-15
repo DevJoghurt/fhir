@@ -6,10 +6,10 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { defineProps, PropType } from '#imports'
+	import type { PropType } from '#imports'
 	import { ElementDefinition } from '@medplum/fhirtypes'
 
-	const props = defineProps({
+	defineProps({
 		element: Object as PropType<ElementDefinition>,
 	})
 </script>

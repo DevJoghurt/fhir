@@ -4,7 +4,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { defineProps, PropType } from 'vue'
+	import type { PropType } from '#imports'
 	import { ElementDefinition } from '@medplum/fhirtypes'
 
 	defineProps({

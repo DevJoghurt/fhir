@@ -14,7 +14,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { defineProps, PropType } from '#imports'
+	import type { PropType } from '#imports'
 	import { ElementDefinitionType } from '@medplum/fhirtypes'
 
 	defineProps({

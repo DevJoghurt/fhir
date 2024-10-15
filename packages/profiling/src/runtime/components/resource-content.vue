@@ -28,7 +28,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref, defineProps } from '#imports';
+	import { ref } from '#imports';
 
 	const tabs = [
 		{ label: 'Sum.', slot: 'summary' },

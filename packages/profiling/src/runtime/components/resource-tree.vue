@@ -69,7 +69,6 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { defineProps } from '#imports'
 	import { TreeItem, TreeRoot } from 'radix-vue'
 	import { ElementDefinition, StructureDefinition } from '@medplum/fhirtypes'
 

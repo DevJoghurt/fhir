@@ -30,7 +30,6 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { defineProps } from 'vue'
 	import { StructureDefinition } from '@medplum/fhirtypes'
 
 	const { resource } = defineProps<{
