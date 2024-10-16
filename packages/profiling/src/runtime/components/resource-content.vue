@@ -1,6 +1,6 @@
 <template>
 	<div class="p-4">
-		<ContentQuery :path="`/docs/resources/${resource}`">
+		<ContentQuery :path="`/profiling/${resource}`">
 			<template #default="{ data }">
 				<UCard>
 					<template #header>

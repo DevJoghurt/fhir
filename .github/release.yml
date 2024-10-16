@@ -1,0 +1,40 @@
+name: Release
+
+permissions: {}
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    concurrency:
+      group: release
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build (stub)
+        run: pnpm dev:prepare
+
+      - name: Publish packages
+        run: chmod +x ./scripts/release.sh && ./scripts/release.sh
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}

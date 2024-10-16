@@ -6,7 +6,7 @@ import { resolve, join } from 'node:path';
 import { defu } from 'defu';
 import Markdown from './markdown';
 
-const profileFolder = 'profiles';
+const profileFolder = 'profiling';
 
 type ReadFSHFilesOptions = {
 	rootDir: string;
@@ -94,7 +94,8 @@ export function createFhirDocs(dir: string) {
 	const doc = new Markdown();
 	doc.meta({
 		title: 'FHIR Implementation Guide',
-		description: 'This is a generated FHIR Implementation Guide.'
+		description: 'This is a generated FHIR Implementation Guide.',
+		layout: 'fhirdocs'
 	});
 	doc.heading('FHIR Implementation Guide', 1);
 	doc.text('This is a generated FHIR Implementation Guide.');
@@ -105,7 +106,7 @@ export function createFhirDocs(dir: string) {
 	doc.component('ResourceContent', {
 		resource: 'structuredefinition-researchstudy'
 	});
-	const markdownFilePath = join(dir, 'fsh-generated', 'index.md');
+	const markdownFilePath = join(dir, 'fsh-generated','content', 'index.md');
 	doc.save(markdownFilePath);
 
 }

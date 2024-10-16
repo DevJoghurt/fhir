@@ -6,6 +6,7 @@
 	</div>
 </template>
 <script setup lang="ts">
+	import { useMedplum } from '#imports';
 
 	const { medplum } = useMedplum();
 

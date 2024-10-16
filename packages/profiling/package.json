@@ -17,8 +17,11 @@
 		},
 		"./sushi": {
 			"types": "./dist/sushi.d.ts",
-			"import": "./dist/sushi.mjs",
-			"require": "./dist/sushi.cjs"
+			"import": "./dist/sushi.mjs"
+		},
+		"./markdown": {
+			"types": "./dist/markdown.d.ts",
+			"import": "./dist/markdown.mjs"
 		}
 	},
 	"publishConfig": {

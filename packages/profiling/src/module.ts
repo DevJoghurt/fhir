@@ -4,7 +4,8 @@ import {
 	hasNuxtModule,
 	installModule,
 	useLogger,
-	addComponentsDir
+	addComponentsDir,
+	addLayout
   } from '@nuxt/kit';
   import { readFSHFiles, createFhirResources } from './sushi';
   import { join } from 'node:path';
@@ -23,7 +24,7 @@ type ModuleOptions = {
 export default defineNuxtModule<ModuleOptions>({
 	meta,
 	defaults: {
-		dir: 'profiles',
+		dir: 'profiling',
 		verbose: true
 	},
 	async setup(options, nuxt) {
@@ -61,16 +62,32 @@ export default defineNuxtModule<ModuleOptions>({
 			installModule('@nuxt/content', {
 				documentDriven: true,
 				sources: {
-					// overwrite default source AKA `content` directory
+					// add fhir profiling generated docs
 					content: {
 					  driver: 'fs',
-					  prefix: '/docs', // All contents inside this source will be prefixed with `/`
-					  base: join(projectFolder, 'fsh-generated')
+					  prefix: '/docs',
+					  base: join(projectFolder, 'fsh-generated', 'content')
+					},
+					// add fhir resources for querying
+					resources: {
+						driver: 'fs',
+						prefix: '/profiling',
+						base: join(projectFolder, 'fsh-generated', 'resources')
+					},
+					// add project content folder for additional docs and overrides
+					project: {
+						driver: 'fs',
+						prefix: '/docs',
+						base: join(projectFolder, options?.dir || '', 'content')
 					}
 				}
 			});
 		}
 
+		// Add fhir docs related things
+		addLayout({
+			src: resolve('./runtime/layouts/fhirdocs.vue')
+		});
 		addComponentsDir({
 			path: resolve('./runtime/components'),
 			global: true,

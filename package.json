@@ -44,7 +44,9 @@
 		"@nuxt/ui": "3.0.0-alpha.6",
 		"@nuxt/kit": "3.13.2",
 		"@medplum/core": "3.2.16",
-		"@medplum/fhirtypes": "3.2.16"
+		"@medplum/fhirtypes": "3.2.16",
+		"typescript": "5.5.4",
+		"@typescript-eslint/typescript-estree": "8.9.0"
 	},
 	"devDependencies": {
         "nuxt": "3.13.2",
@@ -52,7 +54,7 @@
         "vitest": "2.1.1",
         "rimraf": "6.0.1",
         "@nuxt/module-builder": "0.8.4",
-		"typescript": "^5.6.2"
+		"typescript": "^5.5.4"
 	},
 	"packageManager": "pnpm@9.11.0",
 	"engines": {

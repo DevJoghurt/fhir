@@ -1,5 +1,6 @@
 import { md } from "mdbox";
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 export type Component = 'ResourceTree' | 'ResourceContent';
 
@@ -8,15 +9,15 @@ class Markdown {
 
 	private doc: string = '';
 
-	heading(text, level) {
+	heading(text: string, level: number = 1) {
 		this.doc += md.heading(text, level);
 	}
 
-	bold(text) {
+	bold(text: string) {
 		this.doc += md.bold(text);
 	}
 
-	text(text, newLine = true) {
+	text(text: string, newLine: boolean = true) {
 		this.doc += `${text}${newLine ? '\n' : ''}`;
 	}
 
@@ -58,6 +59,11 @@ class Markdown {
 	}
 
 	save(path: string) {
+		// check if folder exists and create it if not
+		const dir = dirname(path);
+		if (!existsSync(dir)){
+			mkdirSync(dir, { recursive: true });
+		}
 		writeFileSync(path, this.doc, 'utf8');
 	}
 
