@@ -85,13 +85,18 @@ export default defineNuxtModule<ModuleOptions>({
 		}
 
 		// Add fhir docs related things
-		addLayout({
-			src: resolve('./runtime/layouts/fhirdocs.vue')
-		});
+		addLayout(resolve('./runtime/layouts/fhirdocs.vue'), 'fhirdocs');
 		addComponentsDir({
 			path: resolve('./runtime/components'),
 			global: true,
 			watch: true
 		});
+		nuxt.hook('nitro:config', async (nitroConfig) => {
+			nitroConfig.publicAssets ||= []
+			nitroConfig.publicAssets.push({
+			  dir: resolve('./runtime/public'),
+			  maxAge: 60 * 60 * 24 * 365
+			})
+		})
 	}
 })

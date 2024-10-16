@@ -1,3 +1,7 @@
+---
+layout: fhirdocs
+---
+
 # Overwrite Index
 ::ResourceContent
 ---
