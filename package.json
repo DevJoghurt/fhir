@@ -21,9 +21,10 @@
 		"playground"
 	],
 	"scripts": {
-		"build": "pnpm --filter \"./packages/**\" prepack",
+		"prepare": "pnpm dev:prepare && nuxi prepare playground",
+		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:stub": "pnpm dev:prepare",
-		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/node_modules\" \"node_modules\"",
+		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"packages/**/.nuxt\" \"packages/**/.output\" \"playground/node_modules\" \"node_modules\"",
 		"dev": "pnpm play",
 		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub",
 		"lint": "eslint . --cache",
