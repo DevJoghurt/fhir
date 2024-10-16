@@ -1,7 +1,7 @@
 {
 	"name": "fhir-framework",
 	"private": true,
-	"version": "0.0.4",
+	"version": "0.0.6",
 	"description": "Build FHIR applications with Nuxt based on Medplum Fhir server",
 	"repository": {
 		"type": "git",
@@ -37,7 +37,7 @@
 		"medplum": "docker compose -f ./medplum/docker-compose.yml up --force-recreate --build"
 	},
 	"resolutions": {
-		"nhealth": "workspace:*",
+		"nhealth-cli": "workspace:*",
 		"@nhealth/fhir": "workspace:*",
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
@@ -51,7 +51,7 @@
 	},
 	"devDependencies": {
         "nuxt": "3.13.2",
-		"nhealth": "*",
+		"nhealth-cli": "*",
         "vitest": "2.1.1",
         "rimraf": "6.0.1",
         "@nuxt/module-builder": "0.8.4",

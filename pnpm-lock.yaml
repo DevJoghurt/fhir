@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  nhealth: workspace:*
+  nhealth-cli: workspace:*
   '@nhealth/fhir': workspace:*
   '@nhealth/fhir-profiling': workspace:*
   '@nhealth/app': workspace:*
@@ -24,7 +24,7 @@ importers:
       '@nuxt/module-builder':
         specifier: 0.8.4
         version: 0.8.4(@nuxt/kit@3.13.2(magicast@0.3.5)(rollup@4.22.5))(nuxi@3.14.0)(typescript@5.5.4)
-      nhealth:
+      nhealth-cli:
         specifier: workspace:*
         version: link:packages/cli
       nuxt:
@@ -60,6 +60,10 @@ importers:
         version: 5.5.4
 
   packages/cli:
+    dependencies:
+      fsh-sushi:
+        specifier: ^3.12.0
+        version: 3.12.0
     devDependencies:
       '@nhealth/fhir-profiling':
         specifier: workspace:*
@@ -3022,6 +3026,10 @@ packages:
 
   fsh-sushi@3.11.1:
     resolution: {integrity: sha512-rQtA/mDktM8uH2aekRKLCLOnpGNWylygFo5PqM5Q5iMu8/O7DvQ/QOwbbsVr7ZGE5FPwz9jnX1QzXRZoqZK5MA==}
+    hasBin: true
+
+  fsh-sushi@3.12.0:
+    resolution: {integrity: sha512-VFIWj1w7YH35rKeRic0NwDffh7JEvv+jXu4isFdxMxZvE6wcmpwgf8Fu35H0LuyZXLYoG4IvG5FFTxHTPp5lZw==}
     hasBin: true
 
   function-bind@1.1.2:
@@ -8928,6 +8936,34 @@ snapshots:
     optional: true
 
   fsh-sushi@3.11.1:
+    dependencies:
+      ajv: 8.17.1
+      antlr4: 4.13.2
+      axios: 1.7.7
+      chalk: 4.1.2
+      commander: 12.1.0
+      fhir: 4.12.0
+      fhir-package-loader: 1.0.0
+      fs-extra: 11.2.0
+      html-minifier-terser: 5.1.1
+      https-proxy-agent: 7.0.5
+      ini: 4.1.3
+      junk: 3.1.0
+      lodash: 4.17.21
+      readline-sync: 1.4.10
+      sanitize-filename: 1.6.3
+      sax: 1.4.1
+      temp: 0.9.4
+      text-table: 0.2.0
+      title-case: 3.0.3
+      valid-url: 1.0.9
+      winston: 3.15.0
+      yaml: 1.10.2
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  fsh-sushi@3.12.0:
     dependencies:
       ajv: 8.17.1
       antlr4: 4.13.2
