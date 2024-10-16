@@ -1,6 +1,6 @@
 {
 	"name": "nhealth",
-	"version": "0.0.0",
+	"version": "0.0.4",
 	"description": "Cli for the nhealth project",
 	"repository": {
 		"type": "git",
