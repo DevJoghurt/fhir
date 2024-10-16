@@ -5,7 +5,7 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
-		"directory": "packages/ui"
+		"directory": "packages/app"
 	},
     "license": "MIT",
     "type": "module",
