@@ -5,7 +5,9 @@ import {
 	installModule,
 	useLogger,
 	addComponentsDir,
-	addLayout
+	addLayout,
+	resolvePath,
+	addImportsDir
   } from '@nuxt/kit';
   import { readFSHFiles, createFhirResources } from './sushi';
   import { join } from 'node:path';
@@ -85,6 +87,7 @@ export default defineNuxtModule<ModuleOptions>({
 		}
 
 		// Add fhir docs related things
+		addImportsDir(resolve('./runtime/composables'));
 		addLayout(resolve('./runtime/layouts/fhirdocs.vue'), 'fhirdocs');
 		addComponentsDir({
 			path: resolve('./runtime/components'),
@@ -97,6 +100,11 @@ export default defineNuxtModule<ModuleOptions>({
 			  dir: resolve('./runtime/public'),
 			  maxAge: 60 * 60 * 24 * 365
 			})
+		})
+		// default app config for fhirDocs
+		const appConfigFile = await resolvePath(resolve('./runtime/app.config'))
+		nuxt.hook('app:resolve', (app) => {
+			app.configs.push(appConfigFile)
 		})
 	}
 })
