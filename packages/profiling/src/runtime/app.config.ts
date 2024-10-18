@@ -3,7 +3,7 @@ import { defineAppConfig } from '#imports';
 export default defineAppConfig({
 	fhirDocs: {
 	  site: {
-		name: 'shadcn-docs',
+		name: 'fhir-docs',
 		description: 'Beautifully designed Nuxt Content template built with shadcn-vue. Customizable. Compatible. Open Source.',
 		ogImage: '/hero.png',
 		ogImageComponent: 'ShadcnDocs',
@@ -14,12 +14,8 @@ export default defineAppConfig({
 		radius: 0.5,
 	  },
 	  header: {
-		title: 'shadcn-docs',
-		showTitle: true,
-		logo: {
-		  light: '/logo.svg',
-		  dark: '/logo-dark.svg',
-		},
+		title: 'Fhir Docs',
+		showTitle: false,
 		darkModeToggle: true,
 		nav: [{
 		  title: 'Docs',

@@ -18,7 +18,7 @@
 		type ScrollAreaRootProps,
 		ScrollAreaViewport,
 	} from 'radix-vue';
-	import { computed, type HTMLAttributes } from 'vue';
+	import { computed, type HTMLAttributes } from '#imports';
 
 	const props = defineProps<ScrollAreaRootProps & { class?: HTMLAttributes['class'] }>();
 

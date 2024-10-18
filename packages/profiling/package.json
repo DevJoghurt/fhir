@@ -50,7 +50,8 @@
 		"mdbox": "^0.1.0",
 		"defu": "^6.1.4",
 		"tailwind-variants": "^0.2.1",
-		"@nuxt/image": "^1.8.1"
+		"@nuxt/image": "^1.8.1",
+		"@iconify/utils": "^2.1.33"
 	},
 	"devDependencies": {
 		"typescript": "^5.6.2",

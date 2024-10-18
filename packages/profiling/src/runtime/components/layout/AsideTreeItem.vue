@@ -6,16 +6,15 @@
 	  <UCollapsible v-if="link.children" v-model:open="isOpen">
 		<UButton class="w-full text-left">
 		  <div class="flex w-full gap-1">
-			<SmartIcon
+			<UIcon
 			  v-if="link.icon"
 			  :name="link.icon"
-			  class="mr-1 self-center"
-			  :size="15"
+			  class="mr-1 w-8 self-center"
 			/>
 			<span class="truncate text-nowrap">
 			  {{ link.title }}
 			</span>
-			<SmartIcon
+			<UIcon
 			  name="lucide:chevron-down"
 			  class="ml-auto self-center transition-transform"
 			  :class="[!isOpen && '-rotate-90']"
@@ -32,11 +31,10 @@
 		class="flex w-full gap-1 text-muted-foreground hover:underline"
 		:class="[isActive && 'font-medium text-primary']"
 	  >
-		<SmartIcon
+		<UIcon
 		  v-if="link.icon"
 		  :name="link.icon"
-		  class="mr-1 self-center"
-		  :size="15"
+		  class="mr-1 w-8 self-center"
 		/>
 		<span class="truncate text-nowrap">
 		  {{ link.title }}

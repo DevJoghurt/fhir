@@ -106,7 +106,7 @@ export function createFhirDocs(dir: string) {
 	doc.component('ResourceContent', {
 		resource: 'structuredefinition-researchstudy'
 	});
-	const markdownFilePath = join(dir, 'fsh-generated','content', 'index.md');
+	const markdownFilePath = join(dir, 'fsh-generated','content', '0.overview', 'index.md');
 	doc.save(markdownFilePath);
 
 }

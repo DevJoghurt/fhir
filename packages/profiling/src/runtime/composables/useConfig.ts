@@ -18,8 +18,8 @@ const defaultConfig: DefaultConfig = {
     title: 'shadcn-docs',
     showTitle: true,
     logo: {
-      light: '/logo.svg',
-      dark: '/logo-dark.svg',
+      light: '/nhealth_light.png',
+      dark: '/nhealth_dark.png',
     },
     showTitleInMobile: false,
     border: false,

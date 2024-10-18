@@ -7,7 +7,8 @@ import {
 	addComponentsDir,
 	addLayout,
 	resolvePath,
-	addImportsDir
+	addImportsDir,
+	extendPages
   } from '@nuxt/kit';
   import { readFSHFiles, createFhirResources } from './sushi';
   import { join } from 'node:path';
@@ -60,17 +61,29 @@ export default defineNuxtModule<ModuleOptions>({
 			snapshot: true
 		});
 
+		// TODO: Check how we can handle navigation https://github.com/nuxt/content/blob/main/src/runtime/server/navigation.ts
+
 		if(!hasNuxtModule('@nuxt/content')){
 			installModule('@nuxt/content', {
-				documentDriven: true,
+				documentDriven: {
+					injectPage: false
+				},
+				navigation: {
+					fields: ['icon'],
+				},
+				experimental: {
+					search: {
+					  indexed: true,
+					},
+				},
 				sources: {
 					// add fhir profiling generated docs
 					content: {
 					  driver: 'fs',
-					  prefix: '/docs',
 					  base: join(projectFolder, 'fsh-generated', 'content')
 					},
 					// add fhir resources for querying
+					// TODO: add a way to query fhir resources without using nuxt content
 					resources: {
 						driver: 'fs',
 						prefix: '/profiling',
@@ -79,10 +92,17 @@ export default defineNuxtModule<ModuleOptions>({
 					// add project content folder for additional docs and overrides
 					project: {
 						driver: 'fs',
-						prefix: '/docs',
 						base: join(projectFolder, options?.dir || '', 'content')
 					}
 				}
+			});
+		}
+
+		const publicDir = resolve('./runtime/public');
+
+		if(!hasNuxtModule('@nuxt/image')){
+			installModule('@nuxt/image', {
+				dir: publicDir
 			});
 		}
 
@@ -94,10 +114,27 @@ export default defineNuxtModule<ModuleOptions>({
 			global: true,
 			watch: true
 		});
+
+		nuxt.options.pages = true;
+
+		extendPages((pages) => {
+			// Respect user's custom catch-all page
+			if (!pages.find(page => page.path === '/:slug(.*)*')) {
+				pages.unshift({
+					name: 'slug',
+					path: '/:slug(.*)*',
+					file: resolve('./runtime/pages/docs.vue'),
+					children: [],
+					meta: {
+						layout: 'fhirdocs'
+					}
+				})
+			}
+		});
 		nuxt.hook('nitro:config', async (nitroConfig) => {
 			nitroConfig.publicAssets ||= []
 			nitroConfig.publicAssets.push({
-			  dir: resolve('./runtime/public'),
+			  dir: publicDir,
 			  maxAge: 60 * 60 * 24 * 365
 			})
 		})

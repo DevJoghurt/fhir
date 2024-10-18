@@ -3,19 +3,18 @@
 	  <LayoutHeaderNavMobile v-if="isMobile" class="mb-5 border-b pb-2" />
 	  <LayoutSearchButton v-if="config.search.inAside" />
 	  <ul v-if="config.aside.useLevel" class="mb-1 border-b pb-4">
-		<li v-for="link in navigation" :key="link.id">
+		<li v-for="link in filteredNavigation" :key="link.id">
 		  <NuxtLink
-			:to="link._path"
+			:to="link?._path || ''"
 			class="mb-1 flex w-full gap-2 rounded-md px-3 py-2 transition-all hover:bg-muted"
 			:class="[
-			  path.startsWith(link._path) && 'bg-muted font-semibold text-primary hover:bg-muted',
+			  path?.startsWith(link?._path) && 'bg-muted font-semibold text-primary hover:bg-muted',
 			]"
 		  >
-			<SmartIcon
+			<UIcon
 			  v-if="link.icon"
 			  :name="link.icon"
-			  class="self-center"
-			  :size="16"
+			  class="w-8 self-center"
 			/>
 			{{ link.title }}
 		  </NuxtLink>
@@ -25,13 +24,26 @@
 	</UiScrollArea>
 </template>
 <script setup lang="ts">
-  import { useContentHelpers, useContent, useConfig, computed, useRoute } from '#imports';
+  import {
+		useContentHelpers,
+		useContent,
+		useConfig,
+		computed,
+		useRoute,
+	} from '#imports';
 
   defineProps<{ isMobile: boolean }>();
 
   const { navDirFromPath } = useContentHelpers();
   const { navigation } = useContent();
   const config = useConfig();
+
+  // Filter profiling resources from navigation
+  const filteredNavigation = computed(() => {
+	return navigation.value.filter((item) => {
+	  return !item._path.startsWith('/profiling');
+	});
+  });
 
   const tree = computed(() => {
 	const route = useRoute();
@@ -42,9 +54,8 @@
 	  const dir = navDirFromPath(leveledPath, navigation.value);
 	  return dir ?? [];
 	}
-
-	return navigation.value;
+	return filteredNavigation.value;
   });
 
-  const path = computed(() => useRoute().path);
+  const path = computed(() => useRoute()?.path);
 </script>

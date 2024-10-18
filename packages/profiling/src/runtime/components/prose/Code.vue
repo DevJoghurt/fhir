@@ -7,7 +7,7 @@
 	  ]"
 	>
 	  <div v-if="!inGroup && filename" class="flex border-b p-3 font-mono text-sm">
-		<SmartIcon v-if="icon" :name="icon" class="mr-1.5 self-center" />
+		<UIcon v-if="icon" :name="icon" class="mr-1.5 self-center" />
 		{{ filename }}
 		<CodeCopy :code class="ml-auto mr-1" />
 	  </div>
@@ -23,14 +23,13 @@
 		  >
 			<slot />
 		  </div>
-		  <ScrollBar orientation="horizontal" />
+		  <UiScrollBar orientation="horizontal" />
 		</UiScrollArea>
 	  </div>
 	</UiCard>
 </template>
 <script setup lang="ts">
   import type { BuiltinLanguage } from 'shiki';
-  import ScrollBar from '../ui/scroll-area/ScrollBar.vue';
 
   const props = defineProps({
 	code: {

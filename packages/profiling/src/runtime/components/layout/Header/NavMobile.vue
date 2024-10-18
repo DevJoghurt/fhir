@@ -1,14 +1,14 @@
 <template>
-	<UButton
-		v-bind="props"
-	>
-	  <slot />
-	</UButton>
+	<div>
+	  <LayoutHeaderNavMobileItem
+		v-for="(item, i) in nav"
+		:key="i"
+		:item="item"
+		:index="i"
+	  />
+	</div>
 </template>
 <script setup lang="ts">
-	import { type ButtonProps } from '#ui/components/Button.vue';
-
-	const props = withDefaults(defineProps<ButtonProps>(), {
-		variant: 'ghost',
-	});
+	import { useConfig } from '#imports';
+  	const { nav } = useConfig().value.header;
 </script>
