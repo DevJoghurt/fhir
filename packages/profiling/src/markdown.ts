@@ -21,10 +21,14 @@ class Markdown {
 		this.doc += `${text}${newLine ? '\n' : ''}`;
 	}
 
+	value(key: string, value: string) {
+		this.doc += `${key}: ${value}\n`;
+	}
+
 	meta(vars: Record<string, string>) {
 		this.doc += '---\n';
 		for (const [key, value] of Object.entries(vars)) {
-			this.doc += `${key}: ${value}\n`;
+			this.value(key, value);
 		}
 		this.doc += '---\n';
 	}

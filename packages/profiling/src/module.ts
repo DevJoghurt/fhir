@@ -10,8 +10,9 @@ import {
 	addImportsDir,
 	extendPages
   } from '@nuxt/kit';
-  import { readFSHFiles, createFhirResources } from './sushi';
+  import { readFSHFiles, initializeProfiling, createFhirDocs } from './sushi';
   import { join } from 'node:path';
+  import { FhirProfilingDocumentation } from './types';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -19,16 +20,22 @@ const meta = {
 	configKey: 'fhirProfiling'
 };
 
+
+
 type ModuleOptions = {
 	dir?: string;
 	verbose?: boolean;
+	documentation?: FhirProfilingDocumentation;
 }
 
 export default defineNuxtModule<ModuleOptions>({
 	meta,
 	defaults: {
 		dir: 'profiling',
-		verbose: true
+		verbose: true,
+		documentation: {
+			enabled: true,
+		}
 	},
 	async setup(options, nuxt) {
 		const logger = useLogger('FHIR Profiling');
@@ -55,11 +62,15 @@ export default defineNuxtModule<ModuleOptions>({
 		}
 
 		// Create FHIR Implementation Guides
-		await createFhirResources(fshFiles, {
+		const fhirProfilingContext = await initializeProfiling(fshFiles, {
 			rootDir: projectFolder,
 			outDir: projectFolder,
-			snapshot: true
+			snapshot: true,
+			documentation: options.documentation || {}
 		});
+
+		await createFhirDocs(fhirProfilingContext);
+
 
 		// TODO: Check how we can handle navigation https://github.com/nuxt/content/blob/main/src/runtime/server/navigation.ts
 
@@ -87,6 +98,7 @@ export default defineNuxtModule<ModuleOptions>({
 					resources: {
 						driver: 'fs',
 						prefix: '/profiling',
+
 						base: join(projectFolder, 'fsh-generated', 'resources')
 					},
 					// add project content folder for additional docs and overrides

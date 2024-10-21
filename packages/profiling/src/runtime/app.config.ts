@@ -69,7 +69,7 @@ export default defineAppConfig({
 	  },
 	  main: {
 		breadCrumb: true,
-		showTitle: true,
+		showTitle: false,
 		codeCopyToast: true,
 		codeIcon: {
 		  'package.json': 'vscode-icons:file-type-node',

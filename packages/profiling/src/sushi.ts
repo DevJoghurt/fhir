@@ -4,6 +4,8 @@ import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
+import type { FhirProfilingContext, FhirProfilingDocumentation } from './types';
+import { createLandingPage } from './generator'
 import Markdown from './markdown';
 
 const profileFolder = 'profiling';
@@ -25,13 +27,14 @@ export async function readFSHFiles(config: ReadFSHFilesOptions): Promise<string[
   	return files;
 }
 
-type CreateFhirOptions = {
+type FhirProfilingOptions = {
 	rootDir: string;
 	outDir: string;
 	snapshot: boolean;
+	documentation: FhirProfilingDocumentation;
 };
 
-export async function createFhirResources(files: string[], opts: CreateFhirOptions): Promise<void> {
+export async function initializeProfiling(files: string[], opts: FhirProfilingOptions): Promise<FhirProfilingContext> {
 	const logger = useLogger();
 	let rawFSH = [] as sushiImport.RawFSH[];
 	if(files.length > 0){
@@ -74,6 +77,10 @@ export async function createFhirResources(files: string[], opts: CreateFhirOptio
 
 	 const outPackage = sushiExport.exportFHIR(tank, defs);
 
+	 // Create content map for writing docs
+	 const context = createProfilingContext(outPackage, opts);
+
+
 	 const { skippedResources } = utils.writeFHIRResources(opts.outDir, outPackage, defs, opts.snapshot);
 
 	 if (skippedResources.length > 0) {
@@ -84,31 +91,74 @@ export async function createFhirResources(files: string[], opts: CreateFhirOptio
 	   );
 	 }
 
-	 createFhirDocs(opts.outDir);
+	 // return fhir profiling context
+	 return context;
+}
+
+export function createProfilingContext(outPackage: sushiExport.Package, opts: FhirProfilingOptions): FhirProfilingContext {
+	const context = {
+		config: {
+			dir: opts.outDir,
+			verbose: true,
+			documentation: opts.documentation
+		},
+		profiles: [],
+		valueSets: [],
+		codeSystems: []
+	} as FhirProfilingContext;
+
+	for (const profile of outPackage.profiles) {
+		const { id, resourceType, url, version, title, description, status, kind, baseDefinition, inProgress = false } = profile;
+		context.profiles.push({
+			id,
+			resourceType,
+			url,
+			version,
+			title,
+			description,
+			status,
+			kind,
+			baseDefinition,
+			inProgress,
+			examples: [],
+			fileName: profile.getFileName()
+		});
+	}
+	for (const instance of outPackage.instances) {
+		const { _instanceMeta } = instance;
+		// filter out examples
+		if (_instanceMeta.usage === 'Example') {
+			// find profile for example
+			const profile = context.profiles.find(p => p.url === _instanceMeta.instanceOfUrl);
+			profile?.examples.push({
+				..._instanceMeta,
+				fileName: instance.getFileName()
+			});
+			continue;
+		}
+	}
+	for (const valueSet of outPackage.valueSets) {
+		const { id, resourceType, url, version, title, description, status } = valueSet;
+		context.valueSets.push({ id, resourceType, url, version, title, description, status });
+	}
+	for (const codeSystem of outPackage.codeSystems) {
+		const { id, resourceType, url, version, title, description, status, date } = codeSystem;
+		context.codeSystems.push({ id, resourceType, url, version, title, description, status, date });
+	}
+	return context;
 
 }
 
-export function createFhirDocs(dir: string) {
+export function createFhirDocs(ctx: FhirProfilingContext) {
 
-	// Write out the markdown
-	const doc = new Markdown();
-	doc.meta({
-		title: 'FHIR Implementation Guide',
-		description: 'This is a generated FHIR Implementation Guide.',
-		layout: 'fhirdocs'
-	});
-	doc.heading('FHIR Implementation Guide', 1);
-	doc.text('This is a generated FHIR Implementation Guide.');
-	doc.heading('Table of Contents', 2);
-	doc.text('This is a table of contents.');
-	doc.heading('Introduction', 2);
-	doc.text('This is an introduction.');
-	doc.component('ResourceContent', {
-		resource: 'structuredefinition-researchstudy'
-	});
-	const markdownFilePath = join(dir, 'fsh-generated','content', '0.overview', 'index.md');
-	doc.save(markdownFilePath);
+	// Create landing page as an overview of the FHIR Implementation Guide
+	createLandingPage(ctx);
 
+	// add _dir.yml to resources folder to exclude it from docs navigation
+	// TODO: check if it is better to include it and create a page for it
+	const dirYml = new Markdown();
+	dirYml.value('navigation', 'false');
+	dirYml.save(join(ctx.config.dir, 'fsh-generated','resources', '_dir.yml'));
 }
 
 export function defineSushiConfig(config: SushiConfiguration) {
