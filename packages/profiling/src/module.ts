@@ -72,8 +72,6 @@ export default defineNuxtModule<ModuleOptions>({
 		await createFhirDocs(fhirProfilingContext);
 
 
-		// TODO: Check how we can handle navigation https://github.com/nuxt/content/blob/main/src/runtime/server/navigation.ts
-
 		if(!hasNuxtModule('@nuxt/content')){
 			installModule('@nuxt/content', {
 				documentDriven: {
@@ -83,9 +81,7 @@ export default defineNuxtModule<ModuleOptions>({
 					fields: ['icon'],
 				},
 				experimental: {
-					search: {
-					  indexed: true,
-					},
+					search: true,
 				},
 				sources: {
 					// add fhir profiling generated docs
@@ -98,7 +94,6 @@ export default defineNuxtModule<ModuleOptions>({
 					resources: {
 						driver: 'fs',
 						prefix: '/profiling',
-
 						base: join(projectFolder, 'fsh-generated', 'resources')
 					},
 					// add project content folder for additional docs and overrides

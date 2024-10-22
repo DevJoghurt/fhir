@@ -1,5 +1,7 @@
 <template>
-	<UModal>
+	<UModal
+		title="Search docs"
+	>
 		<template v-if="enable">
 			<UButton
 				v-if="style === 'input'"
@@ -29,11 +31,11 @@
 		</template>
 		<template #content>
 			<UCommandPalette
-			v-model:search-term="searchTerm"
-			:loading="searchLoading"
-			:groups="groups"
-			placeholder="Search docs..."
-			class="h-80"
+				v-model:search-term="searchTerm"
+				:loading="searchLoading"
+				:groups="groups"
+				placeholder="Search docs..."
+				class="h-80"
 			/>
 	  	</template>
 	</UModal>
@@ -64,6 +66,16 @@
 			searchResult.value = (await searchContent(v)).value;
 			searchLoading.value = false;
 	});
+
+	const groups = computed(() => [{
+		id: 'docs',
+		label: searchResult.value ? `Docs matching “${searchResult.value.length}”...` : 'Docs',
+		items: searchResult.value?.map(doc => ({
+			id: doc.id,
+			label: doc.title
+		})) || [],
+		filter: false
+	}])
 
 	async function handleEnter() {
 		if (searchResult.value[activeSelect.value]?.id) {

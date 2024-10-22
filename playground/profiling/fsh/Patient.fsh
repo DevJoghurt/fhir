@@ -4,8 +4,8 @@ Profile: ResearchPatient
 //Keyword
 Parent: Patient
 Id: ResearchPatient
-Title: "Example Patient"
-Description: "Dieses Profil beschreibt eine Patient*in im Projekt."
+Title: "Research Patient"
+Description: "This profile is used to capture information about a patient involved in a research study."
 //rules
 * ^url = "http://example/fhir/core/modul-person/StructureDefinition/Patient"
 * ^version = "2024.0.0"

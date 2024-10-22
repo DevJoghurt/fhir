@@ -65,7 +65,7 @@ export default defineAppConfig({
 	  },
 	  aside: {
 		useLevel: true,
-		collapse: false,
+		collapse: true,
 	  },
 	  main: {
 		breadCrumb: true,
@@ -134,14 +134,9 @@ export default defineAppConfig({
 		enable: true,
 		title: 'On This Page',
 		links: [{
-		  title: 'Star on GitHub',
-		  icon: 'lucide:star',
-		  to: 'https://github.com/ZTL-UwU/shadcn-docs-nuxt',
-		  target: '_blank',
-		}, {
-		  title: 'Create Issues',
-		  icon: 'lucide:circle-dot',
-		  to: 'https://github.com/ZTL-UwU/shadcn-docs-nuxt/issues',
+		  title: 'HL7 FHIR',
+		  icon: 'healthicons:fhir-logo',
+		  to: 'https://hl7.org/fhir/R4/',
 		  target: '_blank',
 		}],
 	  },

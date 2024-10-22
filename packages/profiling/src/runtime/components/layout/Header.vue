@@ -5,7 +5,7 @@
 	>
 	  <div
 		class="flex h-14 items-center justify-between gap-2 px-4 md:px-8"
-		:class="{ 'border-b lg:border-none': config.header.border, 'container max-w-screen-2xl': config.main.padded }"
+		:class="{ 'border-b lg:border-none': config.header.border, 'mx-auto max-w-[1536px]': config.main.padded }"
 	  >
 		<LayoutHeaderLogo class="hidden flex-1 md:flex" />
 		<LayoutMobileNav />

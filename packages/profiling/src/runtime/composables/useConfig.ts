@@ -29,7 +29,7 @@ const defaultConfig: DefaultConfig = {
   },
   aside: {
     useLevel: true,
-    collapse: false,
+    collapse: true,
   },
   main: {
     breadCrumb: true,
@@ -91,6 +91,7 @@ const defaultConfig: DefaultConfig = {
     enableInMobile: false,
     title: 'On This Page',
     links: [],
+    ignoreDirs: []
   },
   search: {
     enable: true,

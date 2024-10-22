@@ -2,19 +2,19 @@
 	<UiScrollArea orientation="vertical" class="relative h-full overflow-hidden py-6 pr-6 text-sm" type="hover">
 	  <LayoutHeaderNavMobile v-if="isMobile" class="mb-5 border-b pb-2" />
 	  <LayoutSearchButton v-if="config.search.inAside" />
-	  <ul v-if="config.aside.useLevel" class="mb-1 border-b pb-4">
+	  <ul v-if="config.aside.useLevel" class="flex flex-col gap-1 border-b pb-4">
 		<li v-for="link in filteredNavigation" :key="link.id">
 		  <NuxtLink
 			:to="link?._path || ''"
-			class="mb-1 flex w-full gap-2 rounded-md px-3 py-2 transition-all hover:bg-muted"
+			class="flex h-8 items-center gap-2 rounded-md p-2 text-sm text-foreground/80 hover:bg-muted hover:text-primary"
 			:class="[
-			  path?.startsWith(link?._path) && 'bg-muted font-semibold text-primary hover:bg-muted',
+			  path?.startsWith(link?._path) && 'bg-muted !text-primary',
 			]"
 		  >
 			<UIcon
 			  v-if="link.icon"
 			  :name="link.icon"
-			  class="w-8 self-center"
+			  class="w-4 self-center"
 			/>
 			{{ link.title }}
 		  </NuxtLink>

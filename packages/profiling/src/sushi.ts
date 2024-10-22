@@ -1,11 +1,11 @@
 import { globby } from 'globby';
 import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
-import { readFileSync } from 'node:fs';
+import { readFileSync, rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
 import type { FhirProfilingContext, FhirProfilingDocumentation } from './types';
-import { createLandingPage } from './generator'
+import { createLandingPage, createResourceProfiles, createTerminologies } from './generator'
 import Markdown from './markdown';
 
 const profileFolder = 'profiling';
@@ -107,8 +107,12 @@ export function createProfilingContext(outPackage: sushiExport.Package, opts: Fh
 		codeSystems: []
 	} as FhirProfilingContext;
 
+	// transform filename into queryId -> lowercase and replace spaces with '-' and remove ending .json
+	const transformFileName = (fileName: string) => fileName.toLowerCase().replace(/ /g, '-').replace('.json', '');
+
 	for (const profile of outPackage.profiles) {
 		const { id, resourceType, url, version, title, description, status, kind, baseDefinition, inProgress = false } = profile;
+		const fileName = profile.getFileName();
 		context.profiles.push({
 			id,
 			resourceType,
@@ -121,7 +125,8 @@ export function createProfilingContext(outPackage: sushiExport.Package, opts: Fh
 			baseDefinition,
 			inProgress,
 			examples: [],
-			fileName: profile.getFileName()
+			fileName: fileName,
+			queryId: transformFileName(fileName)
 		});
 	}
 	for (const instance of outPackage.instances) {
@@ -150,9 +155,18 @@ export function createProfilingContext(outPackage: sushiExport.Package, opts: Fh
 }
 
 export function createFhirDocs(ctx: FhirProfilingContext) {
+	// Empty content folder
+	const contentDir = join(ctx.config.dir, 'fsh-generated', 'content');
+	rmSync(contentDir, { recursive: true });
 
 	// Create landing page as an overview of the FHIR Implementation Guide
 	createLandingPage(ctx);
+
+	// Create a page for each resource profile
+	createResourceProfiles(ctx);
+
+	// Create a page for each resource profile
+	createTerminologies(ctx);
 
 	// add _dir.yml to resources folder to exclude it from docs navigation
 	// TODO: check if it is better to include it and create a page for it

@@ -4,7 +4,11 @@
 	  :class="[level > 0 && 'pl-4']"
 	>
 	  <UCollapsible v-if="link.children" v-model:open="isOpen">
-		<UButton class="w-full text-left">
+		<UButton
+			variant="ghost"
+			color="neutral"
+			class="w-full text-left"
+			>
 		  <div class="flex w-full gap-1">
 			<UIcon
 			  v-if="link.icon"

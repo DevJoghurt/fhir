@@ -1,5 +1,7 @@
 <template>
-	<UBreadcrumb :items="breadcrumbs" />
+	<UBreadcrumb
+    :items="breadcrumbs"
+  />
 </template>
 <script setup lang="ts">
   const route = useRoute();

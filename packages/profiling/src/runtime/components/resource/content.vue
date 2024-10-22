@@ -1,5 +1,5 @@
 <template>
-	<div class="p-4">
+	<div class="py-4">
 		<ContentQuery :path="`/profiling/${resource}`">
 			<template #default="{ data }">
 				<UCard>

@@ -1,6 +1,12 @@
 import Markdown from '../markdown';
-import { join } from 'node:path';
 import { FhirProfilingContext } from '../types';
+
+type PageSection = {
+	id: string;
+	name: string;
+	title: string;
+	description: string;
+};
 
 export function createLandingPage(ctx: FhirProfilingContext) {
 	const doc = new Markdown();
@@ -10,14 +16,35 @@ export function createLandingPage(ctx: FhirProfilingContext) {
 		layout: ctx.config.documentation?.layout || 'fhirdocs'
 	});
 	doc.heading('FHIR Implementation Guide', 1);
-	doc.text('This is a generated FHIR Implementation Guide.');
-	doc.heading('Table of Contents', 2);
-	doc.text('This is a table of contents.');
-	doc.heading('Introduction', 2);
-	doc.text('This is an introduction.');
-	doc.component('ResourceContent', {
-		resource: 'structuredefinition-researchstudy'
-	});
-	const markdownFilePath = join(ctx.config.dir, 'fsh-generated','content', 'index.md');
-	doc.save(markdownFilePath);
+	doc.text('This page provides a list of the FHIR artifacts defined as part of this implementation guide.');
+
+	const sections = [{
+		id: 'profiles',
+		name: 'Resource Profiles',
+		title: 'Structures: Resource Profiles',
+		description: 'These define constraints on FHIR resources for systems conforming to this implementation guide.'
+	}, {
+		id: 'valueSets',
+		name: 'Value Sets',
+		title: 'Terminology: Value Sets',
+		description: 'These define sets of codes used by systems conforming to this implementation guide.'
+	}, {
+		id: 'codeSystems',
+		name: 'Code Systems',
+		title: 'Terminology: Code Systems',
+		description: 'These define new code systems used by systems conforming to this implementation guide.'
+	}] as PageSection[];
+
+	for (const section of sections) {
+		doc.heading(section.title, 2);
+		doc.text(section.description);
+		// use table to display the list of profiles
+		doc.table({
+			columns: ['Name', 'Description'],
+			rows: ctx[section.id].map(profile => [profile.id, profile.description])
+		});
+	}
+
+	// save the markdown file
+	doc.save(ctx.config.dir, 'fsh-generated','content', '0.index.md');
 }

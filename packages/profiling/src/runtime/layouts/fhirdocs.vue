@@ -3,7 +3,7 @@
 		<NuxtLoadingIndicator :color="false" class="z-100 bg-primary/80" />
 		<UApp>
 			<LayoutHeader />
-			<div class="min-h-screen border-b">
+			<div class="mx-auto max-w-[1536px] p-6 min-h-screen border-b">
 				<div
 				class="flex-1 items-start px-4 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 md:px-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"
 				:class="[config.main.padded && 'container']"

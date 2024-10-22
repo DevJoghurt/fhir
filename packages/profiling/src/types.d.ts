@@ -19,6 +19,7 @@ export type Profile = {
 	inProgress: boolean;
 	examples: ProfileExample[];
 	fileName: string;
+	queryId: string;
 };
 
 export type Instance = {
