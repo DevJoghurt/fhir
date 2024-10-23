@@ -6,11 +6,11 @@ import { readFileSync, rmSync, existsSync } from 'node:fs';
 import { outputJSONSync } from 'fs-extra'
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
-import type { FhirProfilingContext, FhirProfilingDocumentation, FhirProfilingLayer } from './types';
+import type { FhirProfilingContext, FhirProfilingDocumentation, FhirProfilingLayer } from './types/profiling';
 import { createLandingPage, createResourceProfiles, createTerminologies } from './generator'
 import Markdown from './markdown';
 
-export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters'>
+export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters'>;
 
 type ProfilingBaseConfig = {
 	projectPath: string;

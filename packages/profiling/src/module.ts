@@ -12,7 +12,7 @@ import {
   } from '@nuxt/kit';
   import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './sushi';
   import { join } from 'node:path';
-  import { FhirProfilingDocumentation, FhirProfilingLayer } from './types';
+  import { FhirProfilingDocumentation, FhirProfilingLayer } from './types/profiling';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',

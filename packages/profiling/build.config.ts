@@ -11,6 +11,10 @@ export default defineBuildConfig({
 		},
 		{
 			input: 'src/markdown'
+		},
+		{
+			builder: "mkdist",
+			input: "src/types"
 		}
 	]
 });

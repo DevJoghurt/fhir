@@ -22,6 +22,9 @@
 		"./markdown": {
 			"types": "./dist/markdown.d.ts",
 			"import": "./dist/markdown.mjs"
+		},
+		"./types": {
+			"types": "./dist/profiling.d.ts"
 		}
 	},
 	"publishConfig": {
