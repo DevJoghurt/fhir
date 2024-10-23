@@ -10,9 +10,9 @@ import {
 	addImportsDir,
 	extendPages
   } from '@nuxt/kit';
-  import { readFSHFiles, initializeProfiling, createFhirDocs } from './sushi';
+  import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './sushi';
   import { join } from 'node:path';
-  import { FhirProfilingDocumentation } from './types';
+  import { FhirProfilingDocumentation, FhirProfilingLayer } from './types';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -20,10 +20,9 @@ const meta = {
 	configKey: 'fhirProfiling'
 };
 
-
-
 type ModuleOptions = {
 	dir?: string;
+	outDir?: string;
 	verbose?: boolean;
 	documentation?: FhirProfilingDocumentation;
 }
@@ -32,6 +31,7 @@ export default defineNuxtModule<ModuleOptions>({
 	meta,
 	defaults: {
 		dir: 'profiling',
+		outDir: '.nuxt/fhir-profiling',
 		verbose: true,
 		documentation: {
 			enabled: true,
@@ -47,29 +47,39 @@ export default defineNuxtModule<ModuleOptions>({
 
 		// get all fsh files in profiles/fsh folder for fhir sushi -> respecting nuxt layers
 		logger.info('Fhir Profiling: Reading FSH files');
-		const fshFiles = [] as string[];
-		let projectFolder = nuxt.options.srcDir;
+
+		let projectPath = nuxt.options.srcDir;
+		const layers = [] as FhirProfilingLayer[];
 		for (const [i, layer] of nuxt.options._layers.entries()) {
-			const files = await readFSHFiles(layer.config);
-			if(options.verbose){
-				for (const file of files) {
-					logger.info(`Found FSH file: ${file}`);
-				}
-			}
-			fshFiles.push(...files);
+			layers.push({
+				cwd: layer.config.rootDir,
+				dir: layer.config?.sourceOptions?.dir || options.dir || 'profiling'
+			});
 			// Always use base layer as project folder
-			if(i===0) projectFolder = layer.config.rootDir;
+			if(i===0) projectPath = layer.config.rootDir;
 		}
 
-		// Create FHIR Implementation Guides
-		const fhirProfilingContext = await initializeProfiling(fshFiles, {
-			rootDir: projectFolder,
-			outDir: projectFolder,
+		let profilingContext = initializeProfilingContext({
+			projectPath,
+			profilingDir: options.dir || 'profiling',
+			outDir: options.outDir || '.nuxt/fhir-profiling',
+			layers,
 			snapshot: true,
 			documentation: options.documentation || {}
 		});
 
-		await createFhirDocs(fhirProfilingContext);
+		profilingContext = await fishForFiles(profilingContext);
+
+		await buildProfiles(profilingContext);
+
+		if(options.documentation?.enabled){
+			logger.info('Fhir Profiling: Creating FHIR Docs');
+			createFhirDocs(profilingContext);
+		}
+
+		if(nuxt.options.dev){
+			initializeWatcher(profilingContext);
+		}
 
 
 		if(!hasNuxtModule('@nuxt/content')){
@@ -87,19 +97,19 @@ export default defineNuxtModule<ModuleOptions>({
 					// add fhir profiling generated docs
 					content: {
 					  driver: 'fs',
-					  base: join(projectFolder, 'fsh-generated', 'content')
+					  base: join(projectPath, options?.outDir || '', 'content')
 					},
 					// add fhir resources for querying
 					// TODO: add a way to query fhir resources without using nuxt content
 					resources: {
 						driver: 'fs',
 						prefix: '/profiling',
-						base: join(projectFolder, 'fsh-generated', 'resources')
+						base: join(projectPath, options?.outDir || '', 'resources')
 					},
 					// add project content folder for additional docs and overrides
 					project: {
 						driver: 'fs',
-						base: join(projectFolder, options?.dir || '', 'content')
+						base: join(projectPath, options?.dir || '', 'content')
 					}
 				}
 			});
@@ -139,12 +149,12 @@ export default defineNuxtModule<ModuleOptions>({
 			}
 		});
 		nuxt.hook('nitro:config', async (nitroConfig) => {
-			nitroConfig.publicAssets ||= []
+			nitroConfig.publicAssets ||= [];
 			nitroConfig.publicAssets.push({
 			  dir: publicDir,
 			  maxAge: 60 * 60 * 24 * 365
-			})
-		})
+			});
+		});
 		// default app config for fhirDocs
 		const appConfigFile = await resolvePath(resolve('./runtime/app.config'))
 		nuxt.hook('app:resolve', (app) => {

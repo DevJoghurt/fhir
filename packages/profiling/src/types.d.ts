@@ -55,14 +55,24 @@ export type FhirProfilingDocumentation = {
 	description?: string;
 };
 
-export type FhirProfilingConfig = {
+export type FhirProfilingLayer = {
+	cwd: string;
 	dir: string;
+};
+
+export type FhirProfilingConfig = {
+	projectPath: string;
+	profilingDir: string;
+	outDir: string;
+	layers: FhirProfilingLayer[];
 	verbose: boolean;
+	snapshot: boolean;
 	documentation: FhirProfilingDocumentation;
 };
 
 export type FhirProfilingContext = {
 	config: FhirProfilingConfig;
+	files: string[];
 	profiles: Profile[];
 	valueSets: ValueSet[];
 	codeSystems: CodeSystem[];

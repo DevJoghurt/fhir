@@ -15,6 +15,9 @@ export default defineNuxtConfig({
   extends: [
     '@nhealth/app'
   ],
+  fhirProfiling: {
+    outDir: '.nuxt/fhir-profiling',
+  },
   i18n: {
     locales: [{
 		  code: 'de',

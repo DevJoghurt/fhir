@@ -46,5 +46,5 @@ export function createLandingPage(ctx: FhirProfilingContext) {
 	}
 
 	// save the markdown file
-	doc.save(ctx.config.dir, 'fsh-generated','content', '0.index.md');
+	doc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '0.index.md');
 }

@@ -28,7 +28,7 @@ export function createTerminologies(ctx: FhirProfilingContext) {
 		columns: ['Name', 'Description'],
 		rows: ctx.codeSystems.map(codeSystem => [codeSystem.id || '', codeSystem.description || ''])
 	});
-	doc.save(ctx.config.dir, 'fsh-generated','content', '2.terminology', '0.index.md');
+	doc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '2.terminology', '0.index.md');
 
 	// create a page for every value set
 	for (const [i, valueSet] of ctx.valueSets.entries()) {
@@ -42,7 +42,7 @@ export function createTerminologies(ctx: FhirProfilingContext) {
 		valueSetDoc.text(valueSet.description);
 		valueSetDoc.heading('Formal Views of Value Set Content', 2);
 
-		valueSetDoc.save(ctx.config.dir, 'fsh-generated','content', '2.terminology', 'value-sets', `${i+1}.${valueSet.id}.md`);
+		valueSetDoc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '2.terminology', 'value-sets', `${i+1}.${valueSet.id}.md`);
 	}
 
 	// create a page for every code system
@@ -57,6 +57,6 @@ export function createTerminologies(ctx: FhirProfilingContext) {
 		valueSetDoc.text(valueSet.description);
 		valueSetDoc.heading('Formal Views of Value Set Content', 2);
 
-		valueSetDoc.save(ctx.config.dir, 'fsh-generated','content', '2.terminology', 'code-systems',`${i+1}.${valueSet.id}.md`);
+		valueSetDoc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '2.terminology', 'code-systems',`${i+1}.${valueSet.id}.md`);
 	}
 }

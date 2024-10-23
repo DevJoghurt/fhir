@@ -1,25 +1,50 @@
 import { globby } from 'globby';
 import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
-import { readFileSync, rmSync } from 'node:fs';
+import { watch } from 'chokidar';
+import { readFileSync, rmSync, existsSync } from 'node:fs';
+import { outputJSONSync } from 'fs-extra'
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
-import type { FhirProfilingContext, FhirProfilingDocumentation } from './types';
+import type { FhirProfilingContext, FhirProfilingDocumentation, FhirProfilingLayer } from './types';
 import { createLandingPage, createResourceProfiles, createTerminologies } from './generator'
 import Markdown from './markdown';
 
-const profileFolder = 'profiling';
-
-type ReadFSHFilesOptions = {
-	rootDir: string;
-};
-
 export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters'>
 
-export async function readFSHFiles(config: ReadFSHFilesOptions): Promise<string[]> {
+type ProfilingBaseConfig = {
+	projectPath: string;
+	profilingDir: string;
+	outDir: string;
+	documentation: FhirProfilingDocumentation;
+	snapshot: boolean;
+	layers?: FhirProfilingLayer[] | false;
+};
 
-	const files = await globby(`${profileFolder}/fsh/**/*.fsh`, {
-		cwd: config.rootDir,
+export function initializeProfilingContext(config: ProfilingBaseConfig): FhirProfilingContext{
+	const context = {
+		config: {
+			projectPath: config.projectPath,
+			profilingDir: config.profilingDir,
+			outDir: config.outDir,
+			layers: config.layers || false,
+			verbose: true,
+			snapshot: config.snapshot,
+			documentation: config.documentation
+		},
+		files: [],
+		profiles: [],
+		valueSets: [],
+		codeSystems: []
+	} as FhirProfilingContext;
+
+	return context;
+}
+
+export async function readProfilingFolder(layer: FhirProfilingLayer): Promise<string[]> {
+
+	const files = await globby(`${layer.dir}/fsh/**/*.fsh`, {
+		cwd: layer.cwd,
 		absolute: true,
 		deep: 2,
 	});
@@ -27,18 +52,114 @@ export async function readFSHFiles(config: ReadFSHFilesOptions): Promise<string[
   	return files;
 }
 
-type FhirProfilingOptions = {
-	rootDir: string;
-	outDir: string;
-	snapshot: boolean;
-	documentation: FhirProfilingDocumentation;
-};
-
-export async function initializeProfiling(files: string[], opts: FhirProfilingOptions): Promise<FhirProfilingContext> {
+export async function fishForFiles(context: FhirProfilingContext): Promise<FhirProfilingContext> {
 	const logger = useLogger();
+	// reset files
+	context.files = [];
+
+	if(context.config.layers && context.config.layers.length > 0){
+		for (const [i, layer] of context.config.layers.entries()) {
+			const files = await readProfilingFolder(layer);
+			context.files.push(...files);
+		}
+	} else{
+		const files = await readProfilingFolder({
+			cwd: context.config.projectPath,
+			dir: context.config.profilingDir
+		});
+		context.files.push(...files);
+	}
+	if(context.config.verbose){
+		for (const file of context.files) {
+			logger.info(`Found FSH file: ${file}`);
+		}
+	}
+
+	return context
+}
+
+
+/**
+ * 	cc. Apache License, Version 2.0: https://github.com/FHIR/sushi/blob/master/src/utils/Processing.ts
+ *
+ * Needs to be refactored to make the output more flexible
+ *
+ */
+
+export function writeFHIRResources(
+	context: FhirProfilingContext,
+	outPackage: sushiExport.Package,
+	defs: fhirdefs.FHIRDefinitions
+  ) {
+	const logger = useLogger();
+	logger.info('Exporting FHIR resources as JSON...');
+	let count = 0;
+	const skippedResources: string[] = [];
+	const predefinedResources = defs.allPredefinedResources(false);
+	const writeResources = (
+	  resources: {
+		getFileName: () => string;
+		toJSON: (snapshot: boolean) => any;
+		url?: string;
+		id?: string;
+		resourceType?: string;
+	  }[]
+	) => {
+	  const exportDir = join(context.config.projectPath, context.config.outDir, 'resources');
+	  resources.forEach(resource => {
+		if (
+		  !predefinedResources.find(
+			predef =>
+			  predef.url === resource.url &&
+			  predef.resourceType === resource.resourceType &&
+			  predef.id === resource.id
+		  )
+		) {
+		  utils.checkNullValuesOnArray(resource);
+		  outputJSONSync(join(exportDir, resource.getFileName()), resource.toJSON(context.config.snapshot), {
+			spaces: 2
+		  });
+		  count++;
+		} else {
+		  logger.error(
+			`Ignoring FSH definition for ${
+			  resource.url ?? `${resource.resourceType}/${resource.id}`
+			} since it duplicates existing pre-defined resource. ` +
+			  'To use the FSH definition, remove the conflicting file from "input". ' +
+			  'If you do want the FSH definition to be ignored, please comment the definition out ' +
+			  'to remove this error.'
+		  );
+		  skippedResources.push(resource.getFileName());
+		}
+	  });
+	};
+	writeResources(outPackage.profiles);
+	writeResources(outPackage.extensions);
+	writeResources(outPackage.logicals);
+	// WARNING: While custom resources are written to disk, the IG Publisher does not
+	//          accept newly defined resources. However, it is configured to automatically
+	//          search the fsh-generated directory for StructureDefinitions rather than using
+	//          the StructureDefinitions defined in the exported implementation guide. So, be
+	//          aware that the IG Publisher will attempt to process custom resources.
+	//          NOTE: To mitigate against this, the parameter 'autoload-resources = false' is
+	//          injected automatically into the IG array pf parameters if the parameter was
+	//          not already defined and only if the custom resources were generated by Sushi.
+	writeResources(outPackage.resources);
+	writeResources([...outPackage.valueSets, ...outPackage.codeSystems]);
+
+	// Filter out inline instances
+	writeResources(outPackage.instances.filter(i => i._instanceMeta.usage !== 'Inline'));
+
+	logger.info(`Exported ${count} FHIR resources as JSON.`);
+	return { skippedResources };
+}
+
+export async function buildProfiles(context: FhirProfilingContext): Promise<FhirProfilingContext> {
+	const logger = useLogger();
+
 	let rawFSH = [] as sushiImport.RawFSH[];
-	if(files.length > 0){
-		rawFSH = files.map(file => {
+	if(context.files.length > 0){
+		rawFSH = context.files.map(file => {
 			const filePath = resolve(file);
 			const fileContent = readFileSync(filePath, 'utf8');
 			return new sushiImport.RawFSH(fileContent, filePath);
@@ -51,7 +172,10 @@ export async function initializeProfiling(files: string[], opts: FhirProfilingOp
 	const config = defineSushiConfig({
 		fhirVersion: ['4.0.1'],
 		canonical: 'http://example.com/fsh',
-		dependencies: [{packageId: "hl7.fhir.us.core", version: "3.1.0"}]
+		dependencies: [{
+			packageId: "hl7.fhir.us.core",
+			version: "3.1.0"
+		}]
 	});
 
 	const tank = new sushiImport.FSHTank(docs, config);
@@ -61,7 +185,7 @@ export async function initializeProfiling(files: string[], opts: FhirProfilingOp
 	await utils.loadExternalDependencies(defs, config);
 
 	// Load custom resources. In current tank configuration (input/fsh), resources will be in input/
-	fhirdefs.loadCustomResources(join(opts.rootDir, profileFolder), join(opts.rootDir, profileFolder), config?.parameters || [], defs);
+	fhirdefs.loadCustomResources(join(context.config.projectPath, context.config.profilingDir), join(context.config.projectPath, context.config.profilingDir), config?.parameters || [], defs);
 
 	 // Check for StructureDefinition
 	 const structDef = defs.fishForFHIR('StructureDefinition', utils.Type.Resource);
@@ -77,39 +201,11 @@ export async function initializeProfiling(files: string[], opts: FhirProfilingOp
 
 	 const outPackage = sushiExport.exportFHIR(tank, defs);
 
-	 // Create content map for writing docs
-	 const context = createProfilingContext(outPackage, opts);
-
-
-	 const { skippedResources } = utils.writeFHIRResources(opts.outDir, outPackage, defs, opts.snapshot);
-
-	 if (skippedResources.length > 0) {
-	   logger.warn(
-		 `The following resources were skipped due to errors during conversion: ${skippedResources.join(
-		   ', '
-		 )}`
-	   );
-	 }
-
-	 // return fhir profiling context
-	 return context;
-}
-
-export function createProfilingContext(outPackage: sushiExport.Package, opts: FhirProfilingOptions): FhirProfilingContext {
-	const context = {
-		config: {
-			dir: opts.outDir,
-			verbose: true,
-			documentation: opts.documentation
-		},
-		profiles: [],
-		valueSets: [],
-		codeSystems: []
-	} as FhirProfilingContext;
-
+	// Create content map for writing docs
 	// transform filename into queryId -> lowercase and replace spaces with '-' and remove ending .json
 	const transformFileName = (fileName: string) => fileName.toLowerCase().replace(/ /g, '-').replace('.json', '');
-
+	// empty context profiles
+	context.profiles = [];
 	for (const profile of outPackage.profiles) {
 		const { id, resourceType, url, version, title, description, status, kind, baseDefinition, inProgress = false } = profile;
 		const fileName = profile.getFileName();
@@ -142,22 +238,41 @@ export function createProfilingContext(outPackage: sushiExport.Package, opts: Fh
 			continue;
 		}
 	}
+	// empty context valueSets
+	context.valueSets = [];
 	for (const valueSet of outPackage.valueSets) {
 		const { id, resourceType, url, version, title, description, status } = valueSet;
 		context.valueSets.push({ id, resourceType, url, version, title, description, status });
 	}
+	// empty context codeSystems
+	context.codeSystems = [];
 	for (const codeSystem of outPackage.codeSystems) {
 		const { id, resourceType, url, version, title, description, status, date } = codeSystem;
 		context.codeSystems.push({ id, resourceType, url, version, title, description, status, date });
 	}
-	return context;
 
+	// write FHIR resources to disk
+	const { skippedResources } = writeFHIRResources(context, outPackage, defs);
+
+	if (skippedResources.length > 0) {
+	   logger.warn(
+		 `The following resources were skipped due to errors during conversion: ${skippedResources.join(
+		   ', '
+		 )}`
+	   );
+	}
+
+	// return fhir profiling context
+	return context;
 }
 
 export function createFhirDocs(ctx: FhirProfilingContext) {
 	// Empty content folder
-	const contentDir = join(ctx.config.dir, 'fsh-generated', 'content');
-	rmSync(contentDir, { recursive: true });
+	const contentDir = join(ctx.config.projectPath, ctx.config.outDir, 'content');
+	// check if content folder exists and delete it
+	if (existsSync(contentDir)) {
+		rmSync(contentDir, { recursive: true });
+	}
 
 	// Create landing page as an overview of the FHIR Implementation Guide
 	createLandingPage(ctx);
@@ -172,7 +287,31 @@ export function createFhirDocs(ctx: FhirProfilingContext) {
 	// TODO: check if it is better to include it and create a page for it
 	const dirYml = new Markdown();
 	dirYml.value('navigation', 'false');
-	dirYml.save(join(ctx.config.dir, 'fsh-generated','resources', '_dir.yml'));
+	dirYml.save(ctx.config.projectPath, ctx.config.outDir, 'resources', '_dir.yml');
+}
+
+export function initializeWatcher(ctx: FhirProfilingContext){
+	const logger = useLogger();
+
+	const dir = join(ctx.config.projectPath, ctx.config.profilingDir, 'fsh');
+    const watcher = watch(dir, {
+		ignoreInitial: true,
+		depth: 0,
+		ignored: []
+	})
+
+	watcher.on('all', async (event, path) => {
+		logger.log(event, path);
+		if(event === 'add' || event === 'unlink'){
+			ctx = await fishForFiles(ctx);
+		}
+		if( ['change', 'add', 'unlink'].indexOf(event) !== -1){
+			ctx = await buildProfiles(ctx);
+			if(ctx.config.documentation?.enabled){
+				createFhirDocs(ctx);
+			}
+		}
+	})
 }
 
 export function defineSushiConfig(config: SushiConfiguration) {
