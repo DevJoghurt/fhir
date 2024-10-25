@@ -11,6 +11,7 @@
 	const icon = ref<string>('lucide:sun');
 	const currentClass = ref<string>('rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0');
 
+	// TODO: rewrite with tailwind variants
 	function toggleDark() {
 		colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
 		switch (colorMode.value) {

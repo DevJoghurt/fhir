@@ -1,4 +1,4 @@
-import { FhirProfilingContext } from '../types';
+import type { FhirProfilingContext } from '../types/profiling';
 import Markdown from '../markdown';
 
 

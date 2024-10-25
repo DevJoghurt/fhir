@@ -1,5 +1,5 @@
 import Markdown from '../markdown';
-import { FhirProfilingContext } from '../types';
+import type { FhirProfilingContext } from '../types/profiling';
 
 type PageSection = {
 	id: string;
