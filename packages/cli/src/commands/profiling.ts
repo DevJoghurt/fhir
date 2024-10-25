@@ -27,6 +27,10 @@ export default defineCommand({
 		description: 'Outdir for the profiles (default: export)',
 		default: 'export',
 	  },
+	  parallelProcessing: {
+		type: 'string',
+		description: 'Directory for parallel processing'
+	  },
 	  docs: {
 		type: 'boolean',
 		description: 'Generate documentation',
@@ -43,7 +47,11 @@ export default defineCommand({
 			snapshot: true,
 			documentation: {
 				enabled: ctx.args.docs
-			}
+			},
+			parallelProcessing: {
+				enabled: ctx.args.parallelProcessing ? true : false,
+				dir: ctx.args.parallelProcessing || ''
+			},
 		});
 
 		// if not generating docs, then we need to run the build process manually

@@ -35,7 +35,7 @@ export function createResourceProfiles(ctx: FhirProfilingContext) {
 		profileDoc.text(profile.description);
 		profileDoc.heading('Formal Views of Profile Content', 2);
 		profileDoc.component('ResourceContent', {
-			resource: profile.queryId
+			resource: profile.fileName
 		});
 		profileDoc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '1.resource-profiles', `${i+1}.${profile.id}.md`);
 	}

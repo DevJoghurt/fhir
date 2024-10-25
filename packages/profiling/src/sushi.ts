@@ -3,10 +3,15 @@ import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
 import { watch } from 'chokidar';
 import { readFileSync, rmSync, existsSync } from 'node:fs';
-import { outputJSONSync } from 'fs-extra'
+import { outputJSONSync } from 'fs-extra';
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
-import type { FhirProfilingContext, FhirProfilingDocumentation, FhirProfilingLayer } from './types/profiling';
+import type {
+	FhirProfilingContext,
+	FhirProfilingDocumentation,
+	FhirProfilingLayer,
+	FhirProfilingParallelProcessing
+} from './types/profiling';
 import { createLandingPage, createResourceProfiles, createTerminologies } from './generator'
 import Markdown from './markdown';
 
@@ -18,6 +23,7 @@ type ProfilingBaseConfig = {
 	outDir: string;
 	documentation: FhirProfilingDocumentation;
 	snapshot: boolean;
+	parallelProcessing: FhirProfilingParallelProcessing;
 	layers?: FhirProfilingLayer[] | false;
 };
 
@@ -30,7 +36,8 @@ export function initializeProfilingContext(config: ProfilingBaseConfig): FhirPro
 			layers: config.layers || false,
 			verbose: true,
 			snapshot: config.snapshot,
-			documentation: config.documentation
+			documentation: config.documentation,
+			parallelProcessing: config.parallelProcessing
 		},
 		files: [],
 		profiles: [],
@@ -119,6 +126,11 @@ export function writeFHIRResources(
 		  outputJSONSync(join(exportDir, resource.getFileName()), resource.toJSON(context.config.snapshot), {
 			spaces: 2
 		  });
+		  if(context.config.parallelProcessing.enabled){
+			outputJSONSync(join(context.config.projectPath, context.config.parallelProcessing.dir, resource.getFileName()), resource.toJSON(context.config.snapshot), {
+				spaces: 2
+			});
+		  }
 		  count++;
 		} else {
 		  logger.error(
@@ -203,7 +215,7 @@ export async function buildProfiles(context: FhirProfilingContext): Promise<Fhir
 
 	// Create content map for writing docs
 	// transform filename into queryId -> lowercase and replace spaces with '-' and remove ending .json
-	const transformFileName = (fileName: string) => fileName.toLowerCase().replace(/ /g, '-').replace('.json', '');
+	//const transformFileName = (fileName: string) => fileName.toLowerCase().replace(/ /g, '-').replace('.json', '');
 	// empty context profiles
 	context.profiles = [];
 	for (const profile of outPackage.profiles) {
@@ -221,8 +233,7 @@ export async function buildProfiles(context: FhirProfilingContext): Promise<Fhir
 			baseDefinition,
 			inProgress,
 			examples: [],
-			fileName: fileName,
-			queryId: transformFileName(fileName)
+			fileName: fileName
 		});
 	}
 	for (const instance of outPackage.instances) {

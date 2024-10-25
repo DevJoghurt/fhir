@@ -61,3 +61,7 @@
 		title: `${page.value?.title ?? '404'} - ${config.value.site.name}`
 	});
 </script>
+<style>
+	@import "tailwindcss";
+	@import "@nuxt/ui";
+</style>

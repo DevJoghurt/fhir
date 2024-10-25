@@ -17,6 +17,12 @@ export default defineNuxtConfig({
   fhirProfiling: {
     outDir: '.nuxt/fhir-profiling',
   },
+  nitro: {
+    prerender: {
+      // Workaround for "Error: [404] Page not found: /manifest.json"
+      failOnError: false,
+    },
+  },
   i18n: {
     locales: [{
 		  code: 'de',

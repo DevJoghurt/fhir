@@ -19,10 +19,6 @@
 			"types": "./dist/sushi.d.ts",
 			"import": "./dist/sushi.mjs"
 		},
-		"./markdown": {
-			"types": "./dist/markdown.d.ts",
-			"import": "./dist/markdown.mjs"
-		},
 		"./types": {
 			"types": "./dist/profiling.d.ts"
 		}
@@ -52,6 +48,7 @@
 		"globby": "^14.0.2",
 		"mdbox": "^0.1.0",
 		"defu": "^6.1.4",
+		"tailwindcss": "4.0.0-alpha.29",
 		"tailwind-variants": "^0.2.1",
 		"@nuxt/image": "^1.8.1",
 		"@iconify/utils": "^2.1.33",
@@ -61,6 +58,7 @@
 	"devDependencies": {
 		"typescript": "^5.6.2",
 		"@nuxt/module-builder": "0.8.4",
+		"@types/fs-extra": "11.0.4",
 		"unbuild": "^2.0.0",
 		"shiki": "^1.22.0"
 	}

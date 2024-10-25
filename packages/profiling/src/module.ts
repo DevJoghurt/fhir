@@ -8,11 +8,18 @@ import {
 	addLayout,
 	resolvePath,
 	addImportsDir,
-	extendPages
+	extendPages,
+	addServerHandler,
+	addPrerenderRoutes
   } from '@nuxt/kit';
-  import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './sushi';
-  import { join } from 'node:path';
-  import { FhirProfilingDocumentation, FhirProfilingLayer } from './types/profiling';
+import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './sushi';
+import { join } from 'node:path';
+import type {
+	FhirProfilingDocumentation,
+	FhirProfilingLayer,
+	FhirProfilingParallelProcessing
+} from './types/profiling';
+import { defu } from 'defu';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -25,6 +32,7 @@ type ModuleOptions = {
 	outDir?: string;
 	verbose?: boolean;
 	documentation?: FhirProfilingDocumentation;
+	parallelProcessing?: FhirProfilingParallelProcessing;
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -35,6 +43,10 @@ export default defineNuxtModule<ModuleOptions>({
 		verbose: true,
 		documentation: {
 			enabled: true,
+		},
+		parallelProcessing: {
+			enabled: false,
+			dir: 'fsh-profiling'
 		}
 	},
 	async setup(options, nuxt) {
@@ -65,7 +77,11 @@ export default defineNuxtModule<ModuleOptions>({
 			outDir: options.outDir || '.nuxt/fhir-profiling',
 			layers,
 			snapshot: true,
-			documentation: options.documentation || {}
+			documentation: options.documentation || {},
+			parallelProcessing: options.parallelProcessing || {
+				enabled: false,
+				dir: 'fsh-profiling'
+			}
 		});
 
 		profilingContext = await fishForFiles(profilingContext);
@@ -99,13 +115,6 @@ export default defineNuxtModule<ModuleOptions>({
 					  driver: 'fs',
 					  base: join(projectPath, options?.outDir || '', 'content')
 					},
-					// add fhir resources for querying
-					// TODO: add a way to query fhir resources without using nuxt content
-					resources: {
-						driver: 'fs',
-						prefix: '/profiling',
-						base: join(projectPath, options?.outDir || '', 'resources')
-					},
 					// add project content folder for additional docs and overrides
 					project: {
 						driver: 'fs',
@@ -115,22 +124,37 @@ export default defineNuxtModule<ModuleOptions>({
 			});
 		}
 
-		const publicDir = resolve('./runtime/public');
+		const runtimeConfig = nuxt.options.runtimeConfig || {};
+
+		runtimeConfig.fhirProfiling = defu(runtimeConfig.fhirProfiling || {}, {
+			resourcesDir: join(projectPath, options?.outDir || '', 'resources'),
+		})
+
+		addServerHandler({
+			method: 'get',
+			route: "/_resources/:resourceType",
+			handler: resolve('./runtime/server/resources'),
+		});
+
+		const modulePublicDir = resolve('./runtime/public');
 
 		if(!hasNuxtModule('@nuxt/image')){
 			installModule('@nuxt/image', {
-				dir: publicDir
+				dir: modulePublicDir
 			});
 		}
 
 		// Add fhir docs related things
 		addImportsDir(resolve('./runtime/composables'));
+
 		addLayout(resolve('./runtime/layouts/fhirdocs.vue'), 'fhirdocs');
+
 		addComponentsDir({
 			path: resolve('./runtime/components'),
 			global: true,
 			watch: true
 		});
+
 
 		nuxt.options.pages = true;
 
@@ -148,13 +172,24 @@ export default defineNuxtModule<ModuleOptions>({
 				})
 			}
 		});
+
+		// add folder to public assets: modulePublicDir
 		nuxt.hook('nitro:config', async (nitroConfig) => {
 			nitroConfig.publicAssets ||= [];
+
 			nitroConfig.publicAssets.push({
-			  dir: publicDir,
+			  dir: modulePublicDir,
 			  maxAge: 60 * 60 * 24 * 365
 			});
 		});
+
+		// add prerendering for fhir resources
+		if(!nuxt.options.dev && profilingContext.files.length>0){
+			for (const file of profilingContext.profiles.map(p => p.fileName)) {
+				addPrerenderRoutes(`/_resources/${file}`);
+			}
+		}
+
 		// default app config for fhirDocs
 		const appConfigFile = await resolvePath(resolve('./runtime/app.config'))
 		nuxt.hook('app:resolve', (app) => {

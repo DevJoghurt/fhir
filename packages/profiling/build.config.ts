@@ -8,13 +8,6 @@ export default defineBuildConfig({
 	 	},
 		{
 			input: 'src/sushi'
-		},
-		{
-			input: 'src/markdown'
-		},
-		{
-			builder: "mkdist",
-			input: "src/types"
 		}
 	]
 });

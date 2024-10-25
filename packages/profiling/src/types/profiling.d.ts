@@ -19,7 +19,6 @@ export type Profile = {
 	inProgress: boolean;
 	examples: ProfileExample[];
 	fileName: string;
-	queryId: string;
 };
 
 export type Instance = {
@@ -55,6 +54,11 @@ export type FhirProfilingDocumentation = {
 	description?: string;
 };
 
+export type FhirProfilingParallelProcessing = {
+	enabled: boolean;
+	dir: string;
+};
+
 export type FhirProfilingLayer = {
 	cwd: string;
 	dir: string;
@@ -68,6 +72,7 @@ export type FhirProfilingConfig = {
 	verbose: boolean;
 	snapshot: boolean;
 	documentation: FhirProfilingDocumentation;
+	parallelProcessing: FhirProfilingParallelProcessing;
 };
 
 export type FhirProfilingContext = {

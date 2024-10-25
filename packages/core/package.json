@@ -33,7 +33,7 @@
 		"@nuxt/ui": "next",
 		"@medplum/core": "3.2.16",
 		"@medplum/fhirtypes": "3.2.16",
-		"tailwindcss": "4.0.0-alpha.24",
+		"tailwindcss": "4.0.0-alpha.29",
 		"hookable": "^5.5.3",
 		"defu": "^6.1.4"
 	},

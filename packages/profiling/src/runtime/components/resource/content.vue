@@ -1,34 +1,30 @@
 <template>
 	<div class="py-4">
-		<ContentQuery :path="`/profiling/${resource}`">
-			<template #default="{ data }">
-				<UCard>
-					<template #header>
-						<h1 class="text-lg font-thin">{{ data[0].id }}</h1>
-					</template>
-					<div class="flex justify-end px-4">
-						<UTabs v-model="currentTab" defaultValue="0" :items="tabs" size="sm" :content="false" class="w-64">
-						</UTabs>
-					</div>
-					<div>
-						<ResourceSummary v-if="currentTab==='0'" :resource="data[0]" />
-						<ResourceTree v-if="currentTab==='1'" type="differential" :resource="data[0]" />
-						<ResourceTree v-if="currentTab==='2'" type="snapshot" :resource="data[0]" />
-						<ResourceTree v-if="currentTab==='3'" type="snapshot" filter="mustSupport" :resource="data[0]" />
-					</div>
-					<template #footer>
+		<UCard v-if="data && !error">
+			<template #header>
+				<div class="flex justify-between">
+					<h1 class="text-lg font-thin">{{ data.id }}</h1>
+					<UTabs v-model="currentTab" defaultValue="0" :items="tabs" size="sm" :content="false" class="w-64">
+					</UTabs>
+				</div>
+			</template>
+			<div>
+				<ResourceSummary v-if="currentTab==='0'" :resource="data" />
+				<ResourceTree v-if="currentTab==='1'" type="differential" :resource="data" />
+				<ResourceTree v-if="currentTab==='2'" type="snapshot" :resource="data" />
+				<ResourceTree v-if="currentTab==='3'" type="snapshot" filter="mustSupport" :resource="data" />
+			</div>
+			<template #footer>
 
-					</template>
-				</UCard>
 			</template>
-			<template #not-found>
-				<p>No data found.</p>
-			</template>
-    	</ContentQuery>
+		</UCard>
+		<div v-else>
+			<p>{{ error }}</p>
+		</div>
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref } from '#imports';
+	import { ref, useFetch, onMounted } from '#imports';
 
 	const tabs = [
 		{ label: 'Sum.', slot: 'summary' },
@@ -39,7 +35,12 @@
 
 	const currentTab = ref('0');
 
-	defineProps<{
+	const props = defineProps<{
 		resource: string;
-	}>()
+	}>();
+
+	const error = ref(null);
+
+	const { data } = await useFetch(`/_resources/${props.resource}`);
+
 </script>
