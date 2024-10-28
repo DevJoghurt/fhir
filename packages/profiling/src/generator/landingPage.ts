@@ -1,5 +1,5 @@
 import Markdown from '../markdown';
-import type { FhirProfilingContext } from '../types/profiling';
+import type { FhirProfilingContext } from '../profiling';
 
 type PageSection = {
 	id: string;
@@ -11,9 +11,9 @@ type PageSection = {
 export function createLandingPage(ctx: FhirProfilingContext) {
 	const doc = new Markdown();
 	doc.meta({
-		title: ctx.config.documentation?.title || 'FHIR Implementation Guide',
-		description: ctx.config.documentation?.description || 'This is a generated FHIR Implementation Guide.',
-		layout: ctx.config.documentation?.layout || 'fhirdocs'
+		title: ctx.docs?.site?.name || 'FHIR Implementation Guide',
+		description: ctx.docs?.site?.description || 'This is a generated FHIR Implementation Guide.',
+		layout: ctx.docs?.layout || 'fhirdocs'
 	});
 	doc.heading('FHIR Implementation Guide', 1);
 	doc.text('This page provides a list of the FHIR artifacts defined as part of this implementation guide.');
@@ -46,5 +46,5 @@ export function createLandingPage(ctx: FhirProfilingContext) {
 	}
 
 	// save the markdown file
-	doc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '0.index.md');
+	doc.save(ctx.paths.projectPath, ctx.paths.outDir, 'content', '0.index.md');
 }

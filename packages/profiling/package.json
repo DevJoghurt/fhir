@@ -11,13 +11,13 @@
     "type": "module",
 	"exports": {
 		".": {
+			"types": "./dist/profiling.d.ts",
+			"import": "./dist/profiling.mjs"
+		},
+		"./module": {
 		  "types": "./dist/types.d.ts",
 		  "import": "./dist/module.mjs",
 		  "require": "./dist/module.cjs"
-		},
-		"./sushi": {
-			"types": "./dist/sushi.d.ts",
-			"import": "./dist/sushi.mjs"
 		},
 		"./types": {
 			"types": "./dist/profiling.d.ts"
@@ -53,7 +53,8 @@
 		"@nuxt/image": "^1.8.1",
 		"@iconify/utils": "^2.1.33",
 		"chokidar": "4.0.1",
-		"fs-extra": "^11.2.0"
+		"fs-extra": "^11.2.0",
+		"c12": "^2.0.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.6.2",

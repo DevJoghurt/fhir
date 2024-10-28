@@ -7,7 +7,7 @@ export default defineBuildConfig({
 			input: 'src/module'
 	 	},
 		{
-			input: 'src/sushi'
+			input: 'src/profiling'
 		}
 	]
 });

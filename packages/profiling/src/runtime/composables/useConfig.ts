@@ -15,7 +15,7 @@ const defaultConfig: DefaultConfig = {
   },
   header: {
     showLoadingIndicator: true,
-    title: 'shadcn-docs',
+    title: 'Fhir Docs',
     showTitle: true,
     logo: {
       light: '/nhealth_light.png',

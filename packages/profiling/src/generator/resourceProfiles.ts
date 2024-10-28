@@ -1,4 +1,4 @@
-import type { FhirProfilingContext } from '../types/profiling';
+import type { FhirProfilingContext } from '../profiling';
 import Markdown from '../markdown';
 
 
@@ -21,7 +21,7 @@ export function createResourceProfiles(ctx: FhirProfilingContext) {
 		columns: ['Name', 'Description'],
 		rows: ctx.profiles.map(profile => [profile.id || '', profile.description])
 	});
-	doc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '1.resource-profiles', '0.index.md');
+	doc.save(ctx.paths.projectPath, ctx.paths.outDir, 'content', '1.resource-profiles', '0.index.md');
 
 	// create a page for every resource profile
 	for (const [i, profile] of ctx.profiles.entries()) {
@@ -37,7 +37,7 @@ export function createResourceProfiles(ctx: FhirProfilingContext) {
 		profileDoc.component('ResourceContent', {
 			resource: profile.fileName
 		});
-		profileDoc.save(ctx.config.projectPath, ctx.config.outDir, 'content', '1.resource-profiles', `${i+1}.${profile.id}.md`);
+		profileDoc.save(ctx.paths.projectPath, ctx.paths.outDir, 'content', '1.resource-profiles', `${i+1}.${profile.id}.md`);
 	}
 
 }

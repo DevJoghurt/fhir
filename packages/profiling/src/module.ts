@@ -12,13 +12,13 @@ import {
 	addServerHandler,
 	addPrerenderRoutes
   } from '@nuxt/kit';
-import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './sushi';
+import { fishForFiles, createFhirDocs, initializeWatcher, initializeProfilingContext, buildProfiles } from './profiling';
 import { join } from 'node:path';
 import type {
-	FhirProfilingDocumentation,
+	FhirProfilingDocs,
 	FhirProfilingLayer,
 	FhirProfilingParallelProcessing
-} from './types/profiling';
+} from './profiling';
 import { defu } from 'defu';
 
 const meta = {
@@ -31,7 +31,7 @@ type ModuleOptions = {
 	dir?: string;
 	outDir?: string;
 	verbose?: boolean;
-	documentation?: FhirProfilingDocumentation;
+	docs?: FhirProfilingDocs;
 	parallelProcessing?: FhirProfilingParallelProcessing;
 }
 
@@ -41,7 +41,7 @@ export default defineNuxtModule<ModuleOptions>({
 		dir: 'profiling',
 		outDir: '.nuxt/fhir-profiling',
 		verbose: true,
-		documentation: {
+		docs: {
 			enabled: true,
 		},
 		parallelProcessing: {
@@ -71,13 +71,13 @@ export default defineNuxtModule<ModuleOptions>({
 			if(i===0) projectPath = layer.config.rootDir;
 		}
 
-		let profilingContext = initializeProfilingContext({
+		let profilingContext = await initializeProfilingContext({
 			projectPath,
 			profilingDir: options.dir || 'profiling',
 			outDir: options.outDir || '.nuxt/fhir-profiling',
 			layers,
 			snapshot: true,
-			documentation: options.documentation || {},
+			docs: options.docs || {},
 			parallelProcessing: options.parallelProcessing || {
 				enabled: false,
 				dir: 'fsh-profiling'
@@ -88,7 +88,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 		await buildProfiles(profilingContext);
 
-		if(options.documentation?.enabled){
+		if(options.docs?.enabled){
 			logger.info('Fhir Profiling: Creating FHIR Docs');
 			createFhirDocs(profilingContext);
 		}
@@ -96,6 +96,12 @@ export default defineNuxtModule<ModuleOptions>({
 		if(nuxt.options.dev){
 			initializeWatcher(profilingContext);
 		}
+
+		// add fhir profiling context to app.config
+		nuxt.options.appConfig.fhirDocs = defu(nuxt.options.appConfig.fhirDocs || {},{
+			site: profilingContext.docs?.site || {},
+			header: profilingContext.docs?.header || {},
+		});
 
 
 		if(!hasNuxtModule('@nuxt/content')){
@@ -191,9 +197,11 @@ export default defineNuxtModule<ModuleOptions>({
 		}
 
 		// default app config for fhirDocs
+		/*
 		const appConfigFile = await resolvePath(resolve('./runtime/app.config'))
 		nuxt.hook('app:resolve', (app) => {
 			app.configs.push(appConfigFile)
 		})
+			*/
 	}
 })

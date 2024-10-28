@@ -2,28 +2,28 @@ import { overrideEnv } from './env';
 import { clearBuildDir } from './fs'
 import { consola } from 'consola';
 import { loadNuxt, writeTypes, buildNuxt } from '@nuxt/kit';
-import type { FhirProfilingContext } from '../../../profiling/src/types/profiling';
+import type { FhirProfilingContext } from '@nhealth/fhir-profiling';
 
 export async function buildDocs(ctx: FhirProfilingContext){
 	overrideEnv('production');
 
-	const buildDir = `${ctx.config.outDir}/.build`;
+	const buildDir = `${ctx.paths.outDir}/.build`;
 
 	// cleanup before loading nuxt
 	await clearBuildDir(buildDir);
 
     const nuxt = await loadNuxt({
-		cwd: ctx.config.projectPath,
+		cwd: ctx.paths.projectPath,
 		dotenv: {
-		  cwd: ctx.config.projectPath
+		  cwd: ctx.paths.projectPath
 		},
 		defaultConfig: {
 			modules: [
 				[
 					'@nhealth/fhir-profiling', {
-						dir: ctx.config.profilingDir,
+						dir: ctx.paths.profilingDir,
 						outDir: `${buildDir}/fhir-profiling`,
-						parallelProcessing: ctx.config.parallelProcessing
+						parallelProcessing: ctx.paths.parallelProcessing
 					}
 				]
 			],
@@ -36,7 +36,7 @@ export async function buildDocs(ctx: FhirProfilingContext){
 				nitro: {
 					static: true,
 					output: {
-						dir: `${ctx.config.outDir}/docs`,
+						dir: `${ctx.paths.outDir}/docs`,
 					},
 					prerender: {
 						// Workaround for "Error: [404] Page not found: /manifest.json"

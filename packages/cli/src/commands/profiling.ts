@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
 import { resolve } from 'node:path'
-import { initializeProfilingContext, fishForFiles, buildProfiles, initializeWatcher } from '@nhealth/fhir-profiling/sushi'
+import { initializeProfilingContext, fishForFiles, buildProfiles, initializeWatcher } from '@nhealth/fhir-profiling'
 import { sharedArgs } from './_shared'
 import { consola } from 'consola'
 import { buildDocs } from '../utils/build'
@@ -40,12 +40,12 @@ export default defineCommand({
 	async run(ctx) {
 		const cwd = resolve(ctx.args.cwd || '.');
 
-		let profilingCtx = initializeProfilingContext({
+		let profilingCtx = await initializeProfilingContext({
 			outDir: ctx.args.outDir,
 			projectPath: cwd,
 			profilingDir: ctx.args.dir,
 			snapshot: true,
-			documentation: {
+			docs: {
 				enabled: ctx.args.docs
 			},
 			parallelProcessing: {
