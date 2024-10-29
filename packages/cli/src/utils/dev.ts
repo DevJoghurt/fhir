@@ -11,13 +11,19 @@ import { toNodeListener } from 'h3';
 import { joinURL } from 'ufo';
 import type { HTTPSOptions, ListenURL, Listener, ListenOptions } from 'listhen';
 import { listen } from 'listhen';
+import type { ParsedArgs } from 'citty';
+import {
+  parseArgs as parseListhenArgs,
+} from 'listhen/cli';
 import type { Nuxt, NuxtConfig } from '@nuxt/schema';
 import { loadNuxtManifest, writeNuxtManifest } from './nuxt';
 import { clearBuildDir } from '../utils/fs';
-import { loadNuxt, writeTypes, buildNuxt } from '@nuxt/kit';
+import { loadNuxt, writeTypes, buildNuxt, loadNuxtConfig } from '@nuxt/kit';
 import { loading as nuxtLoadingTemplate } from '@nuxt/ui-templates';
 import type { FhirProfilingContext } from '@nhealth/fhir-profiling';
 import { overrideEnv } from './env';
+import type { NuxtOptions } from '@nuxt/schema';
+import command from '../commands/profiling';
 
 export type NuxtDevIPCMessage =
   | { type: 'nuxt:internal:dev:ready', port: number }
@@ -44,9 +50,132 @@ export interface NuxtDevServerOptions {
   devContext: NuxtDevContext
 }
 
-export async function runDevDocs(ctx: FhirProfilingContext){
+export async function runDevDocs(ctx: FhirProfilingContext, args: ParsedArgs<ArgsT>) {
 	overrideEnv('development');
 
+  const buildDir = `${ctx.paths.outDir}/.build`;
+  const cwd = ctx.paths.projectPath;
+
+  const nuxtOptions = await loadNuxtConfig({
+    cwd,
+    overrides: {
+      buildDir: buildDir,
+      dev: true,
+      logLevel: ctx.verbose ?  'verbose' : 'info',
+    },
+  });
+
+  const listenOptions = _resolveListenOptions(nuxtOptions, args);
+
+    // Directly start Nuxt dev
+    const devServer = await createNuxtDevServer(
+      {
+        cwd,
+        overrides: {
+          buildDir: buildDir,
+          devtools: { enabled: true },
+          compatibilityDate: "2024-10-29",
+          modules: [
+            [
+              '@nhealth/fhir-profiling', {
+                dir: ctx.paths.profilingDir,
+                outDir: `${buildDir}/fhir-profiling`,
+                parallelProcessing: ctx.paths.parallelProcessing
+              }
+            ]
+          ],
+        },
+        logLevel: ctx.verbose ?  'verbose' : 'info',
+        clear: true,
+        dotenv: false,
+        envName: 'NODE_ENV',
+        loadingTemplate: nuxtOptions.devServer.loadingTemplate,
+        devContext: {},
+      },
+      listenOptions,
+    )
+    await devServer.init()
+    return { listener: devServer?.listener }
+
+}
+
+type ArgsT = Exclude<
+  Awaited<typeof command.args>,
+  undefined | ((...args: unknown[]) => unknown)
+>
+
+function _resolveListenOptions(
+  nuxtOptions: NuxtOptions,
+  args: ParsedArgs<ArgsT>,
+): Partial<ListenOptions> {
+  const _port
+    = args.port
+    ?? args.p
+    ?? process.env.NUXT_PORT
+    ?? process.env.NITRO_PORT
+    ?? process.env.PORT
+    ?? nuxtOptions.devServer.port
+
+  const _hostname
+    = typeof args.host === 'string'
+      ? args.host
+      : (args.host === true ? '' : undefined)
+        ?? process.env.NUXT_HOST
+        ?? process.env.NITRO_HOST
+        ?? process.env.HOST
+        // TODO: Default host in schema should be undefined instead of ''
+        ?? nuxtOptions._layers?.[0].config?.devServer?.host
+        ?? undefined
+
+  const _public: boolean | undefined
+    = args.public
+    ?? (_hostname && !['localhost', '127.0.0.1', '::1'].includes(_hostname))
+      ? true
+      : undefined
+
+  const _httpsCert
+    = args['https.cert']
+    || (args.sslCert as string)
+    || process.env.NUXT_SSL_CERT
+    || process.env.NITRO_SSL_CERT
+    || (typeof nuxtOptions.devServer.https !== 'boolean'
+      && nuxtOptions.devServer.https?.cert)
+      || ''
+
+  const _httpsKey
+    = args['https.key']
+    || (args.sslKey as string)
+    || process.env.NUXT_SSL_KEY
+    || process.env.NITRO_SSL_KEY
+    || (typeof nuxtOptions.devServer.https !== 'boolean'
+      && nuxtOptions.devServer.https?.key)
+      || ''
+
+  const httpsEnabled
+    = args.https == true
+    || (args.https === undefined && !!nuxtOptions.devServer.https)
+
+  const _listhenOptions = parseListhenArgs({
+    ...args,
+    'open': (args.o as boolean) || args.open,
+    'https': httpsEnabled,
+    'https.cert': _httpsCert,
+    'https.key': _httpsKey,
+  })
+
+  const httpsOptions = httpsEnabled && {
+    ...(nuxtOptions.devServer.https as HTTPSOptions),
+    ...(_listhenOptions.https as HTTPSOptions),
+  }
+
+  return {
+    ..._listhenOptions,
+    port: _port,
+    hostname: _hostname,
+    public: _public,
+    https: httpsOptions,
+    baseURL: nuxtOptions.app.baseURL.startsWith('./') ? nuxtOptions.app.baseURL.slice(1) : nuxtOptions.app.baseURL,
+  }
 }
 
 export async function createNuxtDevServer(
