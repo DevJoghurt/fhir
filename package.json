@@ -1,7 +1,7 @@
 {
 	"name": "fhir-framework",
 	"private": true,
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"description": "Build FHIR applications with Nuxt based on Medplum Fhir server",
 	"repository": {
 		"type": "git",
