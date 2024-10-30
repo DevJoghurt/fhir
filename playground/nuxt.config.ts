@@ -22,11 +22,5 @@ export default defineNuxtConfig({
       // Workaround for "Error: [404] Page not found: /manifest.json"
       failOnError: false,
     },
-  },
-  i18n: {
-    locales: [{
-		  code: 'de',
-		  file: './de.json'
-		}]
   }
 })

@@ -3,7 +3,7 @@ import { useLogger } from '@nuxt/kit';
 import { sushiExport, sushiImport, fhirdefs, utils, fshtypes } from 'fsh-sushi';
 import { watch } from 'chokidar';
 import { readFileSync, rmSync, existsSync } from 'node:fs';
-import { outputJSONSync } from 'fs-extra';
+import fse from 'fs-extra';
 import { resolve, join } from 'node:path';
 import { defu } from 'defu';
 import { createLandingPage, createResourceProfiles, createTerminologies } from './generator'
@@ -224,11 +224,11 @@ export function writeFHIRResources(
 		  )
 		) {
 		  utils.checkNullValuesOnArray(resource);
-		  outputJSONSync(join(exportDir, resource.getFileName()), resource.toJSON(context.snapshot), {
+		  fse.outputJSONSync(join(exportDir, resource.getFileName()), resource.toJSON(context.snapshot), {
 			spaces: 2
 		  });
 		  if(context.paths.parallelProcessing.enabled){
-			outputJSONSync(join(context.paths.projectPath, context.paths.parallelProcessing.dir, resource.getFileName()), resource.toJSON(context.snapshot), {
+			fse.outputJSONSync(join(context.paths.projectPath, context.paths.parallelProcessing.dir, resource.getFileName()), resource.toJSON(context.snapshot), {
 				spaces: 2
 			});
 		  }

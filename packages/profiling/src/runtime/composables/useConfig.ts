@@ -1,7 +1,7 @@
 import { defu } from 'defu';
 import { computed, useAppConfig, useContentHelpers, useContent, useRoute } from '#imports';
 
-const defaultConfig: DefaultConfig = {
+const defaultConfig = {
   site: {
     name: 'FhirDocs',
     description: 'Fhir docs for profiling',

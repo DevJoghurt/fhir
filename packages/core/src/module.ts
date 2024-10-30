@@ -9,7 +9,7 @@ import {
 	addServerImportsDir,
 	addServerHandler
   } from '@nuxt/kit'
-import { defu } from 'defu'
+import defu from 'defu'
 import { randomUUID } from 'node:crypto'
 import { writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -66,7 +66,16 @@ export default defineNuxtModule<ModuleOptions>({
 			runtimeConfig.nitro?.envPrefix || 'NUXT_'
 		}SESSION_PASSWORD`;
 
-		runtimeConfig.session = defu(runtimeConfig?.session || {}, {
+		type SessionConfig ={
+			name: string;
+			password: string;
+			cookie: {
+				sameSite: 'lax' | 'strict' | 'none';
+			};
+		};
+
+
+		runtimeConfig.session = defu(runtimeConfig.session || {}, {
 			name: 'fhir-session',
 			password: process.env[envSessionPassword] || '',
 			cookie: {
@@ -75,7 +84,9 @@ export default defineNuxtModule<ModuleOptions>({
 		});
 
 		// Generate the session password
-		if (nuxt.options.dev && !runtimeConfig.session.password) {
+		//@ts-ignore
+		if (nuxt.options.dev && runtimeConfig.session && !runtimeConfig.session?.password) {
+			//@ts-ignore
 			runtimeConfig.session.password = randomUUID().replace(/-/g, '');
 			// Add it to .env
 			const envPath = join(nuxt.options.rootDir, '.env');
@@ -85,7 +96,8 @@ export default defineNuxtModule<ModuleOptions>({
 				envPath,
 				`${
 					envContent ? envContent + '\n' : envContent
-				}${envSessionPassword}=${runtimeConfig.session.password}`,
+					//@ts-ignore
+				}${envSessionPassword}=${runtimeConfig.session?.password}`,
 				'utf-8',
 				);
 			}

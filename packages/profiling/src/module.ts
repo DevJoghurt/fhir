@@ -19,7 +19,7 @@ import type {
 	FhirProfilingLayer,
 	FhirProfilingParallelProcessing
 } from './profiling';
-import { defu } from 'defu';
+import defu  from 'defu';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -65,6 +65,7 @@ export default defineNuxtModule<ModuleOptions>({
 		for (const [i, layer] of nuxt.options._layers.entries()) {
 			layers.push({
 				cwd: layer.config.rootDir,
+				//@ts-ignore
 				dir: layer.config?.sourceOptions?.dir || options.dir || 'profiling'
 			});
 			// Always use base layer as project folder
@@ -113,6 +114,7 @@ export default defineNuxtModule<ModuleOptions>({
 					fields: ['icon'],
 				},
 				experimental: {
+					// @ts-ignore
 					search: true,
 				},
 				sources: {
@@ -139,7 +141,7 @@ export default defineNuxtModule<ModuleOptions>({
 		addServerHandler({
 			method: 'get',
 			route: "/_resources/:resourceType",
-			handler: resolve('./runtime/server/resources'),
+			handler: resolve('./runtime/server/api/resources'),
 		});
 
 		const modulePublicDir = resolve('./runtime/public');
