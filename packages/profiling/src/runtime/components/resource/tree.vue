@@ -11,7 +11,7 @@
 				Directory Structure
 			</h2>
 			<div class="flex py-2 px-2 border rounded-sm bg-gray-100 mb-4">
-				<div class="w-[18.5rem]">Name</div>
+				<div class="w-[16rem]">Name</div>
 				<div class="w-24">Flags</div>
 				<div class="w-16">Card.</div>
 				<div class="w-36">Type</div>
@@ -49,8 +49,8 @@
 						class="h-4 w-4"
 					/>
 				</div>
-				<div class="flex pl-2 min-h-8">
-					<div :style="`width: ${19 - (item.level*1.4)}rem;`" class="overflow-hidden">{{ item.value.title }}</div>
+				<div class="flex min-h-8">
+					<div :style="`width: ${17 - (item.level*1.4)}rem;`" class="overflow-hidden pl-2">{{ item.value.title }}</div>
 					<div class="w-24">
 						<ProfilingFlags :element="item.value" />
 					</div>
@@ -60,7 +60,7 @@
 					<div class="w-36">
 						<ProfilingType :types="item.value.type" />
 					</div>
-					<div class="flex-1">
+					<div class="flex-1 text-xs font-normal">
 						{{ item.value.short }}
 					</div>
 				</div>
