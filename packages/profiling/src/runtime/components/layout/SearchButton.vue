@@ -41,7 +41,16 @@
 	</UModal>
 </template>
 <script setup lang="ts">
-	import { useConfig, useContent, useContentHelpers, watch, searchContent, ref, navigateTo } from '#imports';
+	import {
+		useConfig,
+		useContent,
+		useContentHelpers,
+		watch,
+		searchContent,
+		ref,
+		navigateTo,
+		computed
+	} from '#imports';
 
 	const { enable, inAside, style, placeholder, placeholderDetailed } = useConfig().value.search;
 
