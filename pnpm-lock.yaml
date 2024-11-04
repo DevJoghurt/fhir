@@ -69,18 +69,21 @@ importers:
   packages/cli:
     dependencies:
       fsh-sushi:
-        specifier: ^3.12.0
+        specifier: 3.12.0
         version: 3.12.0
+      nuxt:
+        specifier: 3.13.2
+        version: 3.13.2(@parcel/watcher@2.4.1)(@types/node@22.7.9)(eslint@9.13.0(jiti@2.3.3))(ioredis@5.4.1)(lightningcss@1.27.0)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.24.0)(terser@5.36.0)(typescript@5.5.4)(vite@5.4.10(@types/node@22.7.9)(lightningcss@1.27.0)(terser@5.36.0))
     devDependencies:
       '@nhealth/fhir-profiling':
         specifier: workspace:*
         version: link:../profiling
       '@nuxt/kit':
         specifier: 3.13.2
-        version: 3.13.2(magicast@0.3.5)(rollup@3.29.5)
+        version: 3.13.2(magicast@0.3.5)(rollup@4.24.0)
       '@nuxt/schema':
         specifier: 3.13.2
-        version: 3.13.2(rollup@3.29.5)
+        version: 3.13.2(rollup@4.24.0)
       '@nuxt/ui-templates':
         specifier: ^1.3.4
         version: 1.3.4
@@ -6717,7 +6720,7 @@ snapshots:
       semver: 7.6.3
       simple-git: 3.27.0
       sirv: 2.0.4
-      tinyglobby: 0.2.6
+      tinyglobby: 0.2.9
       unimport: 3.13.1(rollup@4.24.0)
       vite: 5.4.10(@types/node@22.7.9)(lightningcss@1.27.0)(terser@5.36.0)
       vite-plugin-inspect: 0.8.7(@nuxt/kit@3.13.2(magicast@0.3.5)(rollup@4.24.0))(rollup@4.24.0)(vite@5.4.10(@types/node@22.7.9)(lightningcss@1.27.0)(terser@5.36.0))
@@ -6831,34 +6834,6 @@ snapshots:
       - supports-color
       - webpack-sources
 
-  '@nuxt/kit@3.13.2(magicast@0.3.5)(rollup@3.29.5)':
-    dependencies:
-      '@nuxt/schema': 3.13.2(rollup@3.29.5)
-      c12: 1.11.2(magicast@0.3.5)
-      consola: 3.2.3
-      defu: 6.1.4
-      destr: 2.0.3
-      globby: 14.0.2
-      hash-sum: 2.0.0
-      ignore: 5.3.2
-      jiti: 1.21.6
-      klona: 2.0.6
-      knitwork: 1.1.0
-      mlly: 1.7.2
-      pathe: 1.1.2
-      pkg-types: 1.2.1
-      scule: 1.3.0
-      semver: 7.6.3
-      ufo: 1.5.4
-      unctx: 2.3.1
-      unimport: 3.13.1(rollup@3.29.5)
-      untyped: 1.5.1
-    transitivePeerDependencies:
-      - magicast
-      - rollup
-      - supports-color
-      - webpack-sources
-
   '@nuxt/kit@3.13.2(magicast@0.3.5)(rollup@4.24.0)':
     dependencies:
       '@nuxt/schema': 3.13.2(rollup@4.24.0)
@@ -6905,25 +6880,6 @@ snapshots:
       - supports-color
       - typescript
       - vue-tsc
-      - webpack-sources
-
-  '@nuxt/schema@3.13.2(rollup@3.29.5)':
-    dependencies:
-      compatx: 0.1.8
-      consola: 3.2.3
-      defu: 6.1.4
-      hookable: 5.5.3
-      pathe: 1.1.2
-      pkg-types: 1.2.1
-      scule: 1.3.0
-      std-env: 3.7.0
-      ufo: 1.5.4
-      uncrypto: 0.1.3
-      unimport: 3.13.1(rollup@3.29.5)
-      untyped: 1.5.1
-    transitivePeerDependencies:
-      - rollup
-      - supports-color
       - webpack-sources
 
   '@nuxt/schema@3.13.2(rollup@4.24.0)':
@@ -7655,8 +7611,8 @@ snapshots:
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11
       '@rollup/pluginutils': 4.2.1
-      acorn: 8.12.1
-      acorn-import-attributes: 1.9.5(acorn@8.12.1)
+      acorn: 8.13.0
+      acorn-import-attributes: 1.9.5(acorn@8.13.0)
       async-sema: 3.1.1
       bindings: 1.5.0
       estree-walker: 2.0.2
@@ -7933,9 +7889,9 @@ snapshots:
     dependencies:
       event-target-shim: 5.0.1
 
-  acorn-import-attributes@1.9.5(acorn@8.12.1):
+  acorn-import-attributes@1.9.5(acorn@8.13.0):
     dependencies:
-      acorn: 8.12.1
+      acorn: 8.13.0
 
   acorn-jsx@5.3.2(acorn@8.13.0):
     dependencies:
@@ -11393,7 +11349,7 @@ snapshots:
   terser@5.36.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.12.1
+      acorn: 8.13.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -11582,25 +11538,6 @@ snapshots:
     dependencies:
       css-tree: 3.0.0
       ohash: 1.1.4
-
-  unimport@3.13.1(rollup@3.29.5):
-    dependencies:
-      '@rollup/pluginutils': 5.1.3(rollup@3.29.5)
-      acorn: 8.13.0
-      escape-string-regexp: 5.0.0
-      estree-walker: 3.0.3
-      fast-glob: 3.3.2
-      local-pkg: 0.5.0
-      magic-string: 0.30.12
-      mlly: 1.7.2
-      pathe: 1.1.2
-      pkg-types: 1.2.1
-      scule: 1.3.0
-      strip-literal: 2.1.0
-      unplugin: 1.14.1
-    transitivePeerDependencies:
-      - rollup
-      - webpack-sources
 
   unimport@3.13.1(rollup@4.24.0):
     dependencies:

@@ -289,15 +289,16 @@ export async function buildProfiles(context: FhirProfilingContext): Promise<Fhir
 
 	const docs = sushiImport.importText(rawFSH);
 
+	const sushiConfig = context.sushi as fshtypes.Configuration;
 
-	const tank = new sushiImport.FSHTank(docs, context.sushi);
+	const tank = new sushiImport.FSHTank(docs, sushiConfig);
 
 	const defs = new fhirdefs.FHIRDefinitions();
 
-	await utils.loadExternalDependencies(defs, context.sushi);
+	await utils.loadExternalDependencies(defs, sushiConfig);
 
 	// Load custom resources. In current tank configuration (input/fsh), resources will be in input/
-	fhirdefs.loadCustomResources(join(context.paths.projectPath, context.paths.profilingDir), join(context.paths.projectPath, context.paths.profilingDir), context.sushi?.parameters || [], defs);
+	fhirdefs.loadCustomResources(join(context.paths.projectPath, context.paths.profilingDir), join(context.paths.projectPath, context.paths.profilingDir), sushiConfig?.parameters || [], defs);
 
 	 // Check for StructureDefinition
 	 const structDef = defs.fishForFHIR('StructureDefinition', utils.Type.Resource);
