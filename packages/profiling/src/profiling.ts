@@ -17,7 +17,7 @@ interface ProfileExample extends InstanceMeta {
 	fileName: string;
 }
 
-export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters'>;
+export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters' | 'publisher'>;
 
 // General types
 
@@ -91,6 +91,7 @@ export type FhirProfilingLayer = {
 export type FhirProfilingPaths = {
 	projectPath: string;
 	profilingDir: string;
+	sushiConfig?: string;
 	outDir: string;
 	parallelProcessing: FhirProfilingParallelProcessing;
 };
@@ -101,7 +102,7 @@ export type FhirProfilingPaths = {
 export type FhirProfilingConfig = {
 	docs: FhirProfilingDocs,
 	paths: FhirProfilingPaths,
-	sushi?: Partial<SushiConfiguration>;
+	sushi: Partial<SushiConfiguration>;
 }
 
 export interface FhirProfilingContext extends FhirProfilingConfig {
@@ -127,9 +128,11 @@ export async function initializeProfilingContext(config: ProfilingBaseConfig): P
 		paths: {
 			projectPath: config.projectPath,
 			profilingDir: config.profilingDir,
+			sushiConfig: config?.sushiConfig || undefined,
 			outDir: config.outDir,
 			parallelProcessing: config.parallelProcessing
 		},
+		sushi: defineFhirProfiling({}),
 		layers: config.layers || false,
 		docs: config.docs,
 		files: [],
@@ -145,6 +148,11 @@ export async function initializeProfilingContext(config: ProfilingBaseConfig): P
 		cwd: context.paths.projectPath,
 		defaults: context
 	});
+
+	// TODO: add sushi configuration if available
+	if(fhirProfilingContext.config.paths.sushiConfig){
+
+	}
 
 	return fhirProfilingContext.config;
 }
@@ -282,17 +290,14 @@ export async function buildProfiles(context: FhirProfilingContext): Promise<Fhir
 	const docs = sushiImport.importText(rawFSH);
 
 
-	// TODO: load config from nhealth.config.ts
-	const config = defineFhirProfiling({});
-
-	const tank = new sushiImport.FSHTank(docs, config.sushi);
+	const tank = new sushiImport.FSHTank(docs, context.sushi);
 
 	const defs = new fhirdefs.FHIRDefinitions();
 
-	await utils.loadExternalDependencies(defs, config.sushi);
+	await utils.loadExternalDependencies(defs, context.sushi);
 
 	// Load custom resources. In current tank configuration (input/fsh), resources will be in input/
-	fhirdefs.loadCustomResources(join(context.paths.projectPath, context.paths.profilingDir), join(context.paths.projectPath, context.paths.profilingDir), config?.sushi?.parameters || [], defs);
+	fhirdefs.loadCustomResources(join(context.paths.projectPath, context.paths.profilingDir), join(context.paths.projectPath, context.paths.profilingDir), context.sushi?.parameters || [], defs);
 
 	 // Check for StructureDefinition
 	 const structDef = defs.fishForFHIR('StructureDefinition', utils.Type.Resource);
