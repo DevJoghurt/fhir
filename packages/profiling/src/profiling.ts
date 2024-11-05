@@ -59,21 +59,53 @@ export type FhirProfilingCodeSystem = {
 };
 
 export type FhirProfilingDocs = {
-	enabled?: boolean;
-	layout?: 'fhirdocs';
-	site?: {
-		name?: string;
-		description?: string;
-		ogImage?: string;
-		ogImageComponent?: string;
+	enabled: boolean;
+	layout: 'fhirdocs';
+	site: {
+		name: string;
+		description: string;
+		ogImage: string;
+		ogImageComponent: string;
 	},
-	header?: {
-		showLoadingIndicator?: boolean;
-		title?: string;
-		logo?: {
-			light?: string;
-			dark?: string;
-		}
+	header: {
+		showLoadingIndicator: boolean;
+		title: string;
+		logo: {
+			light: string;
+			dark: string;
+		},
+		showTitleInMobile: boolean;
+		border: boolean;
+		darkModeToggle: boolean;
+		nav: [];
+		links: [];
+	},
+	aside: {
+		useLevel: boolean;
+		collapse: boolean;
+	},
+	main: {
+		breadCrumb: boolean;
+		showTitle: boolean;
+		codeCopyToast: boolean;
+		codeCopyToastText: string;
+		fieldRequiredText: string;
+		padded: boolean;
+		codeIcon: Record<string, string>;
+	},
+	toc: {
+		enable: boolean;
+		enableInMobile: boolean;
+		title: string;
+		links: [];
+		ignoreDirs: [];
+	},
+	search: {
+		enable: boolean;
+		inAside: boolean;
+		style: string;
+		placeholder: string;
+		placeholderDetailed: string;
 	}
 };
 
@@ -100,7 +132,7 @@ export type FhirProfilingPaths = {
  * TODO: Add more configuration options
  */
 export type FhirProfilingConfig = {
-	docs: FhirProfilingDocs,
+	docs: Partial<FhirProfilingDocs>,
 	paths: FhirProfilingPaths,
 	sushi: Partial<SushiConfiguration>;
 }
@@ -116,7 +148,7 @@ export interface FhirProfilingContext extends FhirProfilingConfig {
 };
 
 interface ProfilingBaseConfig extends FhirProfilingPaths {
-	docs: FhirProfilingDocs;
+	docs: Partial<FhirProfilingDocs>;
 	snapshot: boolean;
 	layers?: FhirProfilingLayer[] | false;
 };

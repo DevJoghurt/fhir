@@ -1,7 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-09-30",
   modules: [
-    "@nhealth/fhir-profiling/module"
   ],
   future: {
 		compatibilityVersion: 4,
@@ -13,10 +12,8 @@ export default defineNuxtConfig({
     enabled: true
   },
   extends: [
+    "@nhealth/app"
   ],
-  fhirProfiling: {
-    outDir: '.nuxt/fhir-profiling',
-  },
   nitro: {
     prerender: {
       // Workaround for "Error: [404] Page not found: /manifest.json"

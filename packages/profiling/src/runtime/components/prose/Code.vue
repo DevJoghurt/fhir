@@ -30,6 +30,7 @@
 </template>
 <script setup lang="ts">
   import type { BuiltinLanguage } from 'shiki';
+  import { useConfig, PropType } from '#imports';
 
   const props = defineProps({
 	code: {

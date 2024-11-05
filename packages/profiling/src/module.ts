@@ -31,7 +31,7 @@ type ModuleOptions = {
 	dir?: string;
 	outDir?: string;
 	verbose?: boolean;
-	docs?: FhirProfilingDocs;
+	docs?: Partial<FhirProfilingDocs>;
 	parallelProcessing?: FhirProfilingParallelProcessing;
 }
 
