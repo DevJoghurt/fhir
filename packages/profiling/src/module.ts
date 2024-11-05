@@ -113,6 +113,13 @@ export default defineNuxtModule<ModuleOptions>({
 				navigation: {
 					fields: ['icon'],
 				},
+				highlight: {
+					theme: {
+					  default: 'github-light',
+					  dark: 'github-dark',
+					},
+					preload: ['json', 'js', 'ts', 'html', 'css', 'vue', 'diff', 'shell', 'markdown', 'yaml', 'bash', 'ini'],
+				},
 				experimental: {
 					// @ts-ignore
 					search: true,

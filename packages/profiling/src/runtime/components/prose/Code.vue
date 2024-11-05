@@ -1,5 +1,5 @@
 <template>
-	<UiCard
+	<UCard
 	  class="relative overflow-hidden [&:not(:first-child)]:mt-5 [&:not(:last-child)]:mb-5"
 	  :class="[
 		inGroup && 'mb-0 rounded-t-none border-none shadow-none',
@@ -26,7 +26,7 @@
 		  <UiScrollBar orientation="horizontal" />
 		</UiScrollArea>
 	  </div>
-	</UiCard>
+	</UCard>
 </template>
 <script setup lang="ts">
   import type { BuiltinLanguage } from 'shiki';
