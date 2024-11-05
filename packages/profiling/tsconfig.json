@@ -1,5 +1,5 @@
 {
-	"extends": "../../playground/.nuxt/tsconfig.json",
+	"extends": "../app/src/.nuxt/tsconfig.json",
 	"compilerOptions": {
 		"noUncheckedIndexedAccess": false
 	},
