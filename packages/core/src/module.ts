@@ -63,7 +63,7 @@ export default defineNuxtModule<ModuleOptions>({
 		// START AUTH SESSION CONFIG based on nuxt-auth-utils
 		const runtimeConfig = nuxt.options.runtimeConfig;
 		const envSessionPassword = `${
-			runtimeConfig.nitro?.envPrefix || 'NUXT_'
+			runtimeConfig.nitro?.envPrefix || 'FHIR_'
 		}SESSION_PASSWORD`;
 
 		type SessionConfig ={

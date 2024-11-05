@@ -1,6 +1,6 @@
-import type { ComputedRef, Ref } from 'vue'
 export type { OperationOutcome } from '@medplum/fhirtypes'
-export type { ProfileResource, MedplumClientEventMap } from '@medplum/core';
+import type { ProfileResource } from '@medplum/core';
+export type { MedplumClientEventMap } from '@medplum/core';
 
 export interface SecureSessionData {
 }

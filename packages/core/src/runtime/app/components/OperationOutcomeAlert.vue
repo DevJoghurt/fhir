@@ -11,7 +11,7 @@
 		}"
 		variant="subtle"
 		title="Error"
-		color="red">
+		color="error">
 			<template #description>
 				<ul>
 					<li v-for="issue in issues" :key="issue.details?.text">

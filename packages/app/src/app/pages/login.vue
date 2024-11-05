@@ -12,7 +12,7 @@
             <UForm
                 class="space-y-6"
 				:state="state"
-				:validateOn="['submit', 'input', 'change']"
+				:validateOn="['blur', 'input', 'change']"
 				@submit="onSubmit"
                 :schema="schema">
                 <FhirOperationOutcomeAlert :outcome="errorOutcome" />
@@ -24,7 +24,7 @@
                     <UInput v-model="state.password" icon="i-heroicons-key" class="w-full" size="md" type="password" :placeholder="t('auth.password')"></UInput>
                 </UFormField>
 				<div>
-                    <UButton type="submit" :loading="loading" color="blue" :label="t('auth.signInButton')" block />
+                    <UButton type="submit" :loading="loading" :label="t('auth.signInButton')" block />
                 </div>
 			</UForm>
 		</UCard>
@@ -68,7 +68,7 @@
 
 	async function onSubmit (event: FormSubmitEvent<AuthSchema>) {
         const { email, password } = event.data;
-        const {credentials, error } = await login(email, password);
+        const { credentials, error } = await login(email, password);
         if (error) {
             errorOutcome.value = error;
             return;
