@@ -10,6 +10,7 @@ import { createLandingPage, createResourceProfiles, createTerminologies } from '
 import Markdown from './markdown';
 import type { InstanceDefinition } from 'fsh-sushi/dist/fhirtypes';
 import { loadConfig } from "c12";
+import { CannotResolvePathError } from 'fsh-sushi/dist/errors';
 
 type InstanceMeta = InstanceDefinition['_instanceMeta'];
 
@@ -132,8 +133,8 @@ export type FhirProfilingPaths = {
  * TODO: Add more configuration options
  */
 export type FhirProfilingConfig = {
-	docs: Partial<FhirProfilingDocs>,
-	paths: FhirProfilingPaths,
+	docs: Partial<FhirProfilingDocs>;
+	paths: FhirProfilingPaths;
 	sushi: Partial<SushiConfiguration>;
 }
 
@@ -164,7 +165,7 @@ export async function initializeProfilingContext(config: ProfilingBaseConfig): P
 			outDir: config.outDir,
 			parallelProcessing: config.parallelProcessing
 		},
-		sushi: defineFhirProfiling({}),
+		sushi: defineFhirProfiling({}).sushi,
 		layers: config.layers || false,
 		docs: config.docs,
 		files: [],
@@ -458,7 +459,24 @@ export function initializeWatcher(ctx: FhirProfilingContext){
 	})
 }
 
-export function defineFhirProfiling(config: Partial<FhirProfilingConfig>) {
+export function createImplementationGuideResource(ctx: FhirProfilingContext){
+	const logger = useLogger();
+
+	const ig = new fhirdefs.FHIRDefinitions();
+
+	const data = ig.allImplementationGuides()
+
+
+	const igPath = join(ctx.paths.projectPath, ctx.paths.outDir, 'ig.json');
+	fse.outputJSONSync(igPath, data, { spaces: 2 });
+	logger.info(`Created Implementation Guide at ${igPath}`);
+}
+
+type DeepPartial<T> = T extends object ? {
+    [P in keyof T]?: DeepPartial<T[P]>;
+} : T;
+
+export function defineFhirProfiling(config: DeepPartial<FhirProfilingConfig>) {
 
 	return defu(config, {
 		sushi: {

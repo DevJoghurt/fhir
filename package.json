@@ -21,6 +21,7 @@
 		"playground"
 	],
 	"scripts": {
+		"profiling": "nuxi dev racoon-profiling",
 		"prepare": "pnpm dev:prepare && nuxi prepare playground",
 		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:stub": "pnpm dev:prepare",

@@ -229,6 +229,19 @@ importers:
         specifier: 5.5.4
         version: 5.5.4
 
+  racoon-profiling:
+    dependencies:
+      '@nhealth/fhir-profiling':
+        specifier: workspace:*
+        version: link:../packages/profiling
+      nuxt:
+        specifier: 3.13.2
+        version: 3.13.2(@parcel/watcher@2.4.1)(@types/node@22.7.9)(eslint@9.13.0(jiti@2.3.3))(ioredis@5.4.1)(lightningcss@1.27.0)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.24.0)(terser@5.36.0)(typescript@5.5.4)(vite@5.4.10(@types/node@22.7.9)(lightningcss@1.27.0)(terser@5.36.0))
+    devDependencies:
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
