@@ -6,7 +6,6 @@ import {
 	useLogger,
 	addComponentsDir,
 	addLayout,
-	resolvePath,
 	addImportsDir,
 	extendPages,
 	addServerHandler,
@@ -28,9 +27,11 @@ const meta = {
 };
 
 type ModuleOptions = {
-	dir?: string;
+	profilingDir?: string;
+	contentDir?: string;
 	outDir?: string;
 	verbose?: boolean;
+	sushiConfig?: boolean;
 	docs?: Partial<FhirProfilingDocs>;
 	parallelProcessing?: FhirProfilingParallelProcessing;
 }
@@ -38,9 +39,11 @@ type ModuleOptions = {
 export default defineNuxtModule<ModuleOptions>({
 	meta,
 	defaults: {
-		dir: 'profiling',
+		profilingDir: 'profiling',
+		contentDir: 'content',
 		outDir: '.nuxt/fhir-profiling',
 		verbose: true,
+		sushiConfig: true,
 		docs: {
 			enabled: true,
 		},
@@ -66,7 +69,7 @@ export default defineNuxtModule<ModuleOptions>({
 			layers.push({
 				cwd: layer.config.rootDir,
 				//@ts-ignore
-				dir: layer.config?.sourceOptions?.dir || options.dir || 'profiling'
+				dir: layer.config?.sourceOptions?.profilingDir || options.profilingDir || 'profiling'
 			});
 			// Always use base layer as project folder
 			if(i===0) projectPath = layer.config.rootDir;
@@ -74,8 +77,9 @@ export default defineNuxtModule<ModuleOptions>({
 
 		let profilingContext = await initializeProfilingContext({
 			projectPath,
-			profilingDir: options.dir || 'profiling',
+			profilingDir: options.profilingDir || 'profiling',
 			outDir: options.outDir || '.nuxt/fhir-profiling',
+			sushiConfig: options.sushiConfig,
 			layers,
 			snapshot: true,
 			docs: options.docs || {},
@@ -133,7 +137,7 @@ export default defineNuxtModule<ModuleOptions>({
 					// add project content folder for additional docs and overrides
 					project: {
 						driver: 'fs',
-						base: join(projectPath, options?.dir || '', 'content')
+						base: join(projectPath, options?.contentDir || 'content')
 					}
 				}
 			});
@@ -204,13 +208,5 @@ export default defineNuxtModule<ModuleOptions>({
 				addPrerenderRoutes(`/_resources/${file}`);
 			}
 		}
-
-		// default app config for fhirDocs
-		/*
-		const appConfigFile = await resolvePath(resolve('./runtime/app.config'))
-		nuxt.hook('app:resolve', (app) => {
-			app.configs.push(appConfigFile)
-		})
-			*/
 	}
 })

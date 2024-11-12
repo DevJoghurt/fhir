@@ -45,6 +45,7 @@ const command = defineCommand({
 			outDir: ctx.args.outDir,
 			projectPath: cwd,
 			profilingDir: ctx.args.dir,
+			sushiConfig: true,
 			snapshot: true,
 			docs: {
 				enabled: ctx.args.docs
