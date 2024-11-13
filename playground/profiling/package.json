@@ -1,0 +1,17 @@
+{
+    "name": "fhir-playground-profiling",
+    "private": true,
+    "scripts": {
+      "dev": "nuxi dev",
+      "build": "nuxi build",
+      "start": "nuxi preview"
+    },
+    "dependencies": {
+      "nuxt": "*",
+      "@nhealth/fhir-profiling": "workspace:*",
+      "radix-vue": "^1.9.7"
+    },
+    "devDependencies": {
+      "typescript": "*"
+    }
+}

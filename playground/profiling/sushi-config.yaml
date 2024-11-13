@@ -1,0 +1,17 @@
+canonical: https://fhir.demo.org/profiling
+fhirVersion: [4.0.1]
+FSHOnly: true
+applyExtensionMetadataToRoot: false
+status: active
+license: CC-BY-4.0
+version: 0.0.1
+id: demo
+name: DEMO
+title: "DEMO Fhir Profiles"
+description: "DEMO Fhir Profiles"
+packageId: org.demo.fhir
+copyrightYear: 2024+
+releaseLabel: ci-build
+publisher:
+  name: DEMO FHIR
+  url: https://nhealth.org

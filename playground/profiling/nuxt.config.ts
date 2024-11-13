@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     enabled: true
   },
   extends: [
-    "@nhealth/app"
   ],
   nitro: {
     prerender: {

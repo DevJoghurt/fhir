@@ -1,5 +1,5 @@
 {
-    "name": "fhir-playground",
+    "name": "fhir-playground-demo",
     "private": true,
     "scripts": {
       "dev": "nuxi dev",
@@ -9,10 +9,9 @@
     "dependencies": {
       "nuxt": "*",
       "@nhealth/app": "workspace:*",
-      "@nhealth/fhir-profiling": "workspace:*",
       "radix-vue": "^1.9.7"
     },
     "devDependencies": {
-      "typescript": "^5.6.2"
+      "typescript": "*"
     }
 }
