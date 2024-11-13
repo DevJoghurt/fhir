@@ -66,8 +66,8 @@
 
     type AuthSchema = z.output<typeof schema>;
 
-	async function onSubmit (event: FormSubmitEvent<AuthSchema>) {
-        const { email, password } = event.data;
+	async function onSubmit (payload: FormSubmitEvent<AuthSchema>) : Promise<void> {
+        const { email, password } = payload.data;
         const { credentials, error } = await login(email, password);
         if (error) {
             errorOutcome.value = error;

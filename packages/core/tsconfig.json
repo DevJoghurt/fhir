@@ -1,5 +1,5 @@
 {
-	"extends": "../app/src/.nuxt/tsconfig.json",
+	"extends": "../../playground/demo/.nuxt/tsconfig.json",
 	"compilerOptions": {
 	},
 	"traceResolution": true

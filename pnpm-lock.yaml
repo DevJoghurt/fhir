@@ -15,6 +15,7 @@ overrides:
   '@nuxt/schema': 3.14.159
   '@medplum/core': 3.2.20
   '@medplum/fhirtypes': 3.2.20
+  tailwindcss: 4.0.0-alpha.33
   typescript: 5.5.4
   '@typescript-eslint/typescript-estree': 8.9.0
   sharp: 0.33.4
@@ -47,6 +48,9 @@ importers:
       '@nhealth/fhir':
         specifier: workspace:*
         version: link:../core
+      '@nuxt/image':
+        specifier: ^1.8.1
+        version: 1.8.1(ioredis@5.4.1)(magicast@0.3.5)(rollup@4.26.0)
       '@nuxt/kit':
         specifier: 3.14.159
         version: 3.14.159(magicast@0.3.5)(rollup@4.26.0)
@@ -60,12 +64,6 @@ importers:
       typescript:
         specifier: 5.5.4
         version: 5.5.4
-
-  packages/app/src:
-    devDependencies:
-      '@nuxt/image':
-        specifier: ^1.8.1
-        version: 1.8.1(ioredis@5.4.1)(magicast@0.3.5)(rollup@4.26.0)
 
   packages/cli:
     dependencies:
@@ -193,10 +191,10 @@ importers:
         version: 1.22.2
       tailwind-variants:
         specifier: ^0.2.1
-        version: 0.2.1(tailwindcss@4.0.0-alpha.29)
+        version: 0.2.1(tailwindcss@4.0.0-alpha.33)
       tailwindcss:
-        specifier: 4.0.0-alpha.29
-        version: 4.0.0-alpha.29
+        specifier: 4.0.0-alpha.33
+        version: 4.0.0-alpha.33
     devDependencies:
       '@nuxt/module-builder':
         specifier: 0.8.4
@@ -4753,13 +4751,7 @@ packages:
     resolution: {integrity: sha512-2xmhAf4UIc3PijOUcJPA1LP4AbxhpcHuHM2C26xM0k81r0maAO6uoUSHl3APmvHZcY5cZCY/bYuJdfFa4eGoaw==}
     engines: {node: '>=16.x', pnpm: '>=7.x'}
     peerDependencies:
-      tailwindcss: '*'
-
-  tailwindcss@4.0.0-alpha.29:
-    resolution: {integrity: sha512-yYirQ1zh370k1J4SAbE+1uhE5x0+c8xCv2ffbokbUiqmLL8NEVoFMYkZw1hfj/kafiC2au9aOB2xHZ1dO1g10A==}
-
-  tailwindcss@4.0.0-alpha.30:
-    resolution: {integrity: sha512-e6OsN8n1nRLca2X8ix1QSa+oZA1IYktHw+epLI07+CeQzbLbIDNJieRdbcctM32TAy3vHKvEgdp0rM1WUbpIMQ==}
+      tailwindcss: 4.0.0-alpha.33
 
   tailwindcss@4.0.0-alpha.33:
     resolution: {integrity: sha512-Bg8Ick3IC7fnMxHsKHyF4cgZieZAXbK5LUazJQcMZxRBC4FT1WN08PM/tHQ7x6dlGJNPS35jGlkj8IQX7x6Avw==}
@@ -6649,8 +6641,8 @@ snapshots:
       radix-vue: 1.9.9(vue@3.5.12(typescript@5.5.4))
       scule: 1.3.0
       sirv: 3.0.0
-      tailwind-variants: 0.2.1(tailwindcss@4.0.0-alpha.30)
-      tailwindcss: 4.0.0-alpha.30
+      tailwind-variants: 0.2.1(tailwindcss@4.0.0-alpha.33)
+      tailwindcss: 4.0.0-alpha.33
       tinyglobby: 0.2.10
       typescript: 5.5.4
       unplugin: 1.15.0
@@ -7211,14 +7203,14 @@ snapshots:
       '@tailwindcss/oxide': 4.0.0-alpha.30
       lightningcss: 1.28.1
       postcss: 8.4.49
-      tailwindcss: 4.0.0-alpha.30
+      tailwindcss: 4.0.0-alpha.33
 
   '@tailwindcss/vite@4.0.0-alpha.30(vite@5.4.11(@types/node@22.9.0)(lightningcss@1.28.1)(terser@5.36.0))':
     dependencies:
       '@tailwindcss/node': 4.0.0-alpha.30
       '@tailwindcss/oxide': 4.0.0-alpha.30
       lightningcss: 1.28.1
-      tailwindcss: 4.0.0-alpha.30
+      tailwindcss: 4.0.0-alpha.33
       vite: 5.4.11(@types/node@22.9.0)(lightningcss@1.28.1)(terser@5.36.0)
 
   '@tanstack/table-core@8.20.5': {}
@@ -10988,19 +10980,10 @@ snapshots:
 
   tailwind-merge@2.5.4: {}
 
-  tailwind-variants@0.2.1(tailwindcss@4.0.0-alpha.29):
+  tailwind-variants@0.2.1(tailwindcss@4.0.0-alpha.33):
     dependencies:
       tailwind-merge: 2.5.4
-      tailwindcss: 4.0.0-alpha.29
-
-  tailwind-variants@0.2.1(tailwindcss@4.0.0-alpha.30):
-    dependencies:
-      tailwind-merge: 2.5.4
-      tailwindcss: 4.0.0-alpha.30
-
-  tailwindcss@4.0.0-alpha.29: {}
-
-  tailwindcss@4.0.0-alpha.30: {}
+      tailwindcss: 4.0.0-alpha.33
 
   tailwindcss@4.0.0-alpha.33: {}
 
