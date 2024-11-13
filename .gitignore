@@ -1,5 +1,5 @@
 node_modules
-racoon-profiling
+test-profiling
 
 */**/yarn.lock
 /.yarn

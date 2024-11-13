@@ -21,7 +21,7 @@
 		"playground"
 	],
 	"scripts": {
-		"profiling": "nuxi dev racoon-profiling",
+		"profiling": "nuxi dev test-profiling",
 		"prepare": "pnpm dev:prepare && nuxi prepare playground",
 		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:stub": "pnpm dev:prepare",
@@ -42,18 +42,19 @@
 		"@nhealth/fhir": "workspace:*",
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
-        "nuxt": "3.13.2",
-		"@nuxt/ui": "3.0.0-alpha.7",
-		"@nuxt/kit": "3.13.2",
-		"@medplum/core": "3.2.16",
-		"@medplum/fhirtypes": "3.2.16",
+        "nuxt": "3.14.159",
+		"@nuxt/ui": "3.0.0-alpha.8",
+		"@nuxt/kit": "3.14.159",
+		"@nuxt/schema": "3.14.159",
+		"@medplum/core": "3.2.20",
+		"@medplum/fhirtypes": "3.2.20",
 		"typescript": "5.5.4",
 		"@typescript-eslint/typescript-estree": "8.9.0"
 	},
 	"devDependencies": {
-        "nuxt": "3.13.2",
+        "nuxt": "3.14.159",
 		"nhealth-cli": "*",
-        "vitest": "2.1.1",
+        "vitest": "2.1.4",
         "rimraf": "6.0.1",
         "@nuxt/module-builder": "0.8.4",
 		"typescript": "^5.5.4"

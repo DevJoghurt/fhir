@@ -1,4 +1,4 @@
 packages:
   - packages/**
   - playground
-  - racoon-profiling
+  - test-profiling
