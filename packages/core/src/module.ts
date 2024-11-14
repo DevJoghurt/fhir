@@ -47,62 +47,7 @@ export default defineNuxtModule<ModuleOptions>({
 			global: true
 		});
 
-		// add all server related things here
-		addServerImportsDir(resolve('./runtime/server/utils'));
-		addServerHandler({
-		  handler: resolve('./runtime/server/api/session.delete'),
-		  route: '/api/_auth/session',
-		  method: 'delete',
-		});
-		addServerHandler({
-		  handler: resolve('./runtime/server/api/session.get'),
-		  route: '/api/_auth/session',
-		  method: 'get',
-		});
-
-		// START AUTH SESSION CONFIG based on nuxt-auth-utils
-		const runtimeConfig = nuxt.options.runtimeConfig;
-		const envSessionPassword = `${
-			runtimeConfig.nitro?.envPrefix || 'FHIR_'
-		}SESSION_PASSWORD`;
-
-		type SessionConfig ={
-			name: string;
-			password: string;
-			cookie: {
-				sameSite: 'lax' | 'strict' | 'none';
-			};
-		};
-
-
-		runtimeConfig.session = defu(runtimeConfig.session || {}, {
-			name: 'fhir-session',
-			password: process.env[envSessionPassword] || '',
-			cookie: {
-				sameSite: 'lax',
-			},
-		});
-
-		// Generate the session password
-		//@ts-ignore
-		if (nuxt.options.dev && runtimeConfig.session && !runtimeConfig.session?.password) {
-			//@ts-ignore
-			runtimeConfig.session.password = randomUUID().replace(/-/g, '');
-			// Add it to .env
-			const envPath = join(nuxt.options.rootDir, '.env');
-			const envContent = await readFile(envPath, 'utf-8').catch(() => '');
-			if (!envContent.includes(envSessionPassword)) {
-				await writeFile(
-				envPath,
-				`${
-					envContent ? envContent + '\n' : envContent
-					//@ts-ignore
-				}${envSessionPassword}=${runtimeConfig.session?.password}`,
-				'utf-8',
-				);
-			}
-		}
-		// END AUTH SESSION CONFIG based on nuxt-auth-utils
+		const runtimeConfig = nuxt.options.runtimeConfig || {};
 
 		runtimeConfig.public.fhir = defu(runtimeConfig.public.fhir || {}, {
 			serverUrl: options.serverUrl

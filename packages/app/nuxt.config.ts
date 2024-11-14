@@ -5,6 +5,7 @@ const { resolve } = createResolver(import.meta.url)
 export default defineNuxtConfig({
 	modules: [
 	  '@nhealth/fhir',
+	  '@nhealth/auth',
 	  '@nuxtjs/i18n'
 	],
 	i18n: {

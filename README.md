@@ -2,5 +2,6 @@
 
 Build rapidly FHIR applications with Nuxt
 
-## Medplum FHIR Server
+## FHIR Server
 
+nhealth is designed to work with different FHIR servers. However, currently, there is only support for Medplum.

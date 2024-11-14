@@ -1,8 +1,8 @@
 {
-	"name": "fhir-framework",
+	"name": "nhealth-fhir-framework",
 	"private": true,
 	"version": "0.0.15",
-	"description": "Build FHIR applications with Nuxt based on Medplum Fhir server",
+	"description": "Build FHIR applications with Nuxt",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git"
@@ -41,6 +41,7 @@
 		"@nhealth/fhir": "workspace:*",
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
+		"@nhealth/auth": "workspace:*",
         "nuxt": "3.14.159",
 		"@nuxt/ui": "3.0.0-alpha.8",
 		"@nuxt/kit": "3.14.159",

@@ -1,11 +1,11 @@
 {
-	"name": "@nhealth/fhir",
+	"name": "@nhealth/auth",
 	"version": "0.0.15",
-	"description": "Create FHIR applications with Nuxt based on Medplum Fhir server",
+	"description": "Authentication and Authorization module for Nuxt based Fhir applications",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
-		"directory": "packages/core"
+		"directory": "packages/auth"
 	},
     "license": "MIT",
     "type": "module",
@@ -30,12 +30,8 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "*",
-		"@nuxt/ui": "*",
-		"@medplum/core": "*",
-		"@medplum/fhirtypes": "*",
-		"tailwindcss": "*",
-		"hookable": "^5.5.3",
-		"defu": "^6.1.4"
+		"defu": "^6.1.4",
+		"@adonisjs/hash": "^9.0.5"
 	},
 	"devDependencies": {
 		"@nuxt/module-builder": "0.8.4"

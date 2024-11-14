@@ -3,7 +3,7 @@ import { useSession, createError } from 'h3'
 import { defu } from 'defu'
 import { createHooks } from 'hookable'
 import { useRuntimeConfig } from '#imports'
-import type { UserSession, UserSessionRequired } from '#fhir'
+import type { UserSession, UserSessionRequired } from '#auth'
 
 export interface SessionHooks {
   /**
@@ -11,7 +11,7 @@ export interface SessionHooks {
    * - Add extra properties to the session
    * - Throw an error if the session could not be verified (with a database for example)
    */
-  fetch: (session: UserSessionRequired, event: H3Event) => void | Promise<void>
+  fetch: (session: UserSession, event: H3Event) => void | Promise<void>
   /**
    * Called before clearing the session
    */
@@ -98,7 +98,6 @@ function _useSession(event: H3Event, config: Partial<SessionConfig> = {}) {
     const runtimeConfig = useRuntimeConfig(event)
     const envSessionPassword = `${runtimeConfig.nitro?.envPrefix || 'FHIR_'}SESSION_PASSWORD`
 
-    // @ts-expect-error hard to define with defu
     sessionConfig = defu({ password: process.env[envSessionPassword] }, runtimeConfig.session)
   }
   const finalConfig = defu(config, sessionConfig) as SessionConfig
