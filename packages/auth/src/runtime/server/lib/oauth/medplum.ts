@@ -17,7 +17,7 @@ export interface OAuthMedplumConfig {
 	clientSecret?: string
 	/**
 	 * Medplum OAuth Server URL
-	 * @example http://192.168.1.10:8080/auth
+	 * @example http://localhost:8103/oauth2/authorize
 	 * @default process.env.FHIR_OAUTH_MEDPLUM_SERVER_URL
 	 */
 	serverUrl?: string

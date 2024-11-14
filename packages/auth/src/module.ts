@@ -21,24 +21,61 @@ const meta = {
 	configKey: 'auth',
 };
 
-type ModuleOptions = {
+type IdentityProvider = 'keycloak' | 'medplum'
+
+type KeycloakConfig = {
+	clientId: string
+	clientSecret: string
+	serverUrl: string
+	realm: string
+	redirectURL: string
+}
+
+type MedplumConfig = {
+	clientId: string
+	clientSecret: string
+	serverUrl: string
+	redirectURL: string
+	scope?: string
+}
+
+function isKeycloakConfig(config: KeycloakConfig | MedplumConfig): config is KeycloakConfig {
+	return (config as KeycloakConfig).realm !== undefined;
+}
+
+function isMedplumConfig(config: KeycloakConfig | MedplumConfig): config is MedplumConfig {
+	return (config as MedplumConfig).scope !== undefined;
+}
+
+/**
+ * Module options
+ * @property {Object} [hash] - Optional hashing configuration.
+ * @property {IdentityProvider} [provider] - The identity provider to use.
+ * @property {KeycloakConfig | MedplumConfig} [config] - Configuration for the identity provider.
+ * @property {SessionConfig} session - Session configuration.
+ */
+export type ModuleOptions = {
 	hash?: {
 		/**
 		 * scrypt options used for password hashing
 		 */
 		scrypt?: ScryptConfig
 	}
+	provider?: IdentityProvider;
+	config?: KeycloakConfig | MedplumConfig;
+	session: SessionConfig
 }
 
 declare module 'nuxt/schema' {
 	interface RuntimeConfig {
-	  hash: {
-		scrypt: ScryptConfig
-	  }
-	  /**
-	   * Session configuration
-	   */
-	  session: SessionConfig
+		hash: {
+			scrypt: ScryptConfig
+		}
+		oauth: {
+			keycloak: KeycloakConfig
+			medplum: MedplumConfig
+		}
+		session: SessionConfig
 	}
 }
 
@@ -78,6 +115,12 @@ export default defineNuxtModule<ModuleOptions>({
 		  handler: resolver.resolve('./runtime/server/api/session.get'),
 		  route: '/api/_auth/session',
 		  method: 'get',
+		})
+
+		addServerHandler({
+			handler: resolver.resolve('./runtime/server/route/medplum.get'),
+			route: '/_oauth',
+			method: 'get',
 		})
 
 		// Set node:crypto as unenv external
@@ -125,19 +168,21 @@ export default defineNuxtModule<ModuleOptions>({
 		// OAuth settings
 		runtimeConfig.oauth = defu(runtimeConfig.oauth, {})
 		// Keycloak OAuth
-		runtimeConfig.oauth.keycloak = defu(runtimeConfig.oauth.keycloak, {
-			clientId: '',
-			clientSecret: '',
-			serverUrl: '',
-			realm: '',
-			redirectURL: '',
-		})
+		if (options?.config && options.provider === 'keycloak' && isKeycloakConfig(options.config)) {
+			runtimeConfig.oauth.keycloak = defu(runtimeConfig.oauth.keycloak, {
+				clientId: options.config?.clientId || '',
+				clientSecret: options.config?.clientSecret || '',
+				serverUrl: options.config?.serverUrl || '',
+				realm: options.config?.realm || '',
+				redirectURL: options.config?.redirectURL || '',
+			})
+		}
 		// Medplum OAuth
 		runtimeConfig.oauth.medplum = defu(runtimeConfig.oauth.medplum, {
-			clientId: '',
-			clientSecret: '',
-			serverUrl: '',
-			redirectURL: '',
+			clientId: options.config?.clientId || '',
+			clientSecret: options.config?.clientSecret || '',
+			serverUrl: options.config?.serverUrl || '',
+			redirectURL: options.config?.redirectURL || '',
 		})
 
 	}
