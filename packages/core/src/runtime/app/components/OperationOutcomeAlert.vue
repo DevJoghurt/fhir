@@ -4,7 +4,7 @@
 		icon="i-heroicons-command-line"
 		:close="{
 			icon: 'i-heroicons-x-mark-20-solid',
-			color: 'gray',
+			color: 'primary',
 			variant: 'link',
 			padded: false,
 			onClick: () => error = false
@@ -23,8 +23,8 @@
 </template>
 <script setup lang="ts">
 	import { operationOutcomeIssueToString } from '@medplum/core';
-	import { OperationOutcome, OperationOutcomeIssue } from '@medplum/fhirtypes';
-	import { defineProps, computed, ref, watch } from "#imports"
+	import type { OperationOutcome, OperationOutcomeIssue } from '@medplum/fhirtypes';
+	import { computed, ref, watch } from "#imports"
 	import type { Ref } from "#imports"
 
     type OOAProps = {

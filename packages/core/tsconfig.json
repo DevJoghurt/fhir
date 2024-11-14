@@ -1,6 +1,7 @@
 {
 	"extends": "../../playground/demo/.nuxt/tsconfig.json",
-	"compilerOptions": {
-	},
-	"traceResolution": true
+	"include": [
+		"./src/**/*.ts",
+		"./src/**/*.vue"
+  	]
 }

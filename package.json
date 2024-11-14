@@ -21,7 +21,7 @@
 		"playground"
 	],
 	"scripts": {
-		"prepare": "pnpm dev:prepare && nuxi prepare playground",
+		"prepare": "pnpm dev:prepare && nuxi prepare playground/demo && nuxi prepare playground/profiling",
 		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:stub": "pnpm dev:prepare",
 		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/**/node_modules\" \"packages/**/.nuxt\" \"playground/**/.nuxt\" \"packages/**/.output\" \"playground/**/.output\" \"node_modules\"",

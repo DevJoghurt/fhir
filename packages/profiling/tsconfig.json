@@ -1,8 +1,12 @@
 {
-	"extends": "../app/src/.nuxt/tsconfig.json",
+	"extends": "../../playground/profiling/.nuxt/tsconfig.json",
 	"compilerOptions": {
 		"noUncheckedIndexedAccess": false
 	},
+	"include": [
+		"./src/**/*.ts",
+		"./src/**/*.vue"
+  	],
 	"exclude": [
 		"dist",
 		"node_modules"

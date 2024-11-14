@@ -4,7 +4,7 @@ Manage FHIR profiles and create docs
 ## TODOS
 
 - Checkout validation with JSON Schema: https://github.com/niquola/fhir-schema/tree/master
-- Checkout FHIR Schema to use instead/in addition of Sushi: https://fhir-schema.github.io/fhir-schema/intro.html
+- Auto create types from json schema https://github.com/fhir-schema/fhir-schema-codegen
 
 
 ## Credits
