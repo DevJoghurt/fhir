@@ -23,7 +23,7 @@ import defu  from 'defu';
 const meta = {
 	name: '@nhealth/fhir-profiling',
 	version: '0.1',
-	configKey: 'fhirProfiling'
+	configKey: 'profiling'
 };
 
 type ModuleOptions = {
