@@ -18,7 +18,7 @@ import type {
 	FhirProfilingLayer,
 	FhirProfilingParallelProcessing
 } from './profiling';
-import defu  from 'defu';
+import { defu }  from 'defu';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
