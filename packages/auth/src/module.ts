@@ -28,23 +28,15 @@ type KeycloakConfig = {
 	clientSecret: string
 	serverUrl: string
 	realm: string
-	redirectURL: string
+	redirectUrl: string
 }
 
 type MedplumConfig = {
 	clientId: string
 	clientSecret: string
 	serverUrl: string
-	redirectURL: string
+	redirectUrl: string
 	scope?: string
-}
-
-function isKeycloakConfig(config: KeycloakConfig | MedplumConfig): config is KeycloakConfig {
-	return (config as KeycloakConfig).realm !== undefined;
-}
-
-function isMedplumConfig(config: KeycloakConfig | MedplumConfig): config is MedplumConfig {
-	return (config as MedplumConfig).scope !== undefined;
 }
 
 /**
@@ -62,7 +54,10 @@ export type ModuleOptions = {
 		scrypt?: ScryptConfig
 	}
 	provider?: IdentityProvider;
-	config?: KeycloakConfig | MedplumConfig;
+	config?: {
+		medplum?: MedplumConfig;
+		keycloak?: KeycloakConfig;
+	};
 	session: SessionConfig
 }
 
@@ -94,11 +89,17 @@ export default defineNuxtModule<ModuleOptions>({
 		)
 
 		const composables = [
-			{ name: 'useUserSession', from: resolver.resolve('./runtime/app/composables/session') },
+			{
+				name: 'useUserSession',
+				from: resolver.resolve('./runtime/app/composables/session')
+			},
 		]
 
 		// App
-		addComponentsDir({ path: resolver.resolve('./runtime/app/components') })
+		addComponentsDir({
+			prefix: 'Auth',
+			path: resolver.resolve('./runtime/app/components')
+		})
 		addImports(composables)
 		addPlugin(resolver.resolve('./runtime/app/plugins/session.server'))
 		addPlugin(resolver.resolve('./runtime/app/plugins/session.client'))
@@ -118,8 +119,8 @@ export default defineNuxtModule<ModuleOptions>({
 		})
 
 		addServerHandler({
-			handler: resolver.resolve('./runtime/server/route/medplum.get'),
-			route: '/_oauth',
+			handler: resolver.resolve('./runtime/server/routes/medplum.get'),
+			route: '/auth/medplum',
 			method: 'get',
 		})
 
@@ -168,22 +169,24 @@ export default defineNuxtModule<ModuleOptions>({
 		// OAuth settings
 		runtimeConfig.oauth = defu(runtimeConfig.oauth, {})
 		// Keycloak OAuth
-		if (options?.config && options.provider === 'keycloak' && isKeycloakConfig(options.config)) {
+		if (options?.config && options.provider === 'keycloak' && options.config.keycloak) {
 			runtimeConfig.oauth.keycloak = defu(runtimeConfig.oauth.keycloak, {
-				clientId: options.config?.clientId || '',
-				clientSecret: options.config?.clientSecret || '',
-				serverUrl: options.config?.serverUrl || '',
-				realm: options.config?.realm || '',
-				redirectURL: options.config?.redirectURL || '',
+				clientId: options.config?.keycloak.clientId || '',
+				clientSecret: options.config?.keycloak.clientSecret || '',
+				serverUrl: options.config?.keycloak.serverUrl || '',
+				realm: options.config?.keycloak.realm || '',
+				redirectURL: options.config?.keycloak.redirectUrl || '',
 			})
 		}
-		// Medplum OAuth
-		runtimeConfig.oauth.medplum = defu(runtimeConfig.oauth.medplum, {
-			clientId: options.config?.clientId || '',
-			clientSecret: options.config?.clientSecret || '',
-			serverUrl: options.config?.serverUrl || '',
-			redirectURL: options.config?.redirectURL || '',
-		})
+		if (options?.config && options.provider === 'medplum' && options.config.medplum) {
+			runtimeConfig.oauth.medplum = defu({
+				clientId: options.config?.medplum.clientId || '',
+				clientSecret: options.config?.medplum.clientSecret || '',
+				serverUrl: options.config?.medplum.serverUrl || '',
+				redirectURL: options.config?.medplum.redirectUrl || '',
+				scope: options.config?.medplum.scope || 'openid'
+			}, runtimeConfig.oauth.medplum);
+		}
 
 	}
 });

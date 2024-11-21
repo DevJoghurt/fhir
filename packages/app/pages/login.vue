@@ -26,6 +26,10 @@
 				<div>
                     <UButton type="submit" :loading="loading" :label="t('auth.signInButton')" block />
                 </div>
+
+                <div>
+                    <AuthMedplum type="submit" :loading="loading" :label="t('auth.signInButton')" block />
+                </div>
 			</UForm>
 		</UCard>
 	  </div>
