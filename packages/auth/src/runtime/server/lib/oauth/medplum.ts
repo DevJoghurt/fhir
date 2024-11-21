@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { eventHandler, getQuery, sendRedirect, setCookie } from 'h3'
+import { eventHandler, getQuery, sendRedirect, setCookie, getCookie, deleteCookie } from 'h3'
 import { useRuntimeConfig, createError } from '#imports'
 import { handleMissingConfiguration, handleAccessTokenErrorResponse, getOAuthRedirectURL, requestAccessToken } from '../utils'
 import { defu } from 'defu'
@@ -152,6 +152,10 @@ export function defineOAuthMedplumEventHandler({
 			if (!onError) throw error
 			return onError(event, error)
 		}
+
+		deleteCookie(event, 'codeVerifier')
+		// medplum sets a cookie that we need to delete to allow for re-authentication
+		deleteCookie(event, `medplum-${config.clientId}`)
 
 		return onSuccess(event, {
 			user,

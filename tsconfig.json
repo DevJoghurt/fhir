@@ -3,6 +3,7 @@
 	"exclude": [
 		"dist",
 		"node_modules",
-		"export"
+		"export",
+		"implementierung"
 	]
 }

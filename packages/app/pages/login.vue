@@ -8,9 +8,11 @@
       </div>
 
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-[480px]">
-		<UCard>
+		<UCard :ui="{
+            body: 'p-0 sm:px-0'
+        }">
             <UForm
-                class="space-y-6"
+                class="space-y-6 p-4 sm:px-4"
 				:state="state"
 				:validateOn="['blur', 'input', 'change']"
 				@submit="onSubmit"
@@ -24,13 +26,12 @@
                     <UInput v-model="state.password" icon="i-heroicons-key" class="w-full" size="md" type="password" :placeholder="t('auth.password')"></UInput>
                 </UFormField>
 				<div>
-                    <UButton type="submit" :loading="loading" :label="t('auth.signInButton')" block />
-                </div>
-
-                <div>
-                    <AuthMedplum type="submit" :loading="loading" :label="t('auth.signInButton')" block />
+                    <UButton type="submit" :loading="loading" :label="t('auth.signInButton')"/>
                 </div>
 			</UForm>
+            <div class="border-t-1 border-slate-200 py-6 space-y-6 p-4 sm:px-4">
+                <AuthMedplumLogin />
+            </div>
 		</UCard>
 	  </div>
 	</div>
@@ -38,9 +39,16 @@
 <script setup lang="ts">
 	import z from 'zod'
 	import type { FormSubmitEvent } from '#ui/types'
-	import { useI18n, useMedplum } from '#imports'
+	import { useI18n, useMedplum, definePageMeta } from '#imports'
     import type { Ref } from '#imports'
     import type { OperationOutcome } from '#fhir'
+
+    definePageMeta({
+        layout: 'empty',
+        auth: {
+            unauthenticatedOnly: true
+        }
+    })
 
     const { t } = useI18n({
         useScope: 'global'

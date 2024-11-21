@@ -3,11 +3,18 @@ import { setUserSession, defineOAuthMedplumEventHandler } from '#imports'
 export default defineOAuthMedplumEventHandler({
 	config: {},
 	async onSuccess(event, { user, tokens }) {
-	  console.log('Medplum OAuth success:', user)
 	  await setUserSession(event, {
 		user: {
-			id: user.id,
-		}
+			id: user.sub,
+			displayName: tokens?.profile?.display,
+			reference: tokens?.profile?.reference
+		},
+		secure: {
+			idToken: tokens.id_token
+		},
+		accessToken: tokens.access_token
+	  }, {
+		maxAge: 60 * 60 * 24 * 7 // 1 week
 	  })
 	  return sendRedirect(event, '/')
 	},

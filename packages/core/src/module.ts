@@ -36,11 +36,15 @@ export default defineNuxtModule<ModuleOptions>({
 
 		// add all app related things here
 		addPlugin(resolve('./runtime/app/plugins/medplum'));
-		addImports({
+		addImports([{
 			name: 'useMedplum',
 			as: 'useMedplum',
 			from: resolve('./runtime/app/composables/useMedplum')
-		});
+		},{
+			name: 'useFhir',
+			as: 'useFhir',
+			from: resolve('./runtime/app/composables/useFhir')
+		}]);
 		addComponentsDir({
 			path: resolve('./runtime/app/components'),
 			prefix: 'Fhir',

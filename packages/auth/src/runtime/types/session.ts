@@ -1,9 +1,14 @@
 import type { ComputedRef, Ref } from 'vue'
 
 export interface User {
+  id: string
+  displayName?: string
+  reference?: string
 }
 
 export interface SecureSessionData {
+  idToken?: string
+  accessToken?: string
 }
 
 export interface UserSession {
