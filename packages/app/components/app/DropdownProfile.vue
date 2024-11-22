@@ -1,11 +1,10 @@
 <template>
     <UDropdownMenu
       :items="items"
-      arrow
       :content="{
           side: 'top'
       }">
-        <div class="flex w-full py-3 px-1 items-center">
+        <div class="flex w-full py-3 px-1 items-center cursor-pointer">
           <UAvatar class="flex-none" src="/placeholder_profile_square.jpg" />
           <div class="flex-auto text-sm font-normal px-2">
               {{ user?.displayName }}
@@ -25,7 +24,7 @@
         </template>
 
         <template #item="{ item }">
-            <AppLogout v-if="item.action === 'signout'" class="text-left w-full font-normal text-sm" />
+            <AppLogout v-if="item?.action === 'signout'" class="cursor-pointer text-left w-full font-normal text-sm" />
             <span v-else class="truncate">{{ item.t ? t(item.t) : item.label || '' }}</span>
             <UIcon v-if="item.icon" :name="item.icon" class="flex-shrink-0 h-4 w-4 text-gray-400 dark:text-gray-500 ms-auto" />
         </template>
@@ -52,7 +51,7 @@
       [{
         label: user.value?.displayName || '',
         slot: 'account',
-        disabled: true
+        type: 'label'
       }],
         appConfig.navigation.dropdownProfile.items,
       [{

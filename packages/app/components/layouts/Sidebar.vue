@@ -3,16 +3,16 @@
 		<UApp>
 			<div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
 				<div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-				<div class="flex h-16 shrink-0 items-center">
+				<div class="flex h-16 py-4 shrink-0 items-center">
 					<slot name="logo">
 						<NuxtLink to="/">
-							<Logo class="h-16" alt="Logo"></Logo>
+							<Logo class="h-12" alt="Logo"></Logo>
 						</NuxtLink>
 					</slot>
 				</div>
 				<nav class="flex flex-1 flex-col">
 					<div>
-						<UNavigationMenu :orientation="'vertical'" :links="items" />
+						<UNavigationMenu :orientation="'vertical'" :items="[items]" />
 					</div>
 					<div class="mt-auto">
 						<AppDropdownProfile />
@@ -57,7 +57,10 @@
     const items = computed( () => appConfig.navigation.sidebar.items.map(
         (item)=>({
           label: item?.t ? t(item.t) : item.label || '',
-          icon: item?.icon || undefined
+          icon: item?.icon || '',
+		  to: item?.to || '',
+		  defaultOpen: item?.defaultOpen || false,
+		  children: item?.children || []
         })
       )
     )

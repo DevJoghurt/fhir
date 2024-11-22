@@ -1,4 +1,5 @@
 import { defineAppConfig } from '#imports'
+
 /**
  * Default app config
  */
@@ -6,10 +7,7 @@ export default defineAppConfig({
   title: 'Fhir Application',
   navigation: {
     sidebar: {
-      items: [{
-        label: 'Dashboard',
-        to: '/dashboard',
-      }]
+      items: []
     },
     dropdownProfile: {
       items: [
@@ -29,9 +27,11 @@ export default defineAppConfig({
 export type MenuItem = {
   t?: string
   label?: string
-  to: string
+  defaultOpen?: boolean
+  to?: string
   icon?: string
-  exact?: boolean
+  exact?: boolean,
+  children?: MenuItem[]
 }
 
 export type Menu = {
