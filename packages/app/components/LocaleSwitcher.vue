@@ -11,7 +11,6 @@
 <script setup lang="ts">
 import { useI18n, ref, watch } from '#imports'
 import type { Ref } from '#imports'
-import type { LocaleObject } from '@nuxtjs/i18n'
 
 type IconMapping = {
     [key: string]: string
@@ -29,7 +28,10 @@ const { locale, locales, setLocale } = useI18n()
 const selected = ref({
         code: 'none',
         name: 'None'
-}) as Ref<LocaleObject>
+}) as Ref<{
+    code: string
+    name: string
+}>
 
 selected.value = locales.value.find(i => i.code === locale.value) || {
     code: 'none',

@@ -8,8 +8,7 @@
     },
     "dependencies": {
       "nuxt": "*",
-      "@nhealth/app": "workspace:*",
-      "radix-vue": "^1.9.7"
+      "@nhealth/app": "workspace:*"
     },
     "devDependencies": {
       "typescript": "*"

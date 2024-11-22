@@ -12,12 +12,20 @@ export default defineNuxtConfig({
 		lazy: true,
 		strategy: 'no_prefix',
 		defaultLocale: 'en',
+		experimental: {
+			typedOptionsAndMessages: "all"
+		},
 		locales: [{
-		  code: 'de',
-		  file: './de.json'
-		},{
-		  code: 'en',
-		  file: './en.json'
+			code: 'de',
+			file: './de.json'
+		  },{
+			code: 'en',
+			file: './en.json'
 		}]
 	},
+	vite: {
+		optimizeDeps: {
+			//exclude: ['@intlify/shared','@intlify/core-base', 'is-https', '@medplum/core']
+		}
+	}
 })

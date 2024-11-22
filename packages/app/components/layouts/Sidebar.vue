@@ -12,21 +12,21 @@
 				</div>
 				<nav class="flex flex-1 flex-col">
 					<div>
-						<UVerticalNavigation :links="items" />
+						<UNavigationMenu :orientation="'vertical'" :links="items" />
 					</div>
 					<div class="mt-auto">
-						<UDropdownProfile />
+						<AppDropdownProfile />
 					</div>
 				</nav>
 				</div>
 			</div>
 			<div class="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
 				<UButton
-				icon="i-heroicons-bars-3"
-				size="sm"
-				color="primary"
-				square
-				variant="outline"
+					icon="i-heroicons-bars-3"
+					size="sm"
+					color="primary"
+					square
+					variant="outline"
 				/>
 			</div>
 			<div class="lg:pl-72">
@@ -38,7 +38,6 @@
     </section>
 </template>
 <script setup lang="ts">
-    import type { Locales } from '#build/locales'
     import { useAppConfig, useI18n } from '#imports'
 
     useHead({
@@ -50,15 +49,14 @@
         }
     })
 
-    const { t } = useI18n<{message: Locales}>({
-        useScope: 'global'
-    })
+    const { t } = useI18n()
+
 
     const appConfig = useAppConfig()
 
     const items = computed( () => appConfig.navigation.sidebar.items.map(
         (item)=>({
-          label: item.t ? t(item.t) : item.label || '',
+          label: item?.t ? t(item.t) : item.label || '',
           icon: item?.icon || undefined
         })
       )

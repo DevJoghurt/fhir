@@ -6,7 +6,10 @@ export default defineAppConfig({
   title: 'Fhir Application',
   navigation: {
     sidebar: {
-      items: []
+      items: [{
+        label: 'Dashboard',
+        to: '/dashboard',
+      }]
     },
     dropdownProfile: {
       items: [
