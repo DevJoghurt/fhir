@@ -49,7 +49,7 @@
 						class="h-4 w-4"
 					/>
 				</div>
-				<div class="flex min-h-8">
+				<div class="flex w-full min-h-8">
 					<div :style="`width: ${17 - (item.level*1.4)}rem;`" class="overflow-hidden pl-2">{{ item.value.title }}</div>
 					<div class="w-24">
 						<ProfilingFlags :element="item.value" />
@@ -58,7 +58,7 @@
 						<ProfilingCardinality :element="item.value" />
 					</div>
 					<div class="w-36">
-						<ProfilingType :types="item.value.type" />
+						<ProfilingType :type="item.value.type" />
 					</div>
 					<div class="flex-1 text-xs font-normal">
 						{{ item.value.short }}
@@ -70,7 +70,7 @@
 </template>
 <script setup lang="ts">
 	import { TreeItem, TreeRoot } from 'radix-vue'
-	import { ElementDefinition, StructureDefinition } from '@medplum/fhirtypes'
+	import type { ElementDefinition, StructureDefinition } from '@medplum/fhirtypes'
 
 	type Filter = 'all' | 'mustSupport' | 'extentions'
 	type ResourceType = 'differential' | 'snapshot'
@@ -160,6 +160,7 @@
 
 	// create default expandables
 	const items = createItems(resource, type);
+	console.log(items);
 	const defaultExpanded = items.map((element) => element.id) || [];
 
 	const transformedItems = transform(items);
