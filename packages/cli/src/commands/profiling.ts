@@ -5,10 +5,11 @@ import { sharedArgs } from './_shared'
 import { consola } from 'consola'
 import { buildDocs } from '../utils/build'
 import { runDevDocs } from '../utils/dev'
+import { downloadPublisher, checkJavaRuntime, runPublisher } from '../utils/hl7'
 
 const command = defineCommand({
 	meta: {
-	  name: 'fhir:profiling',
+	  name: 'profiling',
 	  description: 'Create fhir profiles based on Fhir Shorthand',
 	},
 	args: {
@@ -36,6 +37,11 @@ const command = defineCommand({
 		type: 'boolean',
 		description: 'Generate documentation',
 		default: false,
+	  },
+	  hl7: {
+		type: 'boolean',
+		description: 'Use HL7 publisher workflow to generate documentation',
+		default: false,
 	  }
 	},
 	async run(ctx) {
@@ -57,7 +63,7 @@ const command = defineCommand({
 		});
 
 		// if not generating docs, then we need to run the build process manually
-		if(!ctx.args.docs){
+		if(!ctx.args.docs && !ctx.args.hl7){
 			if(['dev', 'build'].indexOf(ctx.args.action) !== -1){
 				consola.info('Loading all fsh files from ', `${cwd}/fsh`);
 
@@ -75,7 +81,7 @@ const command = defineCommand({
 		}
 
 		// if generating docs, then we need nuxt to run the build process
-		if(ctx.args.docs){
+		else if(ctx.args.docs && !ctx.args.hl7){
 			if(ctx.args.action === 'build'){
 				consola.info('Running nuxt dev');
 				await buildDocs(profilingCtx);
@@ -83,6 +89,18 @@ const command = defineCommand({
 			if(ctx.args.action === 'dev'){
 				consola.info('Running nuxt dev');
 				await runDevDocs(profilingCtx, ctx.args);
+			}
+		}
+
+		// if generating hl7 docs, then we need to run the hl7 publisher workflow
+		else if(ctx.args.hl7){
+			// download the publisher
+			await downloadPublisher(profilingCtx);
+			//check if java runtime is installed
+			checkJavaRuntime();
+			if(ctx.args.action === 'build'){
+				consola.info('Running HL7 Publisher');
+				await runPublisher(profilingCtx);
 			}
 		}
 	}

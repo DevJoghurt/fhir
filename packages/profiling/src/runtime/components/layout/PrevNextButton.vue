@@ -10,10 +10,10 @@
 			<Icon name="lucide:arrow-left" size="20" class="mx-auto self-center" />
 		  </div>
 		  <span class="space-y-2 self-center">
-			<div class="text-lg font-semibold">
+			<div class="text-md font-semibold">
 			  {{ prevNext.title }}
 			</div>
-			<div v-if="prevNext.description" class="text-sm text-muted-foreground">
+			<div v-if="prevNext.description" class="text-xs text-muted-foreground">
 			  {{ prevNext.description }}
 			</div>
 		  </span>

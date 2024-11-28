@@ -15,8 +15,8 @@ services:
     image: redis:7
     container_name: medplum-redis
     command: redis-server --requirepass medplum
-    expose:
-      - '6379'
+    ports:
+      - '6379:6379'
   medplum-server:
     container_name: medplum-server
     image: medplum/medplum-server:latest

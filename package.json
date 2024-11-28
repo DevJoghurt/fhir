@@ -29,6 +29,7 @@
 		"lint": "eslint . --cache",
 		"lint:fix": "eslint . --cache --fix",
 		"profiling:dev": "nuxi dev playground/profiling",
+		"profiling:hl7": "npx nhealth-cli profiling build --dir=\"playground/profiling\" --outDir=\"playground/profiling/export\" --hl7",
 		"demo:dev": "nuxi dev playground/demo",
 		"demo:build": "nuxi build playground/demo",
 		"demo:generate": "nuxi generate playground/demo",

@@ -4,6 +4,15 @@ implementierung
 */**/yarn.lock
 /.yarn
 
+# HL7 publisher
+playground/profiling/input-cache
+playground/profiling/temp
+playground/profiling/output
+playground/profiling/template
+
+# Downloaded files
+publisher.jar
+
 # Logs
 *.log
 

@@ -55,9 +55,10 @@ export default defineNuxtModule<ModuleOptions>({
 	async setup(options, nuxt) {
 		const logger = useLogger('FHIR Profiling');
 		const { resolve } = createResolver(import.meta.url);
-		// TODO: find a way to handle tailwind css import from different modules
+		// TODO: find a better way to handle tailwind css import from different modules
 		if(!hasNuxtModule('@nuxt/ui')){
 			installModule('@nuxt/ui');
+			nuxt.options.css.push(resolve('./runtime/tailwind.css'));
 		}
 
 		// get all fsh files in profiles/fsh folder for fhir sushi -> respecting nuxt layers
