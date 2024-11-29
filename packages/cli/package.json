@@ -1,6 +1,6 @@
 {
 	"name": "nhealth-cli",
-	"version": "0.0.18",
+	"version": "0.0.19",
 	"description": "Cli for the nhealth project",
 	"repository": {
 		"type": "git",
@@ -29,7 +29,7 @@
 		"prepack:stub": "unbuild --stub"
 	},
 	"dependencies": {
-		"fsh-sushi": "3.12.0"
+		"fsh-sushi": "3.12.1"
 	},
 	"devDependencies": {
 		"@nuxt/kit": "*",

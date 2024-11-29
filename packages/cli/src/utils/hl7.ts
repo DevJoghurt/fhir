@@ -21,7 +21,6 @@ function downloadFile(url, outputPath) {
  */
 export function checkJavaRuntime() {
 	consola.info('Checking for Java runtime');
-	const { execSync } = require('child_process');
 	try {
 		execSync('java -version');
 	} catch (error) {

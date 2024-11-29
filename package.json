@@ -1,7 +1,7 @@
 {
 	"name": "nhealth-fhir-framework",
 	"private": true,
-	"version": "0.0.18",
+	"version": "0.0.19",
 	"description": "Build FHIR applications with Nuxt",
 	"repository": {
 		"type": "git",
