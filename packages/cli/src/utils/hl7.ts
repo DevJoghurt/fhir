@@ -33,7 +33,7 @@ export function checkJavaRuntime() {
  * Downloads the publisher if not already downloaded
  */
 export async function downloadPublisher(ctx: FhirProfilingContext) {
-	const publisherPath = join(ctx.paths.profilingDir, 'publisher.jar');
+	const publisherPath = join(ctx.paths.projectPath, 'publisher.jar');
 	// check if the publisher is already downloaded -> filename is publisher.jar
 	if (!existsSync(publisherPath)) {
 		// download the publisher
@@ -50,7 +50,7 @@ export async function downloadPublisher(ctx: FhirProfilingContext) {
  * TODO: check if fhir-tools-settings.conf is needed in some contexts
  */
 export async function runPublisher(ctx: FhirProfilingContext) {
-	const publisherPath = join(ctx.paths.profilingDir, 'publisher.jar');
+	const publisherPath = join(ctx.paths.projectPath, 'publisher.jar');
 	// check if the publisher is already downloaded -> filename is publisher.jar
 	if (!existsSync(publisherPath)) {
 		consola.error('HL7 Publisher is not downloaded. Please run the build command first.');
@@ -76,7 +76,7 @@ export async function runPublisher(ctx: FhirProfilingContext) {
 		process.exit(1);
 	}
 	// check if sushi config is set FSHOnly: false -> the ImplementationGuide resource is generated and needed in the ig.ini
-	if(!ctx.sushi?.FSHOnly || (ctx.sushi.FSHOnly === true)){
+	if(ctx.sushi?.FSHOnly === true){
 		consola.error('HL7 Publisher requires the sushi config to have FSHOnly: false');
 		process.exit(1);
 	}
