@@ -58,14 +58,31 @@ export async function runPublisher(ctx: FhirProfilingContext) {
 	}
 	// run the publisher
 
-	// TODOS:
 	// check if files exists -> ig.ini
-	// check if sushi config is set FSHOnly: false -> the ImplementationGuide resource is generated and needed in the ig.ini
+	let igIniPath = false as string | false
+	if(existsSync(ctx.paths.projectPath) && existsSync(join(ctx.paths.projectPath, 'ig.ini'))){
+		igIniPath = join(ctx.paths.projectPath, 'ig.ini');
+	}
+	else if(existsSync(join(ctx.paths.projectPath, ctx.paths.profilingDir, 'ig.ini'))){
+		igIniPath = join(ctx.paths.projectPath, ctx.paths.profilingDir, 'ig.ini');
+	}
+	if(!igIniPath){
+		consola.error('HL7 Publisher requires an ig.ini file to be present in the project directory');
+		process.exit(1);
+	}
 	// check if sushi config menu is set -> menu.xml is generated
-
+	if(!ctx.sushi?.menu){
+		consola.error('HL7 Publisher requires the sushi config to have a menu exntry');
+		process.exit(1);
+	}
+	// check if sushi config is set FSHOnly: false -> the ImplementationGuide resource is generated and needed in the ig.ini
+	if(!ctx.sushi?.FSHOnly || (ctx.sushi.FSHOnly === true)){
+		consola.error('HL7 Publisher requires the sushi config to have FSHOnly: false');
+		process.exit(1);
+	}
 	const { execSync } = require('child_process');
 	consola.info('Running HL7 Publisher');
-	execSync(`java -jar ${publisherPath} -ig ${join(ctx.paths.projectPath,ctx.paths.profilingDir,'ig.ini')} -destination ${ctx.paths.outDir}`,{
+	execSync(`java -jar ${publisherPath} -ig ${igIniPath} -destination ${ctx.paths.outDir}`,{
 		cwd: '.',
 		stdio: 'inherit'
 	});

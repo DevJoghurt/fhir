@@ -19,6 +19,8 @@ import type {
 	FhirProfilingParallelProcessing
 } from './profiling';
 import { defu }  from 'defu';
+// ts bug: https://github.com/nuxt/module-builder/issues/141
+import type {} from 'nuxt/schema';
 
 const meta = {
 	name: '@nhealth/fhir-profiling',
@@ -34,6 +36,14 @@ type ModuleOptions = {
 	sushiConfig?: boolean;
 	docs?: Partial<FhirProfilingDocs>;
 	parallelProcessing?: FhirProfilingParallelProcessing;
+}
+
+declare module 'nuxt/schema' {
+	interface RuntimeConfig {
+		fhirProfiling: {
+			resourcesDir: string;
+		}
+	}
 }
 
 export default defineNuxtModule<ModuleOptions>({

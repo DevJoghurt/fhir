@@ -17,7 +17,7 @@ interface ProfileExample extends InstanceMeta {
 	fileName: string;
 }
 
-export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters' | 'publisher'>;
+export type SushiConfiguration = Pick<fshtypes.Configuration, 'canonical' | 'description' | 'fhirVersion' | 'dependencies' | 'parameters' | 'publisher' | 'menu' | 'FSHOnly'>;
 
 // General types
 
@@ -154,21 +154,40 @@ interface ProfilingBaseConfig extends FhirProfilingPaths {
 };
 
 export async function initializeProfilingContext(config: ProfilingBaseConfig): Promise<FhirProfilingContext>{
-
+	const logger = useLogger('FHIR Profiling');
 	// Read sushi configuration if available
 	let sushiConfig = {} as ResolvedConfig<SushiConfiguration>;
 	if(config.sushiConfig && config.sushiConfig === true){
-		//check if sushi config exists
-		sushiConfig = await loadConfig<SushiConfiguration>({
-			configFile: 'sushi-config',
-			cwd: config.projectPath,
-			defaults: {
-				fhirVersion: [],
-				canonical: 'http://example.com/fsh',
-				dependencies: [],
-				parameters: []
-			}
-		});
+		// find sushi config
+		let sushiConfigPath = false as string | false;
+		// check if projectPath is a file
+		if(existsSync(config.projectPath) &&
+		( existsSync(join(config.projectPath, 'sushi-config.yaml')) ||
+			existsSync(join(config.projectPath, 'sushi-config.yml'))
+		)){
+			sushiConfigPath = config.projectPath
+		}
+		//check if sushi config exists in profilingDir -> file could be yaml or yml
+		if(!sushiConfigPath &&
+			(existsSync(join(config.projectPath, config.profilingDir, 'sushi-config.yaml')) ||
+			existsSync(join(config.projectPath, config.profilingDir, 'sushi-config.yml')))
+		){
+			sushiConfigPath = join(config.projectPath, config.profilingDir)
+		}
+		if(sushiConfigPath){
+			sushiConfig = await loadConfig<SushiConfiguration>({
+				configFile: 'sushi-config',
+				cwd: sushiConfigPath,
+				defaults: {
+					fhirVersion: [],
+					canonical: 'http://example.com/fsh',
+					dependencies: [],
+					parameters: []
+				}
+			});
+		}else{
+			logger.warn('No sushi-config.yaml found in project root or profiling directory. Using default configuration.');
+		}
 	}
 
 	const context = {

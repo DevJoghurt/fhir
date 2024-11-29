@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/app",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"description": "FHIR application layer for Nuxt based on Medplum Fhir server",
 	"repository": {
 		"type": "git",

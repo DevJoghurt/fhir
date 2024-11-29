@@ -7,13 +7,14 @@ import {
 	addServerHandler,
 	addServerImportsDir,
 	addComponentsDir,
-	logger,
 } from '@nuxt/kit'
-import { join } from 'pathe'
+import { join } from 'node:path'
 import { defu } from 'defu'
 import { randomUUID } from 'uncrypto'
 import type { ScryptConfig } from '@adonisjs/hash/types'
 import type { SessionConfig } from 'h3'
+// ts bug: https://github.com/nuxt/module-builder/issues/141
+import type {} from 'nuxt/schema'
 
 const meta = {
 	name: '@nhealth/auth',
@@ -46,7 +47,7 @@ type MedplumConfig = {
  * @property {KeycloakConfig | MedplumConfig} [config] - Configuration for the identity provider.
  * @property {SessionConfig} session - Session configuration.
  */
-export type ModuleOptions = {
+type ModuleOptions = {
 	hash?: {
 		/**
 		 * scrypt options used for password hashing
@@ -117,7 +118,6 @@ export default defineNuxtModule<ModuleOptions>({
 		  route: '/api/_auth/session',
 		  method: 'get',
 		})
-
 		addServerHandler({
 			handler: resolver.resolve('./runtime/server/routes/medplum.get'),
 			route: '/auth/medplum',
@@ -133,11 +133,12 @@ export default defineNuxtModule<ModuleOptions>({
 
 		// Runtime Config
 		const runtimeConfig = nuxt.options.runtimeConfig
+
 		const envSessionPassword = `${
 			runtimeConfig.nitro?.envPrefix || 'FHIR_'
 		}SESSION_PASSWORD`
 
-		runtimeConfig.session = defu(runtimeConfig.session, {
+		runtimeConfig.session = defu(runtimeConfig.session || {}, {
 			name: 'fhir-session',
 			password: process.env[envSessionPassword] || '',
 			cookie: {
@@ -145,7 +146,7 @@ export default defineNuxtModule<ModuleOptions>({
 			},
 		}) as SessionConfig
 
-		runtimeConfig.hash = defu(runtimeConfig.hash, {
+		runtimeConfig.hash = defu(runtimeConfig.hash || {}, {
 			scrypt: options.hash?.scrypt,
 		})
 

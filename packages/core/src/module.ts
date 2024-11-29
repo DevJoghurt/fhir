@@ -5,15 +5,23 @@ import {
 	addImports,
 	hasNuxtModule,
 	installModule,
-	addComponentsDir,
-	addServerImportsDir,
-	addServerHandler
+	addComponentsDir
   } from '@nuxt/kit'
 import defu from 'defu'
-import { randomUUID } from 'node:crypto'
-import { writeFile, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import type { ModuleOptions } from './types'
+// ts bug: https://github.com/nuxt/module-builder/issues/141
+import type {} from 'nuxt/schema'
+
+type ModuleOptions = {
+	serverUrl?: string;
+}
+
+declare module 'nuxt/schema' {
+	interface RuntimeConfig {
+		fhir: {
+			serverUrl: string;
+		}
+	}
+}
 
 const meta = {
 	name: '@nhealth/fhir',
@@ -56,8 +64,5 @@ export default defineNuxtModule<ModuleOptions>({
 		runtimeConfig.public.fhir = defu(runtimeConfig.public.fhir || {}, {
 			serverUrl: options.serverUrl
 		});
-
-		nuxt.options.alias['#fhir'] = resolve('./runtime/types.d.ts');
-
 	}
 });

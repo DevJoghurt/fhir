@@ -1,7 +1,7 @@
 {
 	"name": "nhealth-fhir-framework",
 	"private": true,
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"description": "Build FHIR applications with Nuxt",
 	"repository": {
 		"type": "git",
@@ -29,7 +29,7 @@
 		"lint": "eslint . --cache",
 		"lint:fix": "eslint . --cache --fix",
 		"profiling:dev": "nuxi dev playground/profiling",
-		"profiling:hl7": "npx nhealth-cli profiling build --dir=\"playground/profiling\" --outDir=\"playground/profiling/export\" --hl7",
+		"profiling:hl7": "npx nhealth-cli profiling docs --dir=\"playground/profiling\" --outDir=\"playground/profiling/export\" --hl7",
 		"demo:dev": "nuxi dev playground/demo",
 		"demo:build": "nuxi build playground/demo",
 		"demo:generate": "nuxi generate playground/demo",
