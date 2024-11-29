@@ -5,6 +5,7 @@ import { consola } from 'consola';
 import { join } from 'pathe';
 import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
+import { execSync } from 'node:child_process';
 import type { FhirProfilingContext } from '@nhealth/fhir-profiling';
 
 const pubsource = "https://github.com/HL7/fhir-ig-publisher/releases/latest/download/publisher.jar";
@@ -80,7 +81,6 @@ export async function runPublisher(ctx: FhirProfilingContext) {
 		consola.error('HL7 Publisher requires the sushi config to have FSHOnly: false');
 		process.exit(1);
 	}
-	const { execSync } = require('child_process');
 	consola.info('Running HL7 Publisher');
 	execSync(`java -jar ${publisherPath} -ig ${igIniPath} -destination ${ctx.paths.outDir}`,{
 		cwd: '.',

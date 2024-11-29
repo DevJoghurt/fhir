@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/auth",
-	"version": "0.0.17",
+	"version": "0.0.18",
 	"description": "Authentication and Authorization module for Nuxt based Fhir applications",
 	"repository": {
 		"type": "git",
