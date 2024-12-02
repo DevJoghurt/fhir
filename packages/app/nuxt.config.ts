@@ -22,10 +22,5 @@ export default defineNuxtConfig({
 			code: 'en',
 			file: './en.json'
 		}]
-	},
-	vite: {
-		optimizeDeps: {
-			//exclude: ['@intlify/shared','@intlify/core-base', 'is-https', '@medplum/core']
-		}
 	}
 })

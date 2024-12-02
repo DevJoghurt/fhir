@@ -39,7 +39,7 @@
 <script setup lang="ts">
 	import z from 'zod'
 	import type { FormSubmitEvent } from '#ui/types'
-	import { useI18n, useMedplum, definePageMeta } from '#imports'
+	import { useI18n, definePageMeta } from '#imports'
     import type { Ref } from '#imports'
     import type { OperationOutcome } from '#fhir'
 
@@ -50,11 +50,11 @@
         }
     })
 
+    const loading = ref(false)
+
     const { t } = useI18n({
         useScope: 'global'
     })
-
-	const { loading, medplum, login } = useMedplum()
 
 	const state = reactive({
         email: undefined,
@@ -80,7 +80,7 @@
 
 	async function onSubmit (payload: FormSubmitEvent<AuthSchema>) : Promise<void> {
         const { email, password } = payload.data;
-        const { credentials, error } = await login(email, password);
+        //const { credentials, error } = await login(email, password);
         if (error) {
             errorOutcome.value = error;
             return;
