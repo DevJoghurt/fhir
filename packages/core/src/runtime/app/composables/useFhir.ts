@@ -1,12 +1,11 @@
 import {
 	useState,
 	useFetch,
-	useRuntimeConfig,
-	h
+	useRuntimeConfig
 } from '#imports'
 import { defu } from 'defu'
-import { concatUrls, encodeBase64, getQueryString, ContentType } from './utils'
-import type { QueryTypes } from './utils'
+import { concatUrls, encodeBase64, getQueryString, ContentType } from '../utils'
+import type { QueryTypes } from '../utils'
 import type {
 	ExtractResource,
 	ResourceType,
