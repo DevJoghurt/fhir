@@ -31,7 +31,6 @@
 	"dependencies": {
 		"@nuxt/kit": "*",
 		"@nuxt/ui": "*",
-		"@medplum/core": "*",
 		"@medplum/fhirtypes": "*",
 		"tailwindcss": "*",
 		"hookable": "^5.5.3",
