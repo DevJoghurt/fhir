@@ -80,6 +80,7 @@ export default defineNuxtModule<ModuleOptions>({
 			basePath: options.basePath
 		});
 
-		runtimeConfig.fhir.medplum = defu(runtimeConfig.fhir.medplum || {}, options.medplum || {});
+		runtimeConfig.fhir = runtimeConfig.fhir || {};
+		runtimeConfig.fhir.medplum = defu(runtimeConfig.fhir?.medplum || {}, options?.medplum || {});
 	}
 });

@@ -75,11 +75,16 @@ export function useFhir(options: UseFhirOptions = {
 }) {
 
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
-	const config = defu(options, useRuntimeConfig().public.fhir || {}, useRuntimeConfig().fhir, {
-		server: '',
-		serverUrl: '',
-		basePath: ''
-	})
+	const config = defu(
+		options,
+		useRuntimeConfig().public?.fhir || {},
+		import.meta.server ? useRuntimeConfig()?.fhir || {} : {},
+		{
+			server: '',
+			serverUrl: '',
+			basePath: ''
+		}
+	)
 
 	const fhirBaseUrl = concatUrls(config.serverUrl, config.basePath);
 
