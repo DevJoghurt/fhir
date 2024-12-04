@@ -43,6 +43,7 @@
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
 		"@nhealth/auth": "workspace:*",
+		"@nhealth/dicom": "workspace:*",
         "nuxt": "3.14.159",
 		"@nuxt/ui": "3.0.0-alpha.8",
 		"@nuxt/kit": "3.14.159",

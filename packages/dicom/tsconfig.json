@@ -1,0 +1,7 @@
+{
+	"extends": "../../playground/demo/.nuxt/tsconfig.json",
+	"include": [
+		"./src/**/*.ts",
+		"./src/**/*.vue"
+  	]
+}

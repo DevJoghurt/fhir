@@ -16,7 +16,7 @@ export function useDicomWeb(options: DicomWebOptions = {}) {
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
 	const config = defu(
 		options,
-		useRuntimeConfig().public.fhir?.dicomweb || {}
+		useRuntimeConfig().public.dicom?.web || {}
 	)
 
 	const client = new api.DICOMwebClient({
