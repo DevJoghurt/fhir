@@ -1,0 +1,40 @@
+{
+	"name": "@nhealth/dicom",
+	"version": "0.0.20",
+	"description": "Add dicom support your nhealth application",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DevJoghurt/fhir.git",
+		"directory": "packages/dicom"
+	},
+    "license": "MIT",
+    "type": "module",
+	"exports": {
+		".": {
+		  "types": "./dist/types.d.ts",
+		  "import": "./dist/module.mjs",
+		  "require": "./dist/module.cjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/module.cjs",
+	"types": "./dist/types.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"prepack": "nuxt-module-build build",
+		"prepack:stub": "nuxt-module-build build --stub"
+	},
+	"dependencies": {
+		"@nuxt/kit": "*",
+		"defu": "^6.1.4",
+		"dicomweb-client": "^0.10.4"
+	},
+	"devDependencies": {
+		"@nuxt/module-builder": "0.8.4",
+		"@nuxt/schema": "*"
+	}
+}

@@ -10,6 +10,7 @@ overrides:
   '@nhealth/fhir-profiling': workspace:*
   '@nhealth/app': workspace:*
   '@nhealth/auth': workspace:*
+  '@nhealth/dicom': workspace:*
   nuxt: 3.14.159
   '@nuxt/ui': 3.0.0-alpha.8
   '@nuxt/kit': 3.14.159
@@ -162,6 +163,25 @@ importers:
       tailwindcss:
         specifier: 4.0.0-alpha.33
         version: 4.0.0-alpha.33
+    devDependencies:
+      '@nuxt/module-builder':
+        specifier: 0.8.4
+        version: 0.8.4(@nuxt/kit@3.14.159(magicast@0.3.5)(rollup@4.27.3))(nuxi@3.15.0)(typescript@5.5.4)(vue-tsc@2.1.10(typescript@5.5.4))
+      '@nuxt/schema':
+        specifier: 3.14.159
+        version: 3.14.159(magicast@0.3.5)(rollup@4.27.3)
+
+  packages/dicom:
+    dependencies:
+      '@nuxt/kit':
+        specifier: 3.14.159
+        version: 3.14.159(magicast@0.3.5)(rollup@4.27.3)
+      defu:
+        specifier: ^6.1.4
+        version: 6.1.4
+      dicomweb-client:
+        specifier: ^0.10.4
+        version: 0.10.4
     devDependencies:
       '@nuxt/module-builder':
         specifier: 0.8.4
@@ -3202,6 +3222,9 @@ packages:
 
   dfa@1.2.0:
     resolution: {integrity: sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==}
+
+  dicomweb-client@0.10.4:
+    resolution: {integrity: sha512-TEt26c0JI37IGmSqoj1k1/Y/ZIyq33/ysVaUwE0/Haosn2IBM55NEIPkT+AnhFss2nFAMVtKKWKWLox4luthVw==}
 
   diff@7.0.0:
     resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
@@ -9838,6 +9861,8 @@ snapshots:
       dequal: 2.0.3
 
   dfa@1.2.0: {}
+
+  dicomweb-client@0.10.4: {}
 
   diff@7.0.0: {}
 

@@ -16,7 +16,6 @@ type Medplum = {
 	clientId: string;
 	clientSecret: string;
 }
-
 export type ModuleOptions = {
 	server: ServerType;
 	serverUrl?: string;
@@ -24,7 +23,7 @@ export type ModuleOptions = {
 	medplum?: Medplum;
 }
 
-declare module 'nuxt/schema' {
+declare module '@nuxt/schema' {
 	interface RuntimeConfig {
 		fhir: {
 			medplum?: Medplum;
