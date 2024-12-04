@@ -62,7 +62,7 @@ type ModuleOptions = {
 	session: SessionConfig
 }
 
-declare module 'nuxt/schema' {
+declare module '@nuxt/schema' {
 	interface RuntimeConfig {
 		hash: {
 			scrypt: ScryptConfig

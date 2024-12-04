@@ -77,12 +77,7 @@ export function useFhir(options: UseFhirOptions = {
 	const config = defu(
 		options,
 		useRuntimeConfig().public?.fhir || {},
-		import.meta.server ? useRuntimeConfig()?.fhir || {} : {},
-		{
-			server: '',
-			serverUrl: '',
-			basePath: ''
-		}
+		import.meta.server ? useRuntimeConfig()?.fhir || {} : {}
 	)
 
 	const fhirBaseUrl = concatUrls(config.serverUrl, config.basePath);

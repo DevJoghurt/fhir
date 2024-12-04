@@ -34,7 +34,8 @@
 		"@medplum/fhirtypes": "*",
 		"tailwindcss": "*",
 		"hookable": "^5.5.3",
-		"defu": "^6.1.4"
+		"defu": "^6.1.4",
+		"dicomweb-client": "^0.10.4"
 	},
 	"devDependencies": {
 		"@nuxt/module-builder": "0.8.4",

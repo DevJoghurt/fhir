@@ -17,14 +17,20 @@ type Medplum = {
 	clientSecret: string;
 }
 
+type DicomWeb = {
+	serverUrl: string;
+	prefix?: string;
+}
+
 export type ModuleOptions = {
 	server: ServerType;
 	serverUrl?: string;
 	basePath?: string;
+	dicomweb?: DicomWeb;
 	medplum?: Medplum;
 }
 
-declare module 'nuxt/schema' {
+declare module '@nuxt/schema' {
 	interface RuntimeConfig {
 		fhir: {
 			medplum?: Medplum;
@@ -35,6 +41,7 @@ declare module 'nuxt/schema' {
 			server: ServerType;
 			serverUrl: string;
 			basePath: string;
+			dicomweb: DicomWeb;
 		}
 	}
 }
@@ -50,7 +57,11 @@ export default defineNuxtModule<ModuleOptions>({
 	defaults: {
 		server: 'medplum',
 		serverUrl: 'http://localhost:8103',
-		basePath: '/fhir/R4'
+		basePath: '/fhir/R4',
+		dicomweb: {
+			serverUrl: 'http://localhost:8042',
+			prefix: '/dicom-web'
+		}
 	},
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);
@@ -65,6 +76,10 @@ export default defineNuxtModule<ModuleOptions>({
 			name: 'useFhir',
 			as: 'useFhir',
 			from: resolve('./runtime/app/composables/useFhir')
+		},{
+			name: 'useDicomWeb',
+			as: 'useDicomWeb',
+			from: resolve('./runtime/app/composables/useDicomWeb')
 		}]);
 		addComponentsDir({
 			path: resolve('./runtime/app/components'),
@@ -77,7 +92,8 @@ export default defineNuxtModule<ModuleOptions>({
 		runtimeConfig.public.fhir = defu(runtimeConfig.public.fhir || {}, {
 			server: options.server,
 			serverUrl: options.serverUrl,
-			basePath: options.basePath
+			basePath: options.basePath,
+			dicomweb: options.dicomweb
 		});
 
 		runtimeConfig.fhir = runtimeConfig.fhir || {};
