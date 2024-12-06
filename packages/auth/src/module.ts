@@ -14,7 +14,7 @@ import { randomUUID } from 'uncrypto'
 import type { ScryptConfig } from '@adonisjs/hash/types'
 import type { SessionConfig } from 'h3'
 // ts bug: https://github.com/nuxt/module-builder/issues/141
-import type {} from 'nuxt/schema'
+import type {} from '@nuxt/schema'
 
 const meta = {
 	name: '@nhealth/auth',

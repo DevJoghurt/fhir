@@ -22,7 +22,7 @@
 	</UAlert>
 </template>
 <script setup lang="ts">
-	import { operationOutcomeIssueToString } from '@medplum/core';
+	import { operationOutcomeIssueToString } from '../utils'
 	import type { OperationOutcome, OperationOutcomeIssue } from '@medplum/fhirtypes';
 	import { computed, ref, watch } from "#imports"
 	import type { Ref } from "#imports"

@@ -14,7 +14,7 @@ export default defineOAuthMedplumEventHandler({
 		},
 		accessToken: tokens.access_token
 	  }, {
-		maxAge: 60 * 60 * 24 * 7 // 1 week
+		maxAge: tokens.expires_in
 	  })
 	  return sendRedirect(event, '/')
 	},
