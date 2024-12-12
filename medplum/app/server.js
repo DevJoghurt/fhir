@@ -7,7 +7,7 @@ export const app = createApp();
 
 const publicDir = './node_modules/@medplum/app/dist';
 
-const MEDPLUM_BASE_URL = 'http://localhost:8103/';
+const MEDPLUM_BASE_URL = 'http://localhost:4443/';
 const MEDPLUM_CLIENT_ID = '';
 const MEDPLUM_REGISTER_ENABLED = 'false';
 const GOOGLE_CLIENT_ID = '';
@@ -17,6 +17,7 @@ app.use(
   defineEventHandler((event) => {
     return serveStatic(event, {
       getContents: async (id) => {
+        console.log("GET: " +id);
         let stats = await stat(join(publicDir, id)).catch(() => {});
         if (!stats || !stats.isFile()) {
           id = 'index.html';
@@ -47,18 +48,20 @@ app.use(
         }
 
         if (id.endsWith(".css")) {
+          const content = await readFile(filePath, 'utf-8');
           setResponseHeader(event, 'Content-Type', 'text/css');
-          return readFile(filePath, 'utf-8');
+          setResponseHeader(event, 'Content-Length', Buffer.byteLength(content));
+          return content;
         }
 
-        const file = await readFile(filePath, 'utf-8').catch(() => {});
-        if (!file) {
+        let content = await readFile(filePath, 'utf-8').catch(() => {});
+        if (!content) {
           console.log('No File');
           return null;
         }
-
+        setResponseHeader(event, 'Content-Length', Buffer.byteLength(content));
         setResponseHeader(event, 'Content-Type', 'text/html');
-        return file;
+        return content;
       },
       getMeta: async (id) => {
         let stats = await stat(join(publicDir, id)).catch(() => {});

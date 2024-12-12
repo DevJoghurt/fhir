@@ -133,8 +133,9 @@ export function defineOAuthMedplumEventHandler({
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const user: any = await $fetch(
-			`${config.serverUrl}/oauth2/userinfo`,
+			`${config.serverUrl}/oauth2/userinfo/`,
 			{
+				method: 'GET',
 				credentials: 'include',
 				headers: {
 					Authorization: `Bearer ${tokens.access_token}`,

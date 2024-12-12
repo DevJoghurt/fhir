@@ -13,7 +13,7 @@ export default defineNuxtConfig({
         clientId: process.env.MEDPLUM_CLIENT_ID,
         clientSecret: process.env.MEDPLUM_CLIENT_SECRET,
         redirectUrl: 'http://localhost:3000/auth/medplum',
-        serverUrl: 'http://localhost:8103'
+        serverUrl: 'http://localhost:4443'
       }
     }
   },
