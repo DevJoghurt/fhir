@@ -1,7 +1,7 @@
 {
-	"name": "@nhealth/dicom",
+	"name": "@nhealth/questionaire",
 	"version": "0.0.20",
-	"description": "Add dicom support your nhealth application",
+	"description": "Easyily add FHIR Questionaires to nhealth applications",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
@@ -30,8 +30,7 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "*",
-		"defu": "^6.1.4",
-		"dicomweb-client": "^0.10.4"
+		"defu": "^6.1.4"
 	},
 	"devDependencies": {
 		"@nuxt/module-builder": "0.8.4",

@@ -1,0 +1,76 @@
+services:
+  traefik:
+    container_name: medplum-traefik
+    image: traefik:v3.2
+    restart: always
+    # Enables the web UI and tells Traefik to listen to docker
+    command:
+      --accesslog=true
+      --api.insecure=true
+      --providers.docker
+      --providers.docker.exposedByDefault=false
+      --entryPoints.medplum.address=:4443
+    ports:
+      - "4443:4443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+  postgres:
+    image: postgres:12
+    container_name: medplum-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=medplum
+      - POSTGRES_PASSWORD=medplum
+    volumes:
+      - ./postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf
+      - ./postgres/:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
+    command: postgres -c config_file=/usr/local/etc/postgres/postgres.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d medplum -U medplum"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    expose:
+      - '5432'
+  redis:
+    image: redis:7
+    container_name: medplum-redis
+    restart: always
+    command: redis-server --requirepass medplum
+    ports:
+      - '6379:6379'
+  server:
+    container_name: medplum-server
+    image: medplum/medplum-server:latest
+    restart: always
+    volumes:
+      - ./medplum/medplum.config.json:/usr/src/medplum/packages/server/medplum.config.json
+    ports:
+      - '8103:8103'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-medplum.entrypoints=medplum"
+      - "traefik.http.routers.server-medplum.rule=Host(`localhost`)"
+      #- "traefik.http.routers.server.rule=PathRegexp(`(?i)^/(fhir|oauth2|auth|admin)`)"
+      - "traefik.http.services.server-medplum.loadbalancer.server.port=8103"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  app:
+    container_name: medplum-app
+    restart: always
+    build:
+      context: ./app
+    ports:
+      - "3030:3030"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-medplum.entrypoints=medplum"
+      - "traefik.http.routers.app-medplum.rule=Host(`medplum.localhost`)"
+      #- "traefik.http.routers.app-medplum.rule=PathRegexp(`(?i)^/`)"
+volumes:
+  pgdata:
