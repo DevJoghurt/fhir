@@ -16,10 +16,6 @@
 			"require": "./dist/module.cjs"
 		}
 	},
-	"workspaces": [
-		"packages/**",
-		"playground"
-	],
 	"scripts": {
 		"prepare": "pnpm dev:prepare && nuxi prepare playground/demo && nuxi prepare playground/profiling",
 		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
@@ -43,23 +39,23 @@
 		"@nhealth/fhir-profiling": "workspace:*",
 		"@nhealth/app": "workspace:*",
 		"@nhealth/auth": "workspace:*",
-		"@nhealth/dicom": "workspace:*",
-        "nuxt": "3.14.159",
-		"@nuxt/ui": "3.0.0-alpha.8",
-		"@nuxt/kit": "3.14.159",
-		"@nuxt/schema": "3.14.159",
-		"@medplum/fhirtypes": "3.2.20",
-		"tailwindcss": "4.0.0-alpha.33",
-		"typescript": "5.5.4",
-		"@typescript-eslint/typescript-estree": "8.9.0"
+		"@nhealth/questionaire": "workspace:*",
+        "nuxt": "3.15.4",
+		"@nuxt/ui": "3.0.0-alpha.12",
+		"@nuxt/kit": "3.15.4",
+		"@nuxt/schema": "3.15.4",
+		"@medplum/fhirtypes": "3.2.30",
+		"tailwindcss": "4.0.3",
+		"typescript": "5.7.3",
+		"@typescript-eslint/typescript-estree": "8.23.0"
 	},
 	"devDependencies": {
-        "nuxt": "3.14.159",
+        "nuxt": "3.15.4",
 		"nhealth-cli": "*",
-        "vitest": "2.1.4",
+        "vitest": "3.0.5",
         "rimraf": "6.0.1",
         "@nuxt/module-builder": "0.8.4",
-		"typescript": "^5.5.4"
+		"typescript": "^5.7.3"
 	},
 	"pnpm": {
         "overrides": {
@@ -76,7 +72,7 @@
             ]
         }
     },
-	"packageManager": "pnpm@9.11.0",
+	"packageManager": "pnpm@10.2.0",
 	"engines": {
 	  "node": "^16.10.0 || >=18.0.0"
 	}

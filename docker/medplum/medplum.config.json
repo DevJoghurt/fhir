@@ -1,7 +1,7 @@
 {
 	"logLevel": "debug",
 	"baseUrl": "http://localhost:4443/",
-    "appBaseUrl": "http://medplum.localhost:4443/",
+    "appBaseUrl": "http://localhost:4443/",
 	"allowedOrigins": "*",
 	"database": {
 		"host": "postgres",
