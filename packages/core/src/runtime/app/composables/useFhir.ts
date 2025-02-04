@@ -12,8 +12,10 @@ import type {
 	OperationOutcome,
 	Resource,
 	Bundle
-} from '@medplum/fhirtypes';
+} from '@medplum/fhirtypes'
+import consola from 'consola'
 import type { UseFetchOptions } from '#app'
+
 
 /**
  * JSONPatch patch operation.
@@ -67,10 +69,16 @@ type UseFhirOptions = {
 	 *  @default false
 	 */
 	useCredentials?: boolean;
+
+	/**
+	 *
+	 */
+	logLevel?: 'silent' | 'debug' | 'info' | 'warn' | 'error';
 }
 
 export function useFhir(options: UseFhirOptions = {
-	useCredentials: false
+	useCredentials: false,
+	logLevel: 'info'
 }) {
 
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
@@ -80,11 +88,22 @@ export function useFhir(options: UseFhirOptions = {
 		import.meta.server ? useRuntimeConfig()?.fhir || {} : {}
 	)
 
+	const logLevelMapping = {
+		silent: -999,
+		debug: 3,
+		info: 2,
+		warn: 1,
+		error: 0
+	};
+
+	// Set the log level, mapped to consola log levels
+	consola.level = logLevelMapping[config?.logLevel || 'debug'] || 3;
+
 	const fhirBaseUrl = concatUrls(config.serverUrl, config.basePath);
 
 	const sessionState = useState<SessionState>('fhir-session', () => ({}))
-	if(!sessionState.value?.accessToken){
-		console.warn('No accessToken found in sessionState')
+	if(!sessionState.value?.accessToken ){
+		consola.debug('No accessToken found in sessionState')
 	}
 
 	const accessToken = sessionState.value.accessToken || null

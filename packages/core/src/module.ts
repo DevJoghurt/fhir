@@ -10,7 +10,7 @@ import defu from 'defu'
 // ts bug: https://github.com/nuxt/module-builder/issues/141
 import type {} from '@nuxt/schema'
 
-type ServerType = 'medplum'
+type ServerType = 'medplum' | 'hapi'
 
 type Medplum = {
 	clientId: string;
@@ -47,9 +47,9 @@ const meta = {
 export default defineNuxtModule<ModuleOptions>({
 	meta,
 	defaults: {
-		server: 'medplum',
-		serverUrl: 'http://localhost:8103',
-		basePath: '/fhir/R4'
+		server: 'hapi',
+		serverUrl: 'http://localhost:8080',
+		basePath: '/fhir'
 	},
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);

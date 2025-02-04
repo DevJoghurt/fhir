@@ -7,7 +7,7 @@ Currently under development (WIP).
 
 ## FHIR Server
 
-nhealth is designed to work with various FHIR servers. Currently, it supports only Medplum.
+nhealth is designed to work with various FHIR servers. Currently, it supports Hapi and Medplum.
 
 ## Overview
 
@@ -17,7 +17,7 @@ This repository provides a framework for building FHIR applications using Nuxt. 
 - **packages/profiling**: Offers tools for profiling and managing FHIR resources.
 - **packages/app**: The main application layer that integrates the other packages.
 - **playground/profiling**: A sample project demonstrating profiling capabilities.
-- **packages/dicom**: Currently only testing dicom stuff inside nhealth application. [WIP]
+- **packages/questionaire**: Questionaire builder and viewer for FHIR applications. [WIP]
 - **playground/demo**: A demo project showcasing the framework's usage.
 
 Each package and project is designed to work together, providing a comprehensive solution for building FHIR applications with Nuxt.

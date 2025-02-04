@@ -1,4 +1,0 @@
-CREATE USER medplum WITH PASSWORD 'medplum';
-
-CREATE DATABASE medplum;
-GRANT ALL PRIVILEGES ON DATABASE medplum TO medplum;

@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=hapi
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf
+      - ./postgres/:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
+    command: postgres -c config_file=/usr/local/etc/postgres/postgres.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d hapi -U hapi"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    expose:
+      - '5432'
+  hapi:
+    container_name: hapi
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8080:8080"
+    configs:
+      - source: hapi
+        target: /app/config/application.yaml
+    depends_on:
+      - postgres
+configs:
+  hapi:
+    file: ./hapi/application.yaml
+volumes:
+  pgdata:
