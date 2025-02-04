@@ -12,5 +12,6 @@
 <script lang="ts" setup>
 const { readResource } = await useFhir()
 
-const {data: patient} = await  readResource('Patient', 'bf70d17f-0f3c-48c4-8b64-61e5a48e1c2a')
+
+const {data: patient} = await  readResource('Patient', '1')
 </script>

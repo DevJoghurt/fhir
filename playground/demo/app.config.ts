@@ -11,8 +11,8 @@ export default defineAppConfig({
 				to: '/',
 				icon: 'i-heroicons-home'
 			}, {
-				label: 'DicomWeb',
-				to: '/dicomweb',
+				label: 'Questionaire',
+				to: '/questionaire',
 				icon: 'i-heroicons-cog-8-tooth'
 			}]
 		}

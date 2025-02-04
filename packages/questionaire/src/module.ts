@@ -1,6 +1,7 @@
 import {
 	defineNuxtModule,
-	createResolver
+	createResolver,
+	addComponentsDir
   } from '@nuxt/kit'
 import defu from 'defu'
 // ts bug: https://github.com/nuxt/module-builder/issues/141
@@ -30,5 +31,11 @@ export default defineNuxtModule<ModuleOptions>({
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);
 
+		addComponentsDir({
+			path: resolve('./runtime/app/components'),
+			prefix: 'NQuestionaire',
+			global: true,
+			watch: true
+		});
 	},
 })

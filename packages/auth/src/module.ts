@@ -7,6 +7,7 @@ import {
 	addServerHandler,
 	addServerImportsDir,
 	addComponentsDir,
+	addRouteMiddleware
 } from '@nuxt/kit'
 import { join } from 'node:path'
 import { defu } from 'defu'
@@ -104,6 +105,11 @@ export default defineNuxtModule<ModuleOptions>({
 		addImports(composables)
 		addPlugin(resolver.resolve('./runtime/app/plugins/session.server'))
 		addPlugin(resolver.resolve('./runtime/app/plugins/session.client'))
+		addRouteMiddleware({
+			name: 'auth',
+			path: resolver.resolve('./runtime/app/middleware/auth'),
+			global: true
+		})
 
 		// Server
 		addServerImportsDir(resolver.resolve('./runtime/server/lib/oauth'))

@@ -31,7 +31,7 @@
 		"demo:generate": "nuxi generate playground/demo",
 		"demo:preview": "nuxi preview playground/demo",
 		"typecheck": "tsc --noEmit",
-		"medplum": "docker compose -f ./medplum/docker-compose.yml up --force-recreate --build"
+		"hapi": "docker compose -f ./docker/docker-compose.hapi.yml up --force-recreate --build"
 	},
 	"resolutions": {
 		"nhealth-cli": "workspace:*",
@@ -47,7 +47,8 @@
 		"@medplum/fhirtypes": "3.2.30",
 		"tailwindcss": "4.0.3",
 		"typescript": "5.7.3",
-		"@typescript-eslint/typescript-estree": "8.23.0"
+		"@typescript-eslint/typescript-estree": "8.23.0",
+		"vue-i18n": "11.1.0"
 	},
 	"devDependencies": {
         "nuxt": "3.15.4",
