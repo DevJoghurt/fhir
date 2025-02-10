@@ -19,9 +19,9 @@ declare module '@nuxt/schema' {
 }
 
 const meta = {
-	name: '@nhealth/questionaire',
+	name: '@nhealth/questionnaire',
 	version: '0.0.20',
-	configKey: 'questionaire',
+	configKey: 'questionnaire',
 };
 
 export default defineNuxtModule<ModuleOptions>({
@@ -33,7 +33,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 		addComponentsDir({
 			path: resolve('./runtime/app/components'),
-			prefix: 'NQuestionaire',
+			prefix: 'Fhir',
 			global: true,
 			watch: true
 		});

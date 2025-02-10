@@ -9,7 +9,7 @@
     "dependencies": {
       "nuxt": "*",
       "@nhealth/app": "workspace:*",
-      "@nhealth/questionaire": "workspace:*"
+      "@nhealth/questionnaire": "workspace:*"
     },
     "devDependencies": {
       "typescript": "*"

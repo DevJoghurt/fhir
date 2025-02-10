@@ -1,11 +1,11 @@
 {
-	"name": "@nhealth/questionaire",
+	"name": "@nhealth/questionnaire",
 	"version": "0.0.20",
-	"description": "Easyily add FHIR Questionaires to nhealth applications",
+	"description": "Easyily add FHIR Questionnaires to nhealth applications",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/DevJoghurt/fhir.git",
-		"directory": "packages/dicom"
+		"directory": "packages/questionnaire"
 	},
     "license": "MIT",
     "type": "module",
