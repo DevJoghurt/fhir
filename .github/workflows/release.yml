@@ -20,9 +20,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enable corepack
-        run: corepack enable
-
       - name: Set node
         uses: actions/setup-node@v4
         with:
