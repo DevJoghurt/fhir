@@ -56,6 +56,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 		if(!hasNuxtModule('@nuxt/ui')){
 			installModule('@nuxt/ui');
+			nuxt.options.css.push(resolve('./runtime/tailwind.css'));
 		}
 
 		// add all app related things here

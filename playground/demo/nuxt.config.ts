@@ -13,6 +13,10 @@ export default defineNuxtConfig({
 
   },
 
+  ui: {
+    fonts: true
+  },
+
   colorMode: {
     preference: 'light'
   },
