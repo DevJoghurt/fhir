@@ -38,7 +38,7 @@
     </section>
 </template>
 <script setup lang="ts">
-    import { useAppConfig, useI18n } from '#imports'
+    import { useAppConfig, useI18n, useHead, computed } from '#imports'
 
     useHead({
         htmlAttrs: {
