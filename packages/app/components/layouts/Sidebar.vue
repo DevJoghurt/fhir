@@ -15,7 +15,7 @@
 						<UNavigationMenu :orientation="'vertical'" :items="[items]" />
 					</div>
 					<div class="mt-auto">
-						<AppDropdownProfile />
+						<!--TODO add menu at the bottom-->
 					</div>
 				</nav>
 				</div>

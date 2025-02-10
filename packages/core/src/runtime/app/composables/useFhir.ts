@@ -14,7 +14,7 @@ import type {
 	Bundle
 } from '@medplum/fhirtypes'
 import consola from 'consola'
-import type { UseFetchOptions } from '#app'
+import type { UseFetchOptions, AsyncData } from '#app'
 
 
 /**
@@ -79,7 +79,23 @@ type UseFhirOptions = {
 export function useFhir(options: UseFhirOptions = {
 	useCredentials: false,
 	logLevel: 'info'
-}) {
+}): {
+	fhirUrl: (...path: string[]) => URL;
+	fhirSearchUrl: (resourceType: ResourceType, query: QueryTypes) => URL;
+	readResource: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	search: <K extends ResourceType>(resourceType: K, query?: QueryTypes, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
+	readHistory: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
+	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
+	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
+	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
+	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => AsyncData<T, any>;
+	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => AsyncData<T, any>;
+	updateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
+	patchResource: <K extends ResourceType>(resourceType: K, id: string, operations: PatchOperation[], options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	deleteResource: (resourceType: ResourceType, id: string, options?: FetchOptions<any>) => AsyncData<any, any>;
+	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
+} {
 
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
 	const config = defu(
@@ -135,10 +151,10 @@ export function useFhir(options: UseFhirOptions = {
 		return url;
 	}
 
-	const fetch = async <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: InternalFetchOptions) => {
+	const fetch = <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: InternalFetchOptions): AsyncData<T, any> => {
 		url = url.toString()
 
-		const { data, status, error, refresh, clear } = await useFetch<T>(url, {
+		return useFetch<T>(url, {
 			method: method as any,
 			...fetchOptions,
 			onRequest({ options }) {
@@ -146,7 +162,6 @@ export function useFhir(options: UseFhirOptions = {
 				// Set request header for async requests
 				if(fetchOptions?.asynchRequest){
 					options.headers.set('Prefer', 'respond-async')
-
 				}
 				// Set the request headers for authorization
 				if(!config.useCredentials && accessToken){
@@ -169,10 +184,67 @@ export function useFhir(options: UseFhirOptions = {
 				// handle unauthorized requests
 			  }
 			},
+		}) as AsyncData<T, any>
+	}
 
-		})
+	  /**
+   * Sends a FHIR search request.
+   *
+   * @example
+   * Example using a FHIR search string:
+   *
+   * ```typescript
+   * const bundle = await client.search('Patient', 'name=Alice');
+   * console.log(bundle);
+   * ```
+   *
+   * @example
+   * The return value is a FHIR bundle:
+   *
+   * ```json
+   * {
+   *    "resourceType": "Bundle",
+   *    "type": "searchset",
+   *    "entry": [
+   *       {
+   *          "resource": {
+   *             "resourceType": "Patient",
+   *             "name": [
+   *                {
+   *                   "given": [
+   *                      "George"
+   *                   ],
+   *                   "family": "Washington"
+   *                }
+   *             ],
+   *          }
+   *       }
+   *    ]
+   * }
+   * ```
+   *
+   * @example
+   * To query the count of a search, use the summary feature like so:
+   *
+   * ```typescript
+   * const patients = medplum.search('Patient', '_summary=count');
+   * ```
+   *
+   * See FHIR search for full details: https://www.hl7.org/fhir/search.html
+   * @category Search
+   * @param resourceType - The FHIR resource type.
+   * @param query - Optional FHIR search query or structured query object. Can be any valid input to the URLSearchParams() constructor.
+   * @param options - Optional fetch options.
+   * @returns Promise to the search result bundle.
+   */
+	const search = <K extends ResourceType>(
+		resourceType: K,
+		query?: QueryTypes,
+		options?: FetchOptions<any>
+	  ) => {
+		const url = fhirSearchUrl(resourceType, query);
 
-		return { data, status, error, refresh, clear }
+		return fetch<Bundle<ExtractResource<K>>>('GET', url, options)
 	}
 
 	/**
@@ -193,7 +265,7 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The resource if available.
 	 */
-	const readResource = async <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => {
+	const readResource = <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>): AsyncData<ExtractResource<K>, any> => {
 		if (!id) {
 			throw new Error('The "id" parameter cannot be null, undefined, or an empty string.');
 		}
@@ -219,7 +291,10 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The validate operation outcome.
 	 */
-	const validateResource = async <T extends Resource>(resource: T, options?: FetchOptions<any>) => {
+	const validateResource = <T extends Resource>(
+		resource: T,
+		options?: FetchOptions<any>
+	): AsyncData<OperationOutcome, any> => {
 		return fetch<OperationOutcome>('POST', fhirUrl(resource.resourceType, '$validate'), {
 			body: JSON.stringify(resource),
 			...options
@@ -250,9 +325,8 @@ export function useFhir(options: UseFhirOptions = {
 		resourceType: K,
 		id: string,
 		options?: FetchOptions<any>
-	) => {
-
-		return fetch<ExtractResource<K>>('GET', fhirUrl(resourceType, id, '_history'), options)
+	): AsyncData<Bundle<ExtractResource<K>>, any> => {
+		return fetch<Bundle<ExtractResource<K>>>('GET', fhirUrl(resourceType, id, '_history'), options)
 	}
 
 	/**
@@ -380,11 +454,11 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The result of the create operation.
 	 */
-	const createResourceIfNoneExist = async <T extends Resource>(
+	const createResourceIfNoneExist = <T extends Resource>(
 		resource: T,
 		query: string,
 		options?: FetchOptions<any>
-	  ) => {
+	): AsyncData<T, any> => {
 		options = defu(options, { headers: { 'If-None-Exist': query } })
 		return fetch<T>('POST', fhirUrl(resource.resourceType), {
 			body: JSON.stringify(resource),
@@ -400,11 +474,11 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options  - Optional fetch options.
 	 * @returns The updated/created resource.
 	 */
-	const upsertResource = async <T extends Resource>(
+	const upsertResource = <T extends Resource>(
 		resource: T,
 		query: QueryTypes,
 		options?: FetchOptions<any>
-	  ) => {
+	): AsyncData<T, any> => {
 		// Build conditional update URL, e.g. `PUT /ResourceType?search-param=value`
 		const url = fhirSearchUrl(resource.resourceType, query);
 
@@ -440,7 +514,10 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The result of the update operation.
 	 */
-	const updateResource = async <T extends Resource>(resource: T, options?: FetchOptions<any>) => {
+	const updateResource = <T extends Resource>(
+		resource: T,
+		options?: FetchOptions<any>
+	): AsyncData<T, any> => {
 		if (!resource.resourceType) {
 		  throw new Error('Missing resourceType');
 		}
@@ -479,12 +556,12 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The result of the patch operations.
 	 */
-	const patchResource = async <K extends ResourceType>(
+	const patchResource = <K extends ResourceType>(
 		resourceType: K,
 		id: string,
 		operations: PatchOperation[],
 		options?: FetchOptions<any>
-	  ) => {
+	): AsyncData<ExtractResource<K>, any> => {
 		options = defu(options, {
 			headers: { 'Content-Type': ContentType.JSON_PATCH }
 		})
@@ -564,7 +641,10 @@ export function useFhir(options: UseFhirOptions = {
 	 * @param options - Optional fetch options.
 	 * @returns The FHIR batch/transaction response bundle.
 	 */
-	const executeBatch = async (bundle: Bundle, options?: FetchOptions<any>) => {
+	const executeBatch = (
+		bundle: Bundle,
+		options?: FetchOptions<any>
+	): AsyncData<Bundle, any> => {
 		return fetch<Bundle>('POST', fhirBaseUrl, {
 			body: JSON.stringify(bundle),
 			...options
@@ -575,6 +655,7 @@ export function useFhir(options: UseFhirOptions = {
 		fhirUrl,
 		fhirSearchUrl,
 		readResource,
+		search,
 		readHistory,
 		readVersion,
 		readPatientEverything,

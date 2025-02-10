@@ -4,6 +4,12 @@ import { defineAppConfig } from '#imports'
  * Default app config
  */
 export default defineAppConfig({
+	ui: {
+		colors: {
+		  primary: 'blue',
+		  neutral: 'zinc'
+		}
+	},
 	navigation: {
 		sidebar: {
 			items: [{
@@ -11,8 +17,8 @@ export default defineAppConfig({
 				to: '/',
 				icon: 'i-heroicons-home'
 			}, {
-				label: 'Questionaire',
-				to: '/questionaire',
+				label: 'Questionnaire',
+				to: '/questionnaire',
 				icon: 'i-heroicons-cog-8-tooth'
 			}]
 		}

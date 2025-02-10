@@ -4,8 +4,10 @@ export default defineNuxtConfig({
   ],
 
   modules: [
-    "@nhealth/questionaire"
+    "@nhealth/questionnaire"
   ],
+
+  css: ['~/assets/css/main.css'],
 
   fhir: {
 
