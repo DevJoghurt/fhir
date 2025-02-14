@@ -146,9 +146,6 @@ importers:
       '@nuxt/kit':
         specifier: 3.15.4
         version: 3.15.4(magicast@0.3.5)(rollup@4.34.2)
-      '@nuxt/ui':
-        specifier: 3.0.0-alpha.12
-        version: 3.0.0-alpha.12(@babel/parser@7.26.7)(axios@1.7.9)(change-case@5.4.4)(db0@0.2.3(drizzle-orm@0.31.4(postgres@3.4.5)(react@18.3.1)(sql.js@1.12.0)))(embla-carousel@8.5.2)(ioredis@5.4.2)(magicast@0.3.5)(radix-vue@1.9.13(vue@3.5.13(typescript@5.7.3)))(rollup@4.34.2)(typescript@5.7.3)(vite@6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.37.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3))
       defu:
         specifier: ^6.1.4
         version: 6.1.4
@@ -257,6 +254,9 @@ importers:
       '@nhealth/questionnaire':
         specifier: workspace:*
         version: link:../../packages/questionnaire
+      '@nuxt/ui':
+        specifier: 3.0.0-alpha.12
+        version: 3.0.0-alpha.12(@babel/parser@7.26.7)(axios@1.7.9)(change-case@5.4.4)(db0@0.2.3(drizzle-orm@0.31.4(postgres@3.4.5)(react@18.3.1)(sql.js@1.12.0)))(embla-carousel@8.5.2)(ioredis@5.4.2)(magicast@0.3.5)(radix-vue@1.9.13(vue@3.5.13(typescript@5.7.3)))(rollup@4.34.2)(typescript@5.7.3)(vite@6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.37.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3))
       nuxt:
         specifier: 3.15.4
         version: 3.15.4(@parcel/watcher@2.5.1)(@types/node@22.13.1)(db0@0.2.3(drizzle-orm@0.31.4(postgres@3.4.5)(react@18.3.1)(sql.js@1.12.0)))(drizzle-orm@0.31.4(postgres@3.4.5)(react@18.3.1)(sql.js@1.12.0))(eslint@9.19.0(jiti@2.4.2))(ioredis@5.4.2)(lightningcss@1.29.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.34.2)(terser@5.37.0)(typescript@5.7.3)(vite@6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.37.0)(yaml@2.7.0))(vue-tsc@2.2.0(typescript@5.7.3))(yaml@2.7.0)

@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   ],
 
   modules: [
+    '@nuxt/ui',
     "@nhealth/questionnaire"
   ],
 

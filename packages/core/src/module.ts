@@ -54,11 +54,6 @@ export default defineNuxtModule<ModuleOptions>({
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);
 
-		if(!hasNuxtModule('@nuxt/ui')){
-			installModule('@nuxt/ui');
-			nuxt.options.css.push(resolve('./runtime/tailwind.css'));
-		}
-
 		// add all app related things here
 		addImports([{
 			name: 'useFhir',
