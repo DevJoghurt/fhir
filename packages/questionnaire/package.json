@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/questionnaire",
-	"version": "0.0.25",
+	"version": "0.0.26",
 	"description": "Easyily add FHIR Questionnaires to nhealth applications",
 	"repository": {
 		"type": "git",
