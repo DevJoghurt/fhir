@@ -1,7 +1,6 @@
 <template>
 	<div class="p-8">
 		<div>
-			<FhirResourceTable />
 			<FhirQuestionnaireInstance />
 		</div>
 	</div>

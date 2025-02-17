@@ -62,3 +62,92 @@ export function formatHumanName(name?: HumanName, options?: HumanNameFormatOptio
 
 	return builder.join(' ').trim();
 }
+
+/**
+ * Formats the family name portion of a FHIR HumanName element.
+ * @param name - The name to format.
+ * @returns The formatted family name string.
+ */
+export function formatFamilyName(name: HumanName): string {
+	return ensureString(name.family) ?? '';
+  }
+
+  /**
+   * Returns true if the given date object is a valid date.
+   * Dates can be invalid if created by parsing an invalid string.
+   * @param date - A date object.
+   * @returns Returns true if the date is a valid date.
+   */
+  export function isValidDate(date: Date): boolean {
+	return date instanceof Date && !isNaN(date.getTime());
+  }
+
+  /**
+   * Formats a FHIR date string as a human readable string.
+   * Handles missing values and invalid dates.
+   * @param date - The date to format.
+   * @param locales - Optional locales.
+   * @param options - Optional date format options.
+   * @returns The formatted date string.
+   */
+  export function formatDate(
+	date: string | undefined,
+	locales?: Intl.LocalesArgument,
+	options?: Intl.DateTimeFormatOptions
+  ): string {
+	if (!date) {
+	  return '';
+	}
+	const d = new Date(date);
+	if (!isValidDate(d)) {
+	  return '';
+	}
+	d.setUTCHours(0, 0, 0, 0);
+	return d.toLocaleDateString(locales, { timeZone: 'UTC', ...options });
+  }
+
+  /**
+ * Formats a FHIR time string as a human readable string.
+ * Handles missing values and invalid dates.
+ * @param time - The date to format.
+ * @param locales - Optional locales.
+ * @param options - Optional time format options.
+ * @returns The formatted time string.
+ */
+export function formatTime(
+	time: string | undefined,
+	locales?: Intl.LocalesArgument,
+	options?: Intl.DateTimeFormatOptions
+  ): string {
+	if (!time) {
+	  return '';
+	}
+	const d = new Date('2000-01-01T' + time + 'Z');
+	if (!isValidDate(d)) {
+	  return '';
+	}
+	return d.toLocaleTimeString(locales, options);
+  }
+
+  /**
+   * Formats a FHIR dateTime string as a human readable string.
+   * Handles missing values and invalid dates.
+   * @param dateTime - The dateTime to format.
+   * @param locales - Optional locales.
+   * @param options - Optional dateTime format options.
+   * @returns The formatted dateTime string.
+   */
+  export function formatDateTime(
+	dateTime: string | undefined,
+	locales?: Intl.LocalesArgument,
+	options?: Intl.DateTimeFormatOptions
+  ): string {
+	if (!dateTime) {
+	  return '';
+	}
+	const d = new Date(dateTime);
+	if (!isValidDate(d)) {
+	  return '';
+	}
+	return d.toLocaleString(locales, options);
+  }

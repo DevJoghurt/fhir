@@ -6,21 +6,10 @@ import { defineAppConfig } from '#imports'
 export default defineAppConfig({
   title: 'Fhir Application',
   navigation: {
-    sidebar: {
+    main: {
       items: []
     },
-    dropdownProfile: {
-      items: [
-        {
-          t: 'profile.settings',
-          to: '/settings',
-          icon: 'i-heroicons-cog-8-tooth'
-        }
-      ]
-    },
-    pageSettings: {
-      items: []
-    }
+    dropdown: false
   }
 })
 
@@ -40,9 +29,8 @@ export type Menu = {
 
 //TODO: make more extendable and
 export type Navigation = {
-  dropdownProfile?: Menu
-  pageSettings?: Menu
-  sidebar?: Menu
+  dropdown?: false | Menu
+  main?: Menu
 }
 
 declare module '@nuxt/schema' {

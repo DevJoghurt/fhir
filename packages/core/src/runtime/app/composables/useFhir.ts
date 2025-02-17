@@ -83,7 +83,7 @@ export function useFhir(options: UseFhirOptions = {
 	fhirUrl: (...path: string[]) => URL;
 	fhirSearchUrl: (resourceType: ResourceType, query: QueryTypes) => URL;
 	readResource: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
-	search: <K extends ResourceType>(resourceType: K, query?: QueryTypes, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
+	search: <K extends ResourceType>(resourceType: K, query?: FetchOptions<any>['query'], options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
 	readHistory: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
 	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
@@ -239,12 +239,15 @@ export function useFhir(options: UseFhirOptions = {
    */
 	const search = <K extends ResourceType>(
 		resourceType: K,
-		query?: QueryTypes,
+		query?:  FetchOptions<any>['query'],
 		options?: FetchOptions<any>
 	  ) => {
-		const url = fhirSearchUrl(resourceType, query);
+		const url = fhirSearchUrl(resourceType, {});
 
-		return fetch<Bundle<ExtractResource<K>>>('GET', url, options)
+		return fetch<Bundle<ExtractResource<K>>>('GET', url, {
+			query: query,
+			...options
+		})
 	}
 
 	/**

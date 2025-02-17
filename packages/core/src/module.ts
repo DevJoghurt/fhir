@@ -2,8 +2,6 @@ import {
 	defineNuxtModule,
 	createResolver,
 	addImports,
-	hasNuxtModule,
-	installModule,
 	addComponentsDir
   } from '@nuxt/kit'
 import defu from 'defu'
@@ -53,6 +51,8 @@ export default defineNuxtModule<ModuleOptions>({
 	},
 	async setup(options, nuxt) {
 		const { resolve } = createResolver(import.meta.url);
+
+		nuxt.options.alias['#fhir/types'] = resolve('./runtime/types/index');
 
 		// add all app related things here
 		addImports([{

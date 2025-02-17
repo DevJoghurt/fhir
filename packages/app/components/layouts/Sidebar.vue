@@ -54,7 +54,7 @@
 
     const appConfig = useAppConfig()
 
-    const items = computed( () => appConfig.navigation.sidebar.items.map(
+    const items = computed(() => appConfig.navigation.main.items.map(
         (item)=>({
           label: item?.t ? t(item.t) : item.label || '',
           icon: item?.icon || '',

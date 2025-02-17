@@ -11,15 +11,19 @@ export default defineAppConfig({
 		}
 	},
 	navigation: {
-		sidebar: {
+		main: {
 			items: [{
 				label: 'Home',
 				to: '/',
 				icon: 'i-heroicons-home'
+			},{
+				label: 'Resources',
+				to: '/resources',
+				icon: 'i-heroicons-circle-stack'
 			}, {
 				label: 'Questionnaire',
 				to: '/questionnaire',
-				icon: 'i-heroicons-cog-8-tooth'
+				icon: 'i-heroicons-chat-bubble-bottom-center-text'
 			}]
 		}
 	}

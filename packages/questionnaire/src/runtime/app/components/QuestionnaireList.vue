@@ -9,6 +9,4 @@
 	const { search } = useFhir()
 	const { data } = await search('Questionnaire')
 
-	console.log(data.value?.entry)
-
 </script>
