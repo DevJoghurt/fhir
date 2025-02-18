@@ -86,6 +86,7 @@ export function useFhir(options: UseFhirOptions = {
 	search: <K extends ResourceType>(resourceType: K, query?: FetchOptions<any>['query'], options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
 	readHistory: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
 	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	readSnapshot: <K extends ResourceType>(resourceType: K, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
 	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
 	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
@@ -332,6 +333,8 @@ export function useFhir(options: UseFhirOptions = {
 		return fetch<Bundle<ExtractResource<K>>>('GET', fhirUrl(resourceType, id, '_history'), options)
 	}
 
+
+
 	/**
 	 * Reads a specific version of a resource by resource type, ID, and version ID.
 	 *
@@ -358,6 +361,30 @@ export function useFhir(options: UseFhirOptions = {
 		options?: FetchOptions<any>
 	) => {
 		return fetch<ExtractResource<K>>('GET', fhirUrl(resourceType, id, '_history', vid), options)
+	}
+
+	/**
+	 * Reads a snapshot of a resource by resource.
+	 *
+	 * @example
+	 * Example:
+	 *
+	 * ```typescript
+	 * const snapshot = await readSnapshot('Patient');
+	 * console.log(snapshot);
+	 * ```
+	 *
+	 * See the FHIR "snapshot" operation for full details: https://www.hl7.org/fhir/http.html#vread
+	 * @category Read
+	 * @param resourceType - The FHIR resource type.
+	 * @param options - Optional fetch options.
+	 * @returns The resource if available.
+	 */
+	const readSnapshot = <K extends ResourceType>(
+		resourceType: K,
+		options?: FetchOptions<any>
+	) => {
+		return fetch<ExtractResource<K>>('GET', fhirUrl('StructureDefinition',resourceType, '$snapshot'), options)
 	}
 
 	/**
@@ -661,6 +688,7 @@ export function useFhir(options: UseFhirOptions = {
 		search,
 		readHistory,
 		readVersion,
+		readSnapshot,
 		readPatientEverything,
 		validateResource,
 		createResource,

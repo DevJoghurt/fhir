@@ -3,7 +3,7 @@
 		<div class="mb-4">
 			<FhirResourceSelect v-model="resourceType" @change="updateResource" />
 		</div>
-		<FhirResourceTable :key="resourceType" :resource-type="resourceType" />
+		<FhirResourceTable :key="resourceType || ''" :resource-type="resourceType" />
 	</section>
 </template>
 <script setup lang="ts">

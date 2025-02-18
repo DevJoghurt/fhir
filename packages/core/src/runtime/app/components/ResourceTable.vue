@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 	import { useFhir, computed, useTemplateRef, ref, type Ref, h } from '#imports'
 	import { formatHumanName, formatDateTime } from '../utils'
-	import type { FhirResource } from '../types'
+	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
@@ -38,7 +38,11 @@
 
 	const resource = ref(props.resourceType)
 
-	const { search } = useFhir()
+	const { search, readSnapshot } = useFhir()
+
+	//const { data: snapshot } = await readSnapshot(resource.value)
+
+	//console.log(snapshot)
 
 	const { data, status } = await search(resource.value)
 
@@ -86,9 +90,7 @@
 			return h(
 			'div',
 			{ class: 'text-right' },
-			h(
-				UDropdownMenu,
-				{
+			h(UDropdownMenu, {
 				content: {
 					align: 'end',
 				},
