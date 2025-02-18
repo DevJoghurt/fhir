@@ -51,13 +51,25 @@
 		return item
 	}) ?? [])
 
-	// Create columns based on the keys that are available in the first item
-	const displayColumns = ['id', 'identifier', 'name', 'title', 'meta']
-	const columns = computed(() => {
-		const firstItem = items.value[0]
-		if (!firstItem) return []
-		// go through the displayColumns and create a column setting for each based on TanStack vue-table
-		return displayColumns.filter((key) => typeof firstItem[key] !== 'undefined').map((key) => {
+	// Create columns based on the mapping columns
+
+	const defaultMappingColumns = {
+		Patient: ['id', 'name', 'meta'],
+		Practitioner: ['id', 'name', 'meta'],
+		Organization: ['id', 'identifier', 'name', 'meta'],
+		Location: ['id', 'identifier', 'name', 'meta'],
+		PractitionerRole: ['id', 'identifier', 'name', 'meta'],
+		HealthcareService: ['id', 'identifier', 'name', 'meta'],
+		Endpoint: ['id', 'identifier', 'name', 'meta'],
+		ResearchStudy: ['id', 'identifier', 'title', 'meta'],
+		ResearchSubject: ['id', 'identifier', 'title', 'meta'],
+		ImagingStudy: ['id', 'identifier', 'title', 'meta'],
+		default: ['id', 'meta']
+	} as Record<FhirResource | 'default', string[]>
+
+	const mappingColumns = defaultMappingColumns[resource.value] || defaultMappingColumns['default']
+
+	const columns = mappingColumns.map(key => {
 			const header = key === 'meta' ? 'Last Updated' : key.charAt(0).toUpperCase() + key.slice(1)
 			const column: TableColumn<any> = {
 				accessorKey: key,
@@ -81,10 +93,9 @@
 				}
 			}
 			return column
-		})
-	}) as Ref<TableColumn<any>[]>
+	}) as TableColumn<any>[]
 
-	columns.value.push({
+	columns.push({
 		id: 'actions',
 		cell: ({ row }) => {
 			return h(
