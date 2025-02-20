@@ -20,9 +20,9 @@ export default defineAppConfig({
 				label: 'Fhir Server',
 				icon: 'i-heroicons-fire',
 				children: [{
-					label: 'Server',
-					to: '/server',
-					icon: 'i-heroicons-server'
+					label: 'System',
+					to: '/system',
+					icon: 'i-heroicons-square-3-stack-3d'
 				},{
 					label: 'Resources',
 					to: '/resources',

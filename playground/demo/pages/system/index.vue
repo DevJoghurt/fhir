@@ -2,7 +2,7 @@
 	<div>
 		<div class="">
 			<div class="bg-gray-50 border-b border-gray-200 flex justify-between container mx-auto px-4 py-4">
-				<h1 class="text-xl font-semibold">Server</h1>
+				<h1 class="text-xl font-semibold">System</h1>
 			</div>
 			<div class="flex flex-row gap-4 px-4 py-6">
 				<UCard
