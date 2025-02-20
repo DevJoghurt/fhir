@@ -5,6 +5,7 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/ui',
+    'nuxt-queue',
     "@nhealth/questionnaire"
   ],
 

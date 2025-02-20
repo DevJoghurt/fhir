@@ -9,6 +9,7 @@ import type { QueryTypes } from '../utils'
 import type {
 	ExtractResource,
 	ResourceType,
+	CapabilityStatement,
 	OperationOutcome,
 	Resource,
 	Bundle
@@ -84,9 +85,10 @@ export function useFhir(options: UseFhirOptions = {
 	fhirSearchUrl: (resourceType: ResourceType, query: QueryTypes) => URL;
 	readResource: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
 	search: <K extends ResourceType>(resourceType: K, query?: FetchOptions<any>['query'], options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
-	readHistory: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
+	readHistory: <K extends ResourceType>(resourceType?: K |null, id?: string | null, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>> | Bundle, any>;
 	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
-	readSnapshot: <K extends ResourceType>(resourceType: K, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	readCapabilityStatement: (options?: FetchOptions<any>) => AsyncData<CapabilityStatement, any>;
+	readStructureDefinition: <K extends ResourceType>(resourceType: K, operation?: '$snapshot' | '$questionnaire', options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
 	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
 	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
@@ -326,11 +328,15 @@ export function useFhir(options: UseFhirOptions = {
 	 * @returns Promise to the resource history.
 	 */
 	const readHistory = <K extends ResourceType>(
-		resourceType: K,
-		id: string,
+		resourceType?: K,
+		id?: string,
 		options?: FetchOptions<any>
-	): AsyncData<Bundle<ExtractResource<K>>, any> => {
-		return fetch<Bundle<ExtractResource<K>>>('GET', fhirUrl(resourceType, id, '_history'), options)
+	): AsyncData<Bundle<ExtractResource<K>> | Bundle, any> => {
+		let url = fhirUrl('_history');
+		if(resourceType && id){
+			url = fhirUrl(resourceType, id, '_history');
+		}
+		return fetch<Bundle<ExtractResource<K>> | Bundle>('GET', url, options)
 	}
 
 
@@ -364,27 +370,49 @@ export function useFhir(options: UseFhirOptions = {
 	}
 
 	/**
-	 * Reads a snapshot of a resource by resource.
+	 * Reads a StructureDefinition of a resource.
 	 *
 	 * @example
 	 * Example:
 	 *
 	 * ```typescript
-	 * const snapshot = await readSnapshot('Patient');
-	 * console.log(snapshot);
+	 * const structureDefinition = await readStructureDefinition('Patient', '$snapshot');
+	 * console.log(readStructureDefinition);
 	 * ```
 	 *
-	 * See the FHIR "snapshot" operation for full details: https://www.hl7.org/fhir/http.html#vread
+	 * See the FHIR "StructureDefinition" resource for full details: https://hl7.org/fhir/R4/structuredefinition.html
 	 * @category Read
 	 * @param resourceType - The FHIR resource type.
+	 * @param operation - The operation e.g. $snapshot.
 	 * @param options - Optional fetch options.
 	 * @returns The resource if available.
 	 */
-	const readSnapshot = <K extends ResourceType>(
+	const readStructureDefinition = <K extends ResourceType>(
 		resourceType: K,
+		operation?: '$snapshot' | '$questionnaire',
 		options?: FetchOptions<any>
 	) => {
-		return fetch<ExtractResource<K>>('GET', fhirUrl('StructureDefinition',resourceType, '$snapshot'), options)
+		return fetch<ExtractResource<K>>('GET', fhirUrl('StructureDefinition',resourceType, operation || '$snapshot'),options)
+	}
+
+	/**
+	 * Reads a CapabilityStatement of the server.
+	 *
+	 * @example
+	 * Example:
+	 *
+	 * ```typescript
+	 * const capabilityStatement = await readCapabilityStatement();
+	 * console.log(capabilityStatement);
+	 * ```
+	 *
+	 * See the FHIR "CapabilityStatement"  for full details: https://hl7.org/fhir/R4/capabilitystatement.html
+	 * @category Read
+	 * @param options - Optional fetch options.
+	 * @returns The resource if available.
+	 */
+	const readCapabilityStatement = (options?: FetchOptions<any>) => {
+		return fetch('GET', fhirUrl('metadata'), options)
 	}
 
 	/**
@@ -688,7 +716,8 @@ export function useFhir(options: UseFhirOptions = {
 		search,
 		readHistory,
 		readVersion,
-		readSnapshot,
+		readStructureDefinition,
+		readCapabilityStatement,
 		readPatientEverything,
 		validateResource,
 		createResource,

@@ -17,10 +17,18 @@ export default defineAppConfig({
 				to: '/',
 				icon: 'i-heroicons-home'
 			},{
-				label: 'Resources',
-				to: '/resources',
-				icon: 'i-heroicons-circle-stack'
-			}, {
+				label: 'Fhir Server',
+				icon: 'i-heroicons-fire',
+				children: [{
+					label: 'Server',
+					to: '/server',
+					icon: 'i-heroicons-server'
+				},{
+					label: 'Resources',
+					to: '/resources',
+					icon: 'i-heroicons-circle-stack'
+				}]
+			},{
 				label: 'Questionnaire',
 				to: '/questionnaire',
 				icon: 'i-heroicons-chat-bubble-bottom-center-text'

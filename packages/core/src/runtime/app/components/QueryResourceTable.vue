@@ -22,7 +22,7 @@
 	import { formatHumanName, formatDateTime } from '../utils'
 	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
-	import type { HumanName, Meta } from '@medplum/fhirtypes'
+	import type { HumanName, Meta, Identifier } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
 
 	const props = defineProps<{
@@ -38,11 +38,7 @@
 
 	const resource = ref(props.resourceType)
 
-	const { search, readSnapshot } = useFhir()
-
-	//const { data: snapshot } = await readSnapshot(resource.value)
-
-	//console.log(snapshot)
+	const { search } = useFhir()
 
 	const { data, status } = await search(resource.value)
 
@@ -63,7 +59,7 @@
 		Endpoint: ['id', 'identifier', 'name', 'meta'],
 		ResearchStudy: ['id', 'identifier', 'title', 'meta'],
 		ResearchSubject: ['id', 'identifier', 'title', 'meta'],
-		ImagingStudy: ['id', 'identifier', 'title', 'meta'],
+		ImagingStudy: ['id', 'identifier', 'meta'],
 		default: ['id', 'meta']
 	} as Record<FhirResource | 'default', string[]>
 
@@ -86,6 +82,13 @@
 						const names = row.getValue('name') as HumanName[]
 						if (names[0]) {
 							return formatHumanName(names[0])
+						}
+						return ''
+					}
+					if (key === 'identifier') {
+						const identifier = row.getValue('identifier') as Identifier[]
+						if (identifier[0]) {
+							return identifier[0].value || identifier[0].id || identifier[0].system || ''
 						}
 						return ''
 					}

@@ -10,7 +10,8 @@
       "nuxt": "*",
       "@nuxt/ui": "3.0.0-alpha.13",
       "@nhealth/app": "workspace:*",
-      "@nhealth/questionnaire": "workspace:*"
+      "@nhealth/questionnaire": "workspace:*",
+      "nuxt-queue": "^0.1.7"
     },
     "devDependencies": {
       "typescript": "*"

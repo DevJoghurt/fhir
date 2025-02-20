@@ -10,7 +10,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-const { readResource } = await useFhir()
+const { readResource, createResource } = await useFhir()
 
 
 const {data: patient} = await readResource('Patient', '1')
