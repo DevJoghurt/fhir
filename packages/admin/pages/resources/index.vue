@@ -28,10 +28,9 @@
 
 	const searchString = ref<string>('')
 
-	const { readCapabilityStatement } = useFhir()
+	const { readCapabilityStatement} = useFhir()
 
-	const { data: capabilityStatement, error } = await readCapabilityStatement()
-
+	const { data: capabilityStatement } = await readCapabilityStatement()
 
 	const filteredResources = computed(() =>{
 		const rest = capabilityStatement.value?.rest || []

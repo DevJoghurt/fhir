@@ -18,8 +18,8 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { useFhir, computed, useTemplateRef, ref, type Ref, h } from '#imports'
-	import { formatHumanName, formatDateTime } from '../utils'
+	import { useFhir, computed, useTemplateRef, ref, h } from '#imports'
+	import { formatHumanName, formatDateTime } from '../../utils'
 	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier } from '@medplum/fhirtypes'

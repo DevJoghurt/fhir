@@ -1,9 +1,8 @@
-import {
-	useState,
-	useFetch,
-	useRuntimeConfig
-} from '#imports'
-import { defu } from 'defu'
+import { defu } from 'defu';
+import { FhirClient, encodeBase64 } from '../../utils';
+import { useRuntimeConfig } from '#imports';
+import { $fetch, type FetchOptions as OfetchOptions } from 'ofetch';
+import type { AsyncData } from '#app'
 import type {
 	ExtractResource,
 	ResourceType,
@@ -11,21 +10,15 @@ import type {
 	OperationOutcome,
 	Resource,
 	Bundle
-} from '@medplum/fhirtypes'
+} from '@medplum/fhirtypes';
 import type {
 	QueryTypes,
 	PatchOperation,
 	FetchMethod,
 	ExtendedFetchOptions
-} from '../../utils'
-import { FhirClient, encodeBase64 } from "../../utils"
-import type { UseFetchOptions, AsyncData } from '#app'
+} from '../../utils';
 
-type SessionState = {
-	accessToken?: string
-}
-
-type FetchOptions<T> = Omit<UseFetchOptions<T>, 'method' | 'body' | 'onRequest' | 'onRequestError' | 'onResponse' | 'onResponseError'> & ExtendedFetchOptions;
+type FetchOptions<T> = Omit<OfetchOptions<any>, 'method' | 'body' | 'onRequest' | 'onRequestError' | 'onResponse' | 'onResponseError'> & ExtendedFetchOptions;
 
 type MedplumOptions = {
 	clientId: string | null;
@@ -33,43 +26,12 @@ type MedplumOptions = {
 }
 
 type UseFhirOptions = {
-	/**
-	 * The FHIR server type.
-	 */
 	server?: 'hapi' | 'medplum';
-
-	/**
-	 * The FHIR server URL.
-	 */
 	serverUrl?: string;
-
-	/**
-	 * The FHIR base URL.
-	 */
 	baseUrl?: string;
-
-	/**
-	 * Access token for the fetch request.
-	 */
 	accessToken?: string;
-
-	/**
-	 * Medplum options
-	 */
 	medplum?: MedplumOptions;
-
-	/**
-	 * Use credentials for the fetch request.
-	 * If true, the request will ignore current session with access token.
-	 * !!! Be careful with this option, because creadentials are private and normaly not client side available.
-	 *
-	 *  @default false
-	 */
 	useCredentials?: boolean;
-
-	/**
-	 *
-	 */
 	logLevel?: 'silent' | 'debug' | 'info' | 'warn' | 'error';
 }
 
@@ -96,52 +58,44 @@ export function useFhir(options: UseFhirOptions = {
 	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => AsyncData<Bundle, any> | Promise<Bundle>;
 } {
 
-	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
 	const config = defu(
 		options,
 		useRuntimeConfig().public?.fhir || {},
-		import.meta.server ? useRuntimeConfig()?.fhir || {} : {}
-	)
+		useRuntimeConfig()?.fhir || {}
+	);
 
-	const sessionState = useState<SessionState>('fhir-session', () => ({}))
+	const fetch = async <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: FetchOptions<any>): Promise<T> => {
+		url = url.toString();
 
-	const accessToken = sessionState.value.accessToken || null
-
-	const fetch = <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: FetchOptions<any>): AsyncData<T, any> => {
-		url = url.toString()
-
-		return useFetch<T>(url, {
+		return $fetch<T>(url, {
 			method: method as any,
 			...fetchOptions,
-			onRequest({ options }) {
-				options.headers.set('Accept', 'application/fhir+json')
-				// Set request header for async requests
-				if(fetchOptions?.asynchRequest){
-					options.headers.set('Prefer', 'respond-async')
+			async onRequest({ options }) {
+				options.headers = options.headers || {};
+				options.headers['Accept'] = 'application/fhir+json';
+				if (fetchOptions?.asynchRequest) {
+					options.headers['Prefer'] = 'respond-async';
 				}
-				// Set the request headers for authorization
-				if(!config.useCredentials && accessToken){
-					options.headers.set('Authorization', `Bearer ${accessToken}`)
-				}
-				else if(config.useCredentials && config.medplum?.clientId && config.medplum?.clientSecret){
-					const basicAuth = encodeBase64(config.medplum.clientId + ':' + config.medplum.clientSecret)
-					options.headers.set('Authorization', `Basic ${basicAuth}`)
+				if (!config.useCredentials && config.accessToken) {
+					options.headers['Authorization'] = `Bearer ${config.accessToken}`;
+				} else if (config.useCredentials && config.medplum?.clientId && config.medplum?.clientSecret) {
+					const basicAuth = encodeBase64(config.medplum.clientId + ':' + config.medplum.clientSecret);
+					options.headers['Authorization'] = `Basic ${basicAuth}`;
 				}
 			},
-			onRequestError(event) {
-			  //TODO: Handle the request errors
+			onRequestError({ request, options, error }) {
+				// TODO: Handle the request errors
 			},
 			onResponse({ response }) {
-			  //TODO: Process the response data
+				// TODO: Process the response data
 			},
-			onResponseError(event) {
-			  // Handle the response errors
-			  if(event.response.status === 401){
-				// handle unauthorized requests
-			  }
+			onResponseError({ request, response, options }) {
+				if (response.status === 401) {
+					// handle unauthorized requests
+				}
 			},
-		}) as AsyncData<T, any>
-	}
+		});
+	};
 
 	const client = new FhirClient({
 		server: config.server || 'hapi',
@@ -168,5 +122,5 @@ export function useFhir(options: UseFhirOptions = {
 		patchResource: client.patchResource.bind(client),
 		deleteResource: client.deleteResource.bind(client),
 		executeBatch: client.executeBatch.bind(client)
-	}
+	};
 }

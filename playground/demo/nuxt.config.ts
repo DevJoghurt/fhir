@@ -1,11 +1,11 @@
 export default defineNuxtConfig({
   extends: [
-    "@nhealth/app"
+    "@nhealth/app",
+    "@nhealth/admin",
   ],
 
   modules: [
     '@nuxt/ui',
-    'nuxt-queue',
     "@nhealth/questionnaire"
   ],
 

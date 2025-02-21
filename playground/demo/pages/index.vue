@@ -14,4 +14,5 @@ const { readResource, createResource } = await useFhir()
 
 
 const {data: patient} = await readResource('Patient', '1')
+
 </script>

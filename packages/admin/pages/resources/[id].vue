@@ -26,7 +26,6 @@
 
 	const isBasePath = computed(() => !['profile', 'create', 'upload'].some(el => route.path.includes(el)))
 
-
 	const menu = computed(() => [[
 		{
 			label: 'Entries',
@@ -35,8 +34,8 @@
 			active: isBasePath.value ? true : false
 		},
 		{
-			label: 'Profile',
-			to: `/resources/${resourceType.value}/profile`,
+			label: 'Profiles',
+			to: `/resources/${resourceType.value}/profiles`,
 			icon: 'heroicons-clipboard-document-check',
 		}
 	],[

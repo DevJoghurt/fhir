@@ -2,7 +2,8 @@ import {
 	defineNuxtModule,
 	createResolver,
 	addImports,
-	addComponentsDir
+	addComponentsDir,
+	addServerImports
   } from '@nuxt/kit'
 import defu from 'defu'
 // ts bug: https://github.com/nuxt/module-builder/issues/141
@@ -59,6 +60,11 @@ export default defineNuxtModule<ModuleOptions>({
 			name: 'useFhir',
 			as: 'useFhir',
 			from: resolve('./runtime/app/composables/useFhir')
+		}]);
+		addServerImports([{
+			name: 'useFhir',
+			as: 'useFhir',
+			from: resolve('./runtime/server/utils/useFhir')
 		}]);
 		addComponentsDir({
 			path: resolve('./runtime/app/components'),
