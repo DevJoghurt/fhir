@@ -6,6 +6,13 @@ export default defineNuxtConfig({
 		'@nhealth/fhir',
 		'@nuxtjs/i18n'
 	],
+	queue: {
+		ui: true,
+		redis: {
+			host: 'localhost',
+			port: 6379
+		}
+	},
 	i18n: {
 		lazy: true,
 		strategy: 'no_prefix',

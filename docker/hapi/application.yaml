@@ -7,7 +7,7 @@ spring:
   jpa:
     properties:
       hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
-      hibernate.search.enabled: false
+      hibernate.search.enabled: true
 hapi:
   fhir:
     cors:
@@ -16,3 +16,15 @@ hapi:
         - '*'
     default_encoding: json
     version: R4
+    client_id_strategy: ANY
+    #ig_runtime_upload_enabled: true
+    #enable_repository_validating_interceptor: false
+    #install_transitive_ig_dependencies: true
+    #validate_resource_status_for_package_upload: false
+    #implementationguides:
+    #  base:
+    #    name: hl7.fhir.r4.core
+    #    version: 4.0.1
+    #    packageUrl: https://hl7.org/fhir/R4/hl7.fhir.r4.core.tgz
+    #    reloadExisting: false
+    #    installMode: STORE_AND_INSTALL

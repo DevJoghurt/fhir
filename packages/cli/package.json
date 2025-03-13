@@ -39,8 +39,8 @@
 		"citty": "^0.1.6",
 		"consola": "^3.4.0",
 		"semver": "^7.7.1",
-		"std-env": "^3.8.0",
-		"unbuild": "^3.3.1",
+		"std-env": "^3.8.1",
+		"unbuild": "^3.5.0",
 		"listhen": "^1.9.0"
 	}
 }

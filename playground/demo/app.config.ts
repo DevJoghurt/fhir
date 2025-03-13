@@ -27,6 +27,10 @@ export default defineAppConfig({
 					label: 'Resources',
 					to: '/resources',
 					icon: 'i-heroicons-circle-stack'
+				},{
+					label: 'Queue',
+					to: '/queue',
+					icon: 'i-heroicons:queue-list'
 				}]
 			},{
 				label: 'Questionnaire',

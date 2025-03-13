@@ -3,7 +3,8 @@ import {
 	createResolver,
 	addImports,
 	addComponentsDir,
-	addServerImports
+	addServerImports,
+	addServerImportsDir
   } from '@nuxt/kit'
 import defu from 'defu'
 // ts bug: https://github.com/nuxt/module-builder/issues/141
@@ -60,7 +61,16 @@ export default defineNuxtModule<ModuleOptions>({
 			name: 'useFhir',
 			as: 'useFhir',
 			from: resolve('./runtime/app/composables/useFhir')
+		},{
+			name: 'useResource',
+			as: 'useResource',
+			from: resolve('./runtime/app/composables/useResource')
+		}, {
+			name: 'useStructureDefinition',
+			as: 'useStructureDefinition',
+			from: resolve('./runtime/app/composables/useStructureDefinition')
 		}]);
+
 		addServerImports([{
 			name: 'useFhir',
 			as: 'useFhir',
@@ -71,6 +81,8 @@ export default defineNuxtModule<ModuleOptions>({
 			prefix: 'Fhir',
 			global: true
 		});
+
+		addServerImportsDir(resolve('./runtime/utils'))
 
 		const runtimeConfig = nuxt.options.runtimeConfig || {};
 

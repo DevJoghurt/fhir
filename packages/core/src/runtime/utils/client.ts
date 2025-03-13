@@ -14,6 +14,7 @@ import type {
 } from '@medplum/fhirtypes'
 import consola from 'consola'
 import type { FetchOptions as OfetchOptions } from 'ofetch';
+import { randomUUID } from "uncrypto";
 import type { UseFetchOptions, AsyncData } from '#app'
 
 
@@ -108,6 +109,10 @@ export class FhirClient {
 			url.search = getQueryString(query);
 		}
 		return url;
+	}
+
+	createUUID(): string {
+		return `urn:uuid:${randomUUID()}`;
 	}
 
 	private fetchInternal<T = any>(method: FetchMethod, url: URL | string, fetchOptions?: InternalFetchOptions): AsyncData<T, any> | Promise<T> {
@@ -225,25 +230,31 @@ export class FhirClient {
 	}
 
 	/**
-	 * Reads a StructureDefinition of a resource.
+	 * Reads the StructureDefinition of a resource.
 	 *
 	 * @example
 	 * Example:
 	 *
 	 * ```typescript
-	 * const structureDefinition = await readStructureDefinition('Patient', '$snapshot');
+	 * const structureDefinition = await readStructureDefinition('http://hl7.org/fhir/R4/Patient', '$snapshot');
 	 * console.log(readStructureDefinition);
 	 * ```
 	 *
 	 * See the FHIR "StructureDefinition" resource for full details: https://hl7.org/fhir/R4/structuredefinition.html
 	 * @category Read
-	 * @param resourceType - The FHIR resource type.
+	 * @param idOrUrl - An id or url of the StructureDefinition.
 	 * @param operation - The operation e.g. $snapshot.
 	 * @param options - Optional fetch options.
 	 * @returns The resource if available.
 	 */
-	readStructureDefinition<K extends ResourceType>(resourceType: K, operation?: '$snapshot' | '$questionnaire', options?: FetchOptions<any>): AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>> {
-		return this.fetchInternal<ExtractResource<K>>('GET', this.fhirUrl('StructureDefinition', resourceType, operation || '$snapshot'), options);
+	readStructureDefinition(idOrUrl: string, operation?: '$snapshot' | '$meta', options?: FetchOptions<any>): AsyncData<Bundle<ExtractResource<'StructureDefinition'>>, any> | Promise<Bundle<ExtractResource<'StructureDefinition'>>> {
+		//check if the idOrUrl is a URL
+		const isUrl = idOrUrl.includes('http');
+
+		const fhirUrl = isUrl ? this.fhirUrl('StructureDefinition', operation || '') : this.fhirUrl('StructureDefinition', idOrUrl, operation || '');
+		// if isUrl add the idOrUrl to the query
+		options = defu(options, isUrl ? { query: { url: idOrUrl } } : {});
+		return this.fetchInternal<Bundle<ExtractResource<'StructureDefinition'>>>('GET', fhirUrl, options);
 	}
 
 	/**

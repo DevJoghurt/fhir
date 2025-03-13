@@ -3,7 +3,7 @@
 		<div class="flex bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4">
 			<h1 class="text-xl font-semibold">{{ resourceType }}</h1>
 		</div>
-		<div class="flex bg-gray-50 gap-4 items-center">
+		<div class="flex bg-gray-50 gap-4 items-center px-2">
 			<ULink to="/resources">
 				<UButton icon="heroicons-chevron-left" variant="ghost">Back</UButton>
 			</ULink>
@@ -14,11 +14,13 @@
 				:items="menu"
 			/>
 		</div>
-		<NuxtPage :resource-type="resourceType" />
+		<NuxtPage :resource-type="resourceType" :profiles="profiles" />
 	</section>
 </template>
 <script setup lang="ts">
+	import { useResource } from '#imports'
 	import type { FhirResource } from '#fhir/types'
+	import type { Bundle, BundleEntryResponse, StructureDefinition } from '@medplum/fhirtypes'
 
 	const route = useRoute()
 
@@ -50,4 +52,9 @@
 			icon: 'heroicons-arrow-up-on-square-stack',
 		}
 	]])
+
+	// read CapabilityStatement and get profiles
+	const resourceHandler = await useResource()
+
+	const profiles = await resourceHandler.loadProfiles(resourceType.value)
 </script>

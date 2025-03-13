@@ -1,6 +1,10 @@
 /* Don't do `@import "tailwindcss"`, do this instead: */
 @layer theme, base, components, utilities;
 
+@source "../../../../packages/admin";
+@source "../../../../packages/app";
+@source "../../../../node_modules/nuxt-queue/dist/runtime";
+
 @import "tailwindcss/theme" layer(theme) theme(static);
 @import "tailwindcss/preflight" layer(base);
 @import "tailwindcss/utilities" layer(utilities);

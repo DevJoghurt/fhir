@@ -9,7 +9,7 @@
     "dependencies": {
       "nuxt": "*",
       "@nhealth/fhir-profiling": "workspace:*",
-      "radix-vue": "^1.9.7"
+      "radix-vue": "^1.9.17"
     },
     "devDependencies": {
       "typescript": "*"

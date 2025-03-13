@@ -79,21 +79,22 @@ export function useFhir(options: UseFhirOptions = {
 }): {
 	fhirUrl: (...path: string[]) => URL;
 	fhirSearchUrl: (resourceType: ResourceType, query: QueryTypes) => URL;
-	readResource: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>>;
-	search: <K extends ResourceType>(resourceType: K, query?: FetchOptions<any>['query'], options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any> | Promise<Bundle<ExtractResource<K>>>;
-	readHistory: <K extends ResourceType>(resourceType?: K | null, id?: string | null, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>> | Bundle, any> | Promise<Bundle<ExtractResource<K>> | Bundle>;
-	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>>;
-	readCapabilityStatement: (options?: FetchOptions<any>) => AsyncData<CapabilityStatement, any> | Promise<CapabilityStatement>;
-	readStructureDefinition: <K extends ResourceType>(resourceType: K, operation?: '$snapshot' | '$questionnaire', options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>>;
-	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any> | Promise<Bundle>;
-	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any> | Promise<OperationOutcome>;
-	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any> | Promise<T>;
-	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => AsyncData<T, any> | Promise<T>;
-	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => AsyncData<T, any> | Promise<T>;
-	updateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any> | Promise<T>;
-	patchResource: <K extends ResourceType>(resourceType: K, id: string, operations: PatchOperation[], options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>>;
-	deleteResource: (resourceType: ResourceType, id: string, options?: FetchOptions<any>) => AsyncData<any, any> | Promise<any>;
-	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => AsyncData<Bundle, any> | Promise<Bundle>;
+	createUUID: () => string;
+	readResource: <K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	search: <K extends ResourceType>(resourceType: K, query?: FetchOptions<any>['query'], options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>>, any>;
+	readHistory: <K extends ResourceType>(resourceType?: K | null, id?: string | null, options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<K>> | Bundle, any>;
+	readVersion: <K extends ResourceType>(resourceType: K, id: string, vid: string, options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	readCapabilityStatement: (options?: FetchOptions<any>) => AsyncData<CapabilityStatement, any>;
+	readStructureDefinition: (idOrUrl: string, operation?: '$snapshot' | '$meta', options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<'StructureDefinition'>>, any>;
+	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
+	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
+	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
+	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => AsyncData<T, any>;
+	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => AsyncData<T, any>;
+	updateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
+	patchResource: <K extends ResourceType>(resourceType: K, id: string, operations: PatchOperation[], options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
+	deleteResource: (resourceType: ResourceType, id: string, options?: FetchOptions<any>) => AsyncData<any, any>;
+	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
 } {
 
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
@@ -153,6 +154,7 @@ export function useFhir(options: UseFhirOptions = {
 	return {
 		fhirUrl: client.fhirUrl.bind(client),
 		fhirSearchUrl: client.fhirSearchUrl.bind(client),
+		createUUID: client.createUUID.bind(client),
 		readResource: client.readResource.bind(client),
 		search: client.search.bind(client),
 		readHistory: client.readHistory.bind(client),

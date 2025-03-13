@@ -4,6 +4,9 @@ implementierung
 */**/yarn.lock
 /.yarn
 
+# Profiling
+packages/admin/server/profiling
+
 # HL7 publisher
 playground/profiling/input-cache
 playground/profiling/temp

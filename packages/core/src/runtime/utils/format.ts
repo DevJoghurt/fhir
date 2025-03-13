@@ -21,12 +21,29 @@ function ensureString(input: unknown): string | undefined {
 }
 
 /**
+ * isHumanName
+ * @param input - The input to check.
+ * @returns True if the input is a HumanName.
+ */
+export function isHumanName(input: unknown): input is HumanName {
+	// if input is array get first
+	if (Array.isArray(input)) {
+	  input = input[0];
+	}
+	return (input as HumanName)?.family !== undefined;
+}
+
+/**
  * Formats a FHIR HumanName as a string.
  * @param name - The name to format.
  * @param options - Optional name format options.
  * @returns The formatted name string.
  */
-export function formatHumanName(name?: HumanName, options?: HumanNameFormatOptions): string {
+export function formatHumanName(name?: HumanName | HumanName[], options?: HumanNameFormatOptions): string {
+	if (Array.isArray(name)) {
+	  return name.map(n => formatHumanName(n, options)).join(', ');
+	}
+
 	const builder = [];
 
 	if(!name) {

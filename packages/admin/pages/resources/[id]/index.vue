@@ -1,6 +1,6 @@
 <template>
 	<section>
-		<FhirQueryResourceTable :key="resourceType || ''" :resource-type="resourceType" />
+		<FhirResourceTable :key="resourceType || ''" :resource-type="resourceType" />
 	</section>
 </template>
 <script setup lang="ts">

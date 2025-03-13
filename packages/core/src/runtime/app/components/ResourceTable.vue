@@ -7,7 +7,7 @@
 			:loading="status === 'pending'"
 			loading-color="primary"
 			class="flex-1" />
-	  	<div class="flex justify-between border-t border-(--ui-border) pt-4">
+	  	<div class="flex justify-between border-t border-(--ui-border) px-4 py-4">
 			<UPagination
 				:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
 				:items-per-page="table?.tableApi?.getState().pagination.pageSize"
@@ -19,7 +19,7 @@
 </template>
 <script lang="ts" setup>
 	import { useFhir, computed, useTemplateRef, ref, h } from '#imports'
-	import { formatHumanName, formatDateTime } from '../../utils'
+	import { formatHumanName, formatDateTime, isHumanName } from '../../utils'
 	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier } from '@medplum/fhirtypes'
@@ -59,7 +59,9 @@
 		Endpoint: ['id', 'identifier', 'name', 'meta'],
 		ResearchStudy: ['id', 'identifier', 'title', 'meta'],
 		ResearchSubject: ['id', 'identifier', 'title', 'meta'],
+		StructureDefinition: ['id', 'name', 'meta'],
 		ImagingStudy: ['id', 'identifier', 'meta'],
+		ImplementationGuide: ['id', 'name', 'title', 'meta'],
 		default: ['id', 'meta']
 	} as Record<FhirResource | 'default', string[]>
 
@@ -79,9 +81,12 @@
 						})
 					}
 					if (key === 'name') {
-						const names = row.getValue('name') as HumanName[]
-						if (names[0]) {
-							return formatHumanName(names[0])
+						const name = row.getValue('name') as HumanName[]
+						if (isHumanName(name)) {
+							return formatHumanName(name)
+						}
+						if(typeof name === 'string') {
+							return name
 						}
 						return ''
 					}
