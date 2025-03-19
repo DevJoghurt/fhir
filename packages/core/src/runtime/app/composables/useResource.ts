@@ -52,8 +52,8 @@ class ResourceHandler {
 		const { readCapabilityStatement } = useFhir()
 
 		const { data: capabilityStatement } = await readCapabilityStatement()
-		if (!capabilityStatement) {
-			throw new Error('Failed to load CapabilityStatement')
+		if (!capabilityStatement?.value) {
+			return false;
 		}
 		const rest = capabilityStatement.value?.rest || []
 		const resources = rest[0].resource || []
@@ -69,6 +69,7 @@ class ResourceHandler {
 			}
 		}
 		this.initialized.value = true;
+		return true;
 	}
 
 	getResources() {

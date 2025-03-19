@@ -48,12 +48,6 @@ export default defineNuxtModule<ModuleOptions>({
 		// TODO: add nitro assets for packages instead of using templates
 		createPackageProfileTemplate(meta)
 
-		addServerImports([{
-		name: 'useWorkerProcessor',
-		as: '$useWorkerProcessor',
-		from: resolve(nuxt.options.buildDir, 'inprocess-worker-composable'),
-		}])
-
 		addServerImports([
 			{
 				name: 'defineProfilePackage',

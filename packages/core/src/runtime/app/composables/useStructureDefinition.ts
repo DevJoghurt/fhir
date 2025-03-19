@@ -1,6 +1,7 @@
 import {
 	useFhir,
-	useState
+	useState,
+	reactive
  } from '#imports';
 
 import type { Ref } from '#imports';
@@ -12,8 +13,8 @@ import type {
 	Coding
   } from '@medplum/fhirtypes';
 
-const supportedCodes = [ 'boolean' ] as const;
-export type SupportedCode = (typeof supportedCodes)[number];
+const supportedCodingTypes = [ 'boolean', 'uri', 'string', 'Identifier', 'HumanName' ] as const;
+export type SupportedCodingType = (typeof supportedCodingTypes)[number];
 
 /**
  * Internal representation of a non-primitive FHIR type, suitable for use in resource validation
@@ -39,7 +40,7 @@ export interface InternalTypeSchema {
 	max: number;
 	isRequired: boolean;
 	isArray: boolean;
-	type: 'boolean';
+	type: SupportedCodingType;
 	element?: InternalSchemaElement[];
   }
 
@@ -80,6 +81,18 @@ export interface InternalTypeSchema {
 	parent?: BackboneContext;
   }
 
+interface ResourceState {
+	resourceType: string;
+	id: string | undefined;
+	[ key: string ]: any;
+}
+
+interface Resource extends ResourceState {
+	meta: {
+		profile: string[];
+	}
+}
+
 /**
  * Get instance of StructureDefinitionHandler
  */
@@ -100,12 +113,12 @@ class StructureDefinitionHandler {
 
 	}
 
-	async loadResource(resourceUrl: string): Promise<InternalTypeSchema | null> {
+	async loadResourceDefinition(resourceUrl: string, forceReload: boolean = false): Promise<InternalTypeSchema | null> {
 
 		// return the resource if it is already loaded
-		//if (this.structureDefinitions.value[resourceUrl]) {
-		//	return this.structureDefinitions.value[resourceUrl];
-		//}
+		if (!forceReload || this.structureDefinitions.value[resourceUrl]) {
+			return this.structureDefinitions.value[resourceUrl];
+		}
 
 		const { readStructureDefinition } = useFhir()
 
@@ -141,10 +154,17 @@ class StructureDefinitionHandler {
 
 		for(const el of elements){
 			const type = codingType(el.type || []);
-			if(type === null){
+			console.log('type', type);
+			if(type === null || (el.isModifier === true)){
 				continue;
 			}
 			const path = elementPath(el);
+			// transform path in an array of strings
+			const pathParts = path?.split('.') || [];
+			// temporary ignore paths that are nested
+			if(pathParts.length > 2){
+				continue;
+			}
 			const currentElement: InternalSchemaElement = {
 				name: el.sliceName || el.label || getLastPathElementAsName(path) || '',
 				description: el.definition || el.short || '',
@@ -162,6 +182,63 @@ class StructureDefinitionHandler {
 		return result;
 	}
 
+	async getResourceState(resourceUrl: string, defaultState: ResourceState = { resourceType: '', id: undefined }): Promise<ResourceState> {
+		const resource = await this.loadResourceDefinition(resourceUrl);
+		if (!resource) {
+			return { ...defaultState };
+		}
+
+		const state: ResourceState = {
+			resourceType: resource.name,
+			id: defaultState.id || undefined,
+		};
+
+		for (const element of resource.element) {
+			if (element.isArray) {
+				state[element.path] = defaultState[element.path] || [];
+			} else {
+				state[element.path] = defaultState[element.path] || null;
+			}
+		}
+
+		return reactive(state);
+	}
+
+	async createResource(resourceUrl: string, resourceState: ResourceState): Promise<Resource | null> {
+		const resourceDef = await this.loadResourceDefinition(resourceUrl);
+		if (!resourceDef) {
+			return null;
+		}
+		const resource = {
+			resourceType: resourceDef.name,
+			meta: {
+				profile: [resourceDef.url],
+			}
+		} as Resource;
+
+		if(resourceState.id){
+			resource.id = resourceState.id;
+		}
+
+		for (const element of resourceDef.element) {
+			// get atttribute name from path
+			const parts = element.path.split('.');
+			const attribute = parts[1] || null;
+			if(attribute === null){
+				continue;
+			}
+			if (element.isArray) {
+				if(resourceState[element.path] && Array.isArray(resourceState[element.path]) && resourceState[element.path].length > 0){
+					resource[attribute] = resourceState[element.path];
+				}
+			} else {
+				if(resourceState[element.path]){
+					resource[attribute] = resourceState[element.path];
+				}
+			}
+		}
+		return resource;
+	}
 }
 
 /**
@@ -192,15 +269,15 @@ const capitalize = <T extends string>(s: T | null) => (
  * @param codingType - The coding type array.
  * @returns The coding type code if present; null otherwise.
  */
-function codingType(codingType: ElementType[]): SupportedCode | null {
+function codingType(codingType: ElementType[]): SupportedCodingType | null {
 	if (codingType.length === 0 || !codingType[0].code) {
 		return null;
 	}
 	// Filter out unsupported coding types
-	if (!supportedCodes.includes(codingType[0].code as SupportedCode)) {
+	if (!supportedCodingTypes.includes(codingType[0].code as SupportedCodingType)) {
 		return null;
 	}
-	return codingType[0].code as SupportedCode;
+	return codingType[0].code as SupportedCodingType;
 }
 
   /**

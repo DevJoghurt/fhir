@@ -3,6 +3,7 @@
 
 @source "../../../../packages/admin";
 @source "../../../../packages/app";
+@source "../../../../packages/core";
 @source "../../../../node_modules/nuxt-queue/dist/runtime";
 
 @import "tailwindcss/theme" layer(theme) theme(static);
