@@ -154,7 +154,7 @@ class StructureDefinitionHandler {
 
 		for(const el of elements){
 			const type = codingType(el.type || []);
-			console.log('type', type);
+
 			if(type === null || (el.isModifier === true)){
 				continue;
 			}
@@ -189,7 +189,7 @@ class StructureDefinitionHandler {
 		}
 
 		const state: ResourceState = {
-			resourceType: resource.name,
+			resourceType: resource.type,
 			id: defaultState.id || undefined,
 		};
 
@@ -210,7 +210,7 @@ class StructureDefinitionHandler {
 			return null;
 		}
 		const resource = {
-			resourceType: resourceDef.name,
+			resourceType: resourceDef.type,
 			meta: {
 				profile: [resourceDef.url],
 			}

@@ -14,17 +14,18 @@
 				:items="menu"
 			/>
 		</div>
-		<NuxtPage :resource-type="resourceType" :profiles="profiles" />
+		<NuxtPage :resource-type="resourceType" :profiles="profiles" :resource-id="resourceId" />
 	</section>
 </template>
 <script setup lang="ts">
 	import { useResource } from '#imports'
 	import type { FhirResource } from '#fhir/types'
-	import type { Bundle, BundleEntryResponse, StructureDefinition } from '@medplum/fhirtypes'
 
 	const route = useRoute()
 
-	const resourceType = ref<FhirResource | null>(route.params.id as FhirResource)
+	const resourceType = ref<FhirResource | null>(route.params.resource as FhirResource)
+
+	const resourceId = ref<string | string[] | null>(route.params?.id || null)
 
 	const isBasePath = computed(() => !['profile', 'create', 'upload'].some(el => route.path.includes(el)))
 

@@ -41,11 +41,14 @@ export default defineNuxtModule<ModuleOptions>({
 			}
 		}
 
+		//TODO: exclude profiling paths from watch paths of nitro and nuxt -> nuxt.options.watch.exclude
+		// otherwsie it makes dev environment slow
+
 		const {
 			meta,
 			assets
 		} = await analyzePackageDirs(profilingPaths)
-		// TODO: add nitro assets for packages instead of using templates
+
 		createPackageProfileTemplate(meta)
 
 		addServerImports([
