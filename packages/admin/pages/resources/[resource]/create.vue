@@ -32,12 +32,13 @@
 			</div>
 		</div>
 		<div class="p-8">
-			<FhirResourceForm :key="selectedProfileUrl" :resourceUrl="selectedProfileUrl" />
+			<FhirResourceForm @submit="onSubmit" :key="selectedProfileUrl" :resourceUrl="selectedProfileUrl" />
 		</div>
 	</div>
 </template>
 <script setup lang="ts">
 	import type { StructureDefinition, ResourceType } from '@medplum/fhirtypes'
+	import type { Resource } from '@medplum/fhirtypes'
 
 	type Profile = Pick<StructureDefinition, 'name' | 'description' | 'publisher' | 'status' | 'url'> & { base: boolean }
 
@@ -57,4 +58,10 @@
 	})
 
 	const selectedProfileUrl = ref<string>(props?.profiles.find(profile => profile.base)?.url || '')
+
+	const onSubmit = (resp: Resource) => {
+		if(resp?.id){
+			navigateTo(`/resources/${props.resourceType}/${resp.id}`)
+		}
+	}
 </script>

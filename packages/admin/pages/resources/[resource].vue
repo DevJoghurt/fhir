@@ -21,11 +21,13 @@
 	import { useResource } from '#imports'
 	import type { FhirResource } from '#fhir/types'
 
+	const router = useRouter()
+
 	const route = useRoute()
 
 	const resourceType = ref<FhirResource | null>(route.params.resource as FhirResource)
 
-	const resourceId = ref<string | string[] | null>(route.params?.id || null)
+	const resourceId = computed(() =>route.params?.id || null)
 
 	const isBasePath = computed(() => !['profile', 'create', 'upload'].some(el => route.path.includes(el)))
 

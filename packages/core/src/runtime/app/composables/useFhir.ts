@@ -1,8 +1,11 @@
 import {
 	useState,
 	useFetch,
-	useRuntimeConfig
+	useRuntimeConfig,
+	onMounted,
+	ref
 } from '#imports'
+import type { Ref } from '#imports'
 import { defu } from 'defu'
 import type {
 	ExtractResource,
@@ -73,6 +76,41 @@ type UseFhirOptions = {
 	logLevel?: 'silent' | 'debug' | 'info' | 'warn' | 'error';
 }
 
+/**
+ * A runtime fetch function that behaves similarly to useFetch but works at runtime.
+ * It returns an object with data, error, and pending properties.
+ */
+export async function runtimeFetch<T = any>(
+	url: string | URL,
+	options: {
+		method?: FetchMethod;
+		headers?: Record<string, string>;
+		body?: any;
+		asynchRequest?: boolean;
+	}
+): Promise<{ data: Ref<T | null>; error: any; pending: Ref<boolean>}> {
+	const data = ref<T | null>(null);
+	const error = ref<any>(null);
+	const pending = ref<boolean>(true);
+
+	try {
+		pending.value = true;
+		data.value = await $fetch<T>(url.toString(), {
+			method: options.method || 'GET',
+			headers: options.headers,
+			body: options.body,
+		});
+		error.value = null;
+	} catch (err) {
+		data.value = null;
+		error.value = err;
+	} finally {
+		pending.value = false;
+	}
+
+	return { data, error, pending };
+}
+
 export function useFhir(options: UseFhirOptions = {
 	useCredentials: false,
 	logLevel: 'info'
@@ -108,40 +146,62 @@ export function useFhir(options: UseFhirOptions = {
 
 	const accessToken = sessionState.value.accessToken || null
 
-	const fetch = <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: FetchOptions<any>): AsyncData<T, any> => {
-		url = url.toString()
+	const isMounted = ref(false);
 
+	onMounted(() => {
+		isMounted.value = true;
+	});
+
+	const fetch = <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: FetchOptions<any>): AsyncData<T, any> => {
+		url = url.toString();
+
+		if (isMounted.value) {
+			// Use runtimeFetch if the component is fully mounted
+			return runtimeFetch<T>(url, {
+				method,
+				headers: {
+					Accept: 'application/fhir+json',
+					...(fetchOptions?.asynchRequest && { Prefer: 'respond-async' }),
+					...(!config.useCredentials && accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+					...(config.useCredentials && config.medplum?.clientId && config.medplum?.clientSecret
+						? { Authorization: `Basic ${encodeBase64(config.medplum.clientId + ':' + config.medplum.clientSecret)}` }
+						: {})
+				},
+				body: fetchOptions?.body,
+			});
+		}
+
+		// Use useFetch if the component is not fully mounted
 		return useFetch<T>(url, {
 			method: method as any,
 			...fetchOptions,
 			onRequest({ options }) {
-				options.headers.set('Accept', 'application/fhir+json')
+				options.headers.set('Accept', 'application/fhir+json');
 				// Set request header for async requests
-				if(fetchOptions?.asynchRequest){
-					options.headers.set('Prefer', 'respond-async')
+				if (fetchOptions?.asynchRequest) {
+					options.headers.set('Prefer', 'respond-async');
 				}
 				// Set the request headers for authorization
-				if(!config.useCredentials && accessToken){
-					options.headers.set('Authorization', `Bearer ${accessToken}`)
-				}
-				else if(config.useCredentials && config.medplum?.clientId && config.medplum?.clientSecret){
-					const basicAuth = encodeBase64(config.medplum.clientId + ':' + config.medplum.clientSecret)
-					options.headers.set('Authorization', `Basic ${basicAuth}`)
+				if (!config.useCredentials && accessToken) {
+					options.headers.set('Authorization', `Bearer ${accessToken}`);
+				} else if (config.useCredentials && config.medplum?.clientId && config.medplum?.clientSecret) {
+					const basicAuth = encodeBase64(config.medplum.clientId + ':' + config.medplum.clientSecret);
+					options.headers.set('Authorization', `Basic ${basicAuth}`);
 				}
 			},
 			onRequestError(event) {
-			  //TODO: Handle the request errors
+				//TODO: Handle the request errors
 			},
 			onResponse({ response }) {
-			  //TODO: Process the response data
+				//TODO: Process the response data
 			},
 			onResponseError(event) {
-			  // Handle the response errors
-			  if(event.response.status === 401){
-				// handle unauthorized requests
-			  }
+				// Handle the response errors
+				if(event.response.status === 401){
+					// handle unauthorized requests
+				}
 			},
-		}) as AsyncData<T, any>
+		}) as AsyncData<T, any>;
 	}
 
 	const client = new FhirClient({

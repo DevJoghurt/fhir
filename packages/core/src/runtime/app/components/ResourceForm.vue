@@ -29,7 +29,7 @@
 						size="sm"
 						>
 						<component
-							:is="`FhirFormDataType-${element.type}`"
+							:is="`FhirDataTypeForm-${element.type}`"
 							v-model="resourceState[element.path]"
 							:isArray="element.isArray"
 							/>
@@ -47,12 +47,15 @@
 <script lang="ts" setup>
 	import type { FormSubmitEvent } from '@nuxt/ui'
 	import { useFhir, ref, useStructureDefinition, useTemplateRef } from '#imports'
+	import type { Resource } from '@medplum/fhirtypes'
 
 	const props = defineProps<{
 		resourceUrl: string
 	}>()
 
-	const emit = defineEmits(['submit'])
+	const emit = defineEmits<{
+		(e: 'submit', resource: Resource): void
+	}>()
 
 	const form = useTemplateRef('ResourceForm')
 
@@ -71,6 +74,8 @@
 	const resourceState = await structureDefintion.getResourceState(resourceUrl.value)
 
 	const handleSubmit = async (event: FormSubmitEvent<any>) => {
+		event.preventDefault()
+
 		const resource = await structureDefintion.createResource(resourceUrl.value, resourceState)
 		if(!resource){
 			return
@@ -78,7 +83,7 @@
 		loading.value = true
 		const { data } = await createResource<any>(resource)
 		loading.value = false
-
+		form.value?.clear()
 		emit('submit', data.value)
 	}
 </script>

@@ -11,5 +11,6 @@
 
 	const uri = ref<string>('')
 
+	const emit = defineEmits(['update:modelValue'])
 	//TODO validate URI
 </script>

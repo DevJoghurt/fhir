@@ -83,7 +83,7 @@ export interface InternalTypeSchema {
 
 interface ResourceState {
 	resourceType: string;
-	id: string | undefined;
+	id?: string | undefined;
 	[ key: string ]: any;
 }
 
@@ -194,10 +194,16 @@ class StructureDefinitionHandler {
 		};
 
 		for (const element of resource.element) {
+			// get atttribute name from path
+			const parts = element.path.split('.');
+			const attribute = parts[1] || null;
+			if(attribute === null){
+				continue;
+			}
 			if (element.isArray) {
-				state[element.path] = defaultState[element.path] || [];
+				state[element.path] = defaultState[attribute] || [];
 			} else {
-				state[element.path] = defaultState[element.path] || null;
+				state[element.path] = defaultState[attribute] || null;
 			}
 		}
 

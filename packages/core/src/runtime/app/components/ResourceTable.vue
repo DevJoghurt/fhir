@@ -6,7 +6,39 @@
 			:columns="columns"
 			:loading="status === 'pending'"
 			loading-color="primary"
-			class="flex-1" />
+			class="flex-1">
+			<template #id-cell="{ row }">
+				<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ row.getValue('id') }}</ULink>
+			</template>
+			<template #name-cell="{ row }">
+				<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ formatName(row.getValue('name')) }}</ULink>
+			</template>
+			<template #actions-cell="{ row }">
+				<UDropdownMenu
+					:content="{
+						align: 'end',
+					}",
+					:items="[
+						{
+							label: 'Details',
+							onSelect: () => emit('select', row.original)
+						},
+						{
+							label: 'Delete',
+							onSelect: () => {}
+						}
+					]"
+				>
+					<UButton
+						icon="i-lucide-ellipsis-vertical"
+						color="neutral"
+						variant="ghost"
+						class="ml-auto cursor-pointer"
+					/>
+				</UDropdownMenu>
+
+			</template>
+		</UTable>
 	  	<div class="flex justify-between border-t border-(--ui-border) px-4 py-4">
 			<UPagination
 				:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
@@ -22,11 +54,15 @@
 	import { formatHumanName, formatDateTime, isHumanName } from '../../utils'
 	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
-	import type { HumanName, Meta, Identifier } from '@medplum/fhirtypes'
+	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
 
 	const props = defineProps<{
-		resourceType: FhirResource
+		resourceType: ResourceType
+	}>()
+
+	const emit = defineEmits<{
+		(e: 'select', resource: Resource): void
 	}>()
 
 	const table = useTemplateRef('table')
@@ -44,12 +80,15 @@
 
 	const items = computed(() => data.value?.entry?.map((entry: any) => {
 		const {resourceType, ...item} = entry.resource
-		return item
+		return {
+			...item
+		}
 	}) ?? [])
 
 	// Create columns based on the mapping columns
 
 	const defaultMappingColumns = {
+		CodeSystem: ['id', 'name', 'meta'],
 		Patient: ['id', 'name', 'meta'],
 		Practitioner: ['id', 'name', 'meta'],
 		Organization: ['id', 'identifier', 'name', 'meta'],
@@ -63,9 +102,19 @@
 		ImagingStudy: ['id', 'identifier', 'meta'],
 		ImplementationGuide: ['id', 'name', 'title', 'meta'],
 		default: ['id', 'meta']
-	} as Record<FhirResource | 'default', string[]>
+	} as Record<ResourceType | 'default', string[]>
 
 	const mappingColumns = defaultMappingColumns[resource.value] || defaultMappingColumns['default']
+
+	const formatName = (name: HumanName[] | string) => {
+		if (isHumanName(name)) {
+			return formatHumanName(name)
+		}
+		if(typeof name === 'string') {
+			return name
+		}
+		return ''
+	}
 
 	const columns = mappingColumns.map(key => {
 			const header = key === 'meta' ? 'Last Updated' : key.charAt(0).toUpperCase() + key.slice(1)
@@ -82,17 +131,11 @@
 					}
 					if (key === 'name') {
 						const name = row.getValue('name') as HumanName[]
-						if (isHumanName(name)) {
-							return formatHumanName(name)
-						}
-						if(typeof name === 'string') {
-							return name
-						}
-						return ''
+						return formatName(name)
 					}
 					if (key === 'identifier') {
 						const identifier = row.getValue('identifier') as Identifier[]
-						if (identifier[0]) {
+						if (identifier && identifier[0]) {
 							return identifier[0].value || identifier[0].id || identifier[0].system || ''
 						}
 						return ''
@@ -104,34 +147,7 @@
 	}) as TableColumn<any>[]
 
 	columns.push({
-		id: 'actions',
-		cell: ({ row }) => {
-			return h(
-			'div',
-			{ class: 'text-right' },
-			h(UDropdownMenu, {
-				content: {
-					align: 'end',
-				},
-				items: [{
-					label: 'Details',
-					onSelect: () => {},
-				}, {
-					label: 'Delete',
-					onSelect: () => {
-
-					},
-				}],
-				},
-				() =>
-				h(UButton, {
-					icon: 'i-lucide-ellipsis-vertical',
-					color: 'neutral',
-					variant: 'ghost',
-					class: 'ml-auto cursor-pointer',
-				}),
-			),
-			)
-		}
+		accessorKey: 'actions',
+		header: 'Actions'
 	})
 </script>

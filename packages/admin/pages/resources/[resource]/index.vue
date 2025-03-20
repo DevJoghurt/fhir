@@ -1,12 +1,16 @@
 <template>
 	<section>
-		<FhirResourceTable :key="resourceType || ''" :resource-type="resourceType" />
+		<FhirResourceTable @select="onSelect" :key="resourceType || ''" :resource-type="resourceType" />
 	</section>
 </template>
 <script setup lang="ts">
-	import type { FhirResource } from '#fhir/types'
+	import type { Resource, ResourceType } from '@medplum/fhirtypes'
 
-	defineProps<{
-		resourceType: FhirResource
+	const props = defineProps<{
+		resourceType: ResourceType
 	}>()
+
+	const onSelect = (resource: Resource) => {
+		navigateTo(`/resources/${props.resourceType}/${resource.id}`)
+	}
 </script>

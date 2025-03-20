@@ -10,4 +10,6 @@
 	import { ref } from '#imports'
 
 	const string = ref<string>('')
+
+	const emit = defineEmits(['update:modelValue'])
 </script>

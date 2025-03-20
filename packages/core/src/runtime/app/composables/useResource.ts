@@ -1,6 +1,6 @@
 import { useFhir, useState } from '#imports'
 import type { Ref } from '#imports'
-import type { ResourceType } from '@medplum/fhirtypes'
+import type { ResourceType, Resource } from '@medplum/fhirtypes'
 
 export type Profile = {
 	base: string;
@@ -72,13 +72,38 @@ class ResourceHandler {
 		return true;
 	}
 
+	/**
+	 * Get the resource schema
+	 * @param resourceType
+	 * @returns
+	 */
 	getResources() {
 		// return the cached resources as array
 		return Object.values(this.resources.value);
 	}
 
-	async loadProfiles(resource: ResourceType) {
-		const rs = this.resources.value[resource];
+	/**
+	 * Resolve the profile of a resource
+	 * @param resource Resource
+	 * @returns	url of the profile
+	 *
+	 */
+	resolveProfile(resource: Resource) {
+		let profile = null;
+		if(resource?.meta?.profile && resource.meta.profile.length > 0) {
+			profile = resource.meta.profile[0];
+		}
+		else if (resource?.resourceType && this.resources.value[resource?.resourceType]) {
+			profile = this.resources.value[resource.resourceType].profile.base;
+		}
+		if (!profile) {
+			profile = 'http://hl7.org/fhir/StructureDefinition/' + resource?.resourceType;
+		}
+		return profile;
+	}
+
+	async loadProfiles(resourceType: ResourceType) {
+		const rs = this.resources.value[resourceType];
 		// load cached profiles if available
 		if (rs.profile.definitions) {
 			return rs.profile.definitions;
@@ -102,7 +127,7 @@ class ResourceHandler {
 			base: rs.profile.base === entry.resource?.url || false
 		})) || [];
 
-		this.resources.value[resource].profile.definitions = profiles;
+		this.resources.value[resourceType].profile.definitions = profiles;
 
 		return profiles;
 	}
