@@ -69,6 +69,10 @@ export default defineNuxtModule<ModuleOptions>({
 			name: 'useStructureDefinition',
 			as: 'useStructureDefinition',
 			from: resolve('./runtime/app/composables/useStructureDefinition')
+		}, {
+			name: 'operationOutcomeToString',
+			as: 'operationOutcomeToString',
+			from: resolve('./runtime/utils/outcomes')
 		}]);
 
 		addServerImports([{

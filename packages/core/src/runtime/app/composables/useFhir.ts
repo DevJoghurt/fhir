@@ -13,7 +13,8 @@ import type {
 	CapabilityStatement,
 	OperationOutcome,
 	Resource,
-	Bundle
+	Bundle,
+	ValueSet
 } from '@medplum/fhirtypes'
 import type {
 	QueryTypes,
@@ -22,6 +23,7 @@ import type {
 	ExtendedFetchOptions
 } from '../../utils'
 import { FhirClient, encodeBase64 } from "../../utils"
+import type { ValueSetExpandParams } from '../../utils'
 import type { UseFetchOptions, AsyncData } from '#app'
 
 type SessionState = {
@@ -126,6 +128,7 @@ export function useFhir(options: UseFhirOptions = {
 	readStructureDefinition: (idOrUrl: string, operation?: '$snapshot' | '$meta', options?: FetchOptions<any>) => AsyncData<Bundle<ExtractResource<'StructureDefinition'>>, any>;
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
 	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
+	valueSetExpand: (params: ValueSetExpandParams, options?: FetchOptions<any>) => AsyncData<ValueSet, any>;
 	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
 	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => AsyncData<T, any>;
 	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => AsyncData<T, any>;
@@ -216,6 +219,7 @@ export function useFhir(options: UseFhirOptions = {
 		fhirSearchUrl: client.fhirSearchUrl.bind(client),
 		createUUID: client.createUUID.bind(client),
 		readResource: client.readResource.bind(client),
+		valueSetExpand: client.valueSetExpand.bind(client),
 		search: client.search.bind(client),
 		readHistory: client.readHistory.bind(client),
 		readVersion: client.readVersion.bind(client),

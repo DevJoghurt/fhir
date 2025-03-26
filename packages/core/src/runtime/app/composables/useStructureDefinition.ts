@@ -10,10 +10,11 @@ import type {
 	ElementDefinition,
 	StructureDefinition,
 	Extension,
-	Coding
+	Coding,
+	ElementDefinitionBinding
   } from '@medplum/fhirtypes';
 
-const supportedCodingTypes = [ 'boolean', 'uri', 'string', 'Identifier', 'HumanName' ] as const;
+const supportedCodingTypes = [ 'boolean', 'uri', 'string', 'Identifier', 'HumanName', 'code', 'Code' ] as const;
 export type SupportedCodingType = (typeof supportedCodingTypes)[number];
 
 /**
@@ -41,6 +42,7 @@ export interface InternalTypeSchema {
 	isRequired: boolean;
 	isArray: boolean;
 	type: SupportedCodingType;
+	binding?: ElementDefinitionBinding;
 	element?: InternalSchemaElement[];
   }
 
@@ -155,7 +157,7 @@ class StructureDefinitionHandler {
 		for(const el of elements){
 			const type = codingType(el.type || []);
 
-			if(type === null || (el.isModifier === true)){
+			if(type === null){
 				continue;
 			}
 			const path = elementPath(el);
@@ -173,6 +175,7 @@ class StructureDefinitionHandler {
 				max: parseCardinality(el?.max || '1'),
 				isRequired: el?.min ? el.min > 0 : false,
 				type: type,
+				binding: el?.binding || undefined,
 				isArray: el.max === '*' || el.max === '-1',
 			};
 

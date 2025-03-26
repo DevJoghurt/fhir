@@ -1,5 +1,6 @@
 /*
 * Universal Fhir Client Implementation
+* Credits medplum: https://github.com/medplum/medplum/blob/main/packages/core/src/client.ts
 */
 import { defu } from 'defu'
 import { concatUrls, getQueryString, ContentType } from '../utils'
@@ -10,7 +11,8 @@ import type {
 	CapabilityStatement,
 	OperationOutcome,
 	Resource,
-	Bundle
+	Bundle,
+	ValueSet
 } from '@medplum/fhirtypes'
 import consola from 'consola'
 import type { FetchOptions as OfetchOptions } from 'ofetch';
@@ -26,6 +28,18 @@ export interface PatchOperation {
 	readonly op: 'add' | 'remove' | 'replace' | 'copy' | 'move' | 'test';
 	readonly path: string;
 	readonly value?: any;
+}
+
+/**
+ * ValueSet $expand operation parameters.
+ * See: https://hl7.org/fhir/r4/valueset-operation-expand.html
+ */
+export interface ValueSetExpandParams {
+	url?: string;
+	filter?: string;
+	date?: string;
+	offset?: number;
+	count?: number;
 }
 
 export type FetchMethod = 'POST' | 'PATCH' | 'DELETE' | 'PUT' | 'GET'
@@ -380,6 +394,20 @@ export class FhirClient {
 			body: JSON.stringify(resource),
 			...options
 		});
+	}
+
+	/**
+	 * Searches a ValueSet resource using the "expand" operation.
+	 * See: https://www.hl7.org/fhir/operation-valueset-expand.html
+	 * @category Search
+	 * @param params - The ValueSet expand parameters.
+	 * @param options - Optional fetch options.
+	 * @returns Promise to expanded ValueSet.
+	 */
+	valueSetExpand(params: ValueSetExpandParams, options?: FetchOptions<any>): AsyncData<ValueSet, any> | Promise<ValueSet> {
+		const url = this.fhirUrl('ValueSet', '$expand');
+		url.search = new URLSearchParams(params as Record<string, string>).toString();
+		return this.fetchInternal<ValueSet>('GET', url.toString(), options);
 	}
 
 	/**

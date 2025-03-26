@@ -25,7 +25,7 @@
 						},
 						{
 							label: 'Delete',
-							onSelect: () => {}
+							onSelect: () => emit('delete', row.original)
 						}
 					]"
 				>
@@ -52,7 +52,6 @@
 <script lang="ts" setup>
 	import { useFhir, computed, useTemplateRef, ref, h } from '#imports'
 	import { formatHumanName, formatDateTime, isHumanName } from '../../utils'
-	import type { FhirResource } from '../../types'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
@@ -62,7 +61,8 @@
 	}>()
 
 	const emit = defineEmits<{
-		(e: 'select', resource: Resource): void
+		(e: 'select', resource: Resource): void;
+		(e: 'delete', resource: Resource): void;
 	}>()
 
 	const table = useTemplateRef('table')

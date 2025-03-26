@@ -1,12 +1,12 @@
 <template>
 	<section>
-		<div class="flex bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4">
-			<h1 class="text-xl font-semibold">{{ resourceType }}</h1>
-		</div>
-		<div class="flex bg-gray-50 gap-4 items-center px-2">
+		<div class="flex bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4 space-x-4 items-center">
 			<ULink to="/resources">
 				<UButton icon="heroicons-chevron-left" variant="ghost">Back</UButton>
 			</ULink>
+			<h1 class="text-xl font-semibold">{{ resourceType }}</h1>
+		</div>
+		<div class="flex bg-gray-50 gap-4 items-center px-2">
 			<UNavigationMenu
 				class="w-full"
 				highlight-color="primary"

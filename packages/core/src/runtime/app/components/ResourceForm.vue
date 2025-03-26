@@ -24,7 +24,7 @@
 					<UFormField
 						:label="element.name"
 						:name="element.path"
-
+						:required="element.isRequired"
 						:description="element.description"
 						size="sm"
 						>
@@ -32,7 +32,8 @@
 							:is="`FhirDataTypeForm-${element.type}`"
 							v-model="resourceState[element.path]"
 							:isArray="element.isArray"
-							/>
+							:binding="element.binding"
+						/>
 					</UFormField>
 				</template>
 			</div>
@@ -71,7 +72,10 @@
 	const resourceDefintion = await structureDefintion.loadResourceDefinition(resourceUrl.value, true)
 	// END TODO
 
+	console.log(resourceDefintion)
+
 	const resourceState = await structureDefintion.getResourceState(resourceUrl.value)
+	console.log(resourceState)
 
 	const handleSubmit = async (event: FormSubmitEvent<any>) => {
 		event.preventDefault()
