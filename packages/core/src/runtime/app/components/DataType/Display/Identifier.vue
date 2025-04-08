@@ -9,6 +9,6 @@
 	import type { Identifier } from '@medplum/fhirtypes'
 
 	defineProps<{
-		value: Identifier[] | []
+		value: Identifier[] | [] | null
 	}>()
 </script>

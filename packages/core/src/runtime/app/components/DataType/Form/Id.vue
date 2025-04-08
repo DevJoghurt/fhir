@@ -2,7 +2,7 @@
 	<UInput
 		name="uri"
 		class="w-full"
-		v-model="string"
+		v-model="id"
 		@change="update"
 		/>
 </template>
@@ -10,28 +10,28 @@
 	import { ref } from '#imports'
 	import type { InternalSchemaElement } from '../../../composables/useFhirResource'
 
-	type StringType = {
+	type IdType = {
 		_id: string
 		value: string
 	} | string | null | undefined
 
-	const emit = defineEmits(['update:modelValue', 'change'])
-
 	const props = defineProps<{
-		modelValue: StringType
+		modelValue: IdType
 		element: InternalSchemaElement
 	}>()
 
-	const string = ref<string>(
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	const id = ref<string>(
 		typeof props.modelValue === 'string'
 			? props.modelValue
 			: props.modelValue?.value || ''
 	);
 
 	const update = () => {
-		let result = string.value as StringType
+		let result = id.value as IdType
 		if(typeof props.modelValue === 'object' && props.modelValue !== null) {
-			result = { ...props.modelValue, value: string.value }
+			result = { ...props.modelValue, value: id.value }
 		}
 		emit('update:modelValue', result)
 		emit('change', result, props.element)

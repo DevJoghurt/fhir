@@ -1,34 +1,36 @@
 <template>
-	<div class="flex items-center space-x-4 border border-gray-300 rounded-md py-1 px-2">
-		<UCheckbox v-model="boolean" @change="update" label="Select" />
-	</div>
+	<UInputNumber
+		name="integer"
+		class="w-full"
+		v-model="unsignedInt"
+		@change="update" />
 </template>
 <script setup lang="ts">
 	import { ref } from '#imports'
 	import type { InternalSchemaElement } from '../../../composables/useFhirResource'
 
-	type BooleanType = {
+	type UnsignedIntType = {
 		_id: string
-		value: boolean
-	} | boolean| null | undefined
+		value: number
+	} | number | null | undefined
 
 	const props = defineProps<{
-		modelValue: BooleanType
+		modelValue: UnsignedIntType
 		element: InternalSchemaElement
 	}>()
 
-	const boolean = ref<boolean>(
-		typeof props.modelValue === 'boolean'
+	const unsignedInt = ref<number>(
+		typeof props.modelValue === 'number'
 			? props.modelValue
-			: props.modelValue?.value || false
+			: props.modelValue?.value || 0
 	);
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
 	const update = () => {
-		let result = boolean.value as BooleanType
+		let result = unsignedInt.value as UnsignedIntType
 		if(typeof props.modelValue === 'object' && props.modelValue !== null) {
-			result = { ...props.modelValue, value: boolean.value }
+			result = { ...props.modelValue, value: unsignedInt.value }
 		}
 		emit('update:modelValue', result)
 		emit('change', result, props.element)

@@ -50,7 +50,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { useFhir, computed, useTemplateRef, ref, h } from '#imports'
+	import { useFhirClient, computed, useTemplateRef, ref, h } from '#imports'
 	import { formatHumanName, formatDateTime, isHumanName } from '../../utils'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
@@ -74,7 +74,7 @@
 
 	const resource = ref(props.resourceType)
 
-	const { search } = useFhir()
+	const { search } = useFhirClient()
 
 	const { data, status } = await search(resource.value)
 

@@ -34,7 +34,7 @@ type UseFhirOptions = {
 	logLevel?: 'silent' | 'debug' | 'info' | 'warn' | 'error';
 }
 
-export function useFhir(options: UseFhirOptions = {
+export function useFhirClient(options: UseFhirOptions = {
 	useCredentials: false,
 	logLevel: 'info'
 }): {

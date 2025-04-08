@@ -29,6 +29,9 @@
 				</div>
 			</UCard>
 			<UCard
+				:ui="{
+					body: 'p-0 sm:p-0'
+				}"
 				class="w-full lg:w-1/2">
 				<template #header>
 					<div class="flex">
@@ -38,27 +41,40 @@
 						</div>
 					</div>
 				</template>
-				<ul>
-					<li v-for="item in history.entry" :key="item.id" class="border-b border-gray-200 flex justify-between gap-2 py-2">
-						<div class="flex gap-2">
-							<UBadge>{{ item.request?.method }}</UBadge>
-							<span>{{ item.request?.url }}</span>
-						</div>
-						<UBadge color="neutral">{{ item.response?.status }}</UBadge>
-					</li>
-				</ul>
+				<div class="overflow-y-auto h-80 p-4 sm:p-4">
+					<ul>
+						<li v-for="item in history.entry" :key="item.id" class="border-b border-gray-200 flex justify-between gap-2 py-2">
+							<div class="flex gap-2">
+								<div class="w-18">
+									<UBadge :color="methodColorMapping[item.request?.method || 'PATCH']">{{ item.request?.method }}</UBadge>
+								</div>
+								<span class="text-xs">{{ item.request?.url }}</span>
+							</div>
+							<UBadge color="neutral">{{ item.response?.status }}</UBadge>
+						</li>
+					</ul>
+				</div>
 			</UCard>
 		</div>
 	</section>
 </template>
 <script setup lang="ts">
-	const { readCapabilityStatement, readHistory } = useFhir()
+	const { readCapabilityStatement, readHistory } = useFhirClient()
 
 	const statusColorMapping = {
 		draft: 'neutral',
 		active: 'success',
 		retired: 'error',
 		unknown: 'info'
+	} as const
+
+	const methodColorMapping = {
+		GET: 'success',
+		POST: 'info',
+		PUT: 'warning',
+		DELETE: 'error',
+		HEAD: 'warning',
+		PATCH: 'neutral',
 	} as const
 
 	const { data: capabilityStatement, error } = await readCapabilityStatement()

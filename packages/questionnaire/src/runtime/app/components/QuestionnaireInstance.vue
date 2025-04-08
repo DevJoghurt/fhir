@@ -42,7 +42,7 @@
 </template>
 <script lang="ts" setup>
 	import z from 'zod'
-	import { reactive, useFhir } from '#imports'
+	import { reactive, useFhirClient } from '#imports'
 	import type { FormSubmitEvent } from '@nuxt/ui'
 
 	const schema = z.object({
@@ -60,7 +60,7 @@
 		purpose: undefined
 	})
 
-	const { createResource } = useFhir()
+	const { createResource } = useFhirClient()
 
 	const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 		const {  } = await createResource({

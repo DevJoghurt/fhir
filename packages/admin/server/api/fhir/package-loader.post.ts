@@ -1,4 +1,4 @@
-import { defineEventHandler, useFhir, readValidatedBody, setResponseStatus, $useFlow, normalizeBundleResponse } from '#imports';
+import { defineEventHandler, useFhirClient, readValidatedBody, setResponseStatus, $useFlow, normalizeBundleResponse } from '#imports';
 import z from 'zod';
 
 const bodySchema = z.object({
@@ -8,7 +8,7 @@ const bodySchema = z.object({
 
 
 export default defineEventHandler(async (event) => {
-	const { executeBatch, createUUID } = useFhir();
+	const { executeBatch, createUUID } = useFhirClient();
 
 	const validatedResult = await readValidatedBody(event, bodySchema.safeParse)
 	if (!validatedResult.success) {

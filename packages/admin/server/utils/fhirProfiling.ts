@@ -1,8 +1,8 @@
-import { useFhir } from '#imports';
+import { useFhirClient } from '#imports';
 import type { Resource } from '@medplum/fhirtypes'
 
 export async function loadFhirProfileIntoServer(resource: Resource) {
-	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhir();
+	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhirClient();
 
 	// check if resource is StructureDefinition and has a snapshot
 	let needsToCreateSnapshot = resource.resourceType === 'StructureDefinition' && typeof resource?.snapshot === 'undefined';

@@ -1,4 +1,4 @@
-import { useFhir, useState } from '#imports'
+import { useFhirClient, useState } from '#imports'
 import type { Ref } from '#imports'
 import type { ResourceType, Resource } from '@medplum/fhirtypes'
 
@@ -25,40 +25,30 @@ type InternalResourceSchema = {
 
 
 /**
- * ResourceHandler based on CapatibilityStatement and loaded StructureDefinitions of fhir server's resources
+ * Uses the FHIR server CapatibilityStatement to analyze the supported features of the FHIR server
  *
  * @returns ResourceHandler
  */
-export async function useResource() {
-	const resourceHandler = new ResourceHandler();
-	await resourceHandler.loadCapatibilityStatement();
-	return resourceHandler;
-}
+export async function useFhirCapatibilityStatement() {
 
-class ResourceHandler {
-	// use global state to cache the resources
-	private readonly resources: Ref<Record<ResourceType, InternalResourceSchema>> = useState('fhir:resources', () => Object.create(null));
-	private readonly initialized = useState<boolean>('fhir:resources:initialized',()=>false);
+	const resources: Ref<Record<ResourceType, InternalResourceSchema>> = useState('fhir:cs:resources', () => Object.create(null));
+	const initialized = useState<boolean>('fhir:cs:resources:initialized',()=>false);
 
-	constructor() {
-
-	}
-
-	async loadCapatibilityStatement(force: boolean = false) {
-		if (this.initialized.value && !force) {
+	const loadCapatibilityStatement = async (force: boolean = false) => {
+		if (initialized.value && !force) {
 			return;
 		}
 		// load the capatibility statement
-		const { readCapabilityStatement } = useFhir()
+		const { readCapabilityStatement } = useFhirClient()
 
 		const { data: capabilityStatement } = await readCapabilityStatement()
 		if (!capabilityStatement?.value) {
 			return false;
 		}
 		const rest = capabilityStatement.value?.rest || []
-		const resources = rest[0].resource || []
-		for (const resource of resources) {
-			this.resources.value[resource.type as ResourceType] = {
+		const restResources = rest[0].resource || []
+		for (const resource of restResources) {
+			resources.value[resource.type as ResourceType] = {
 				name: resource.type as string,
 				type: resource.profile as string,
 				profile: {
@@ -68,7 +58,8 @@ class ResourceHandler {
 				}
 			}
 		}
-		this.initialized.value = true;
+		initialized.value = true;
+
 		return true;
 	}
 
@@ -77,9 +68,9 @@ class ResourceHandler {
 	 * @param resourceType
 	 * @returns
 	 */
-	getResources() {
+	const getResources = () => {
 		// return the cached resources as array
-		return Object.values(this.resources.value);
+		return Object.values(resources.value);
 	}
 
 	/**
@@ -88,13 +79,13 @@ class ResourceHandler {
 	 * @returns	url of the profile
 	 *
 	 */
-	resolveProfile(resource: Resource) {
+	const resolveProfile = (resource: Resource) => {
 		let profile = null;
 		if(resource?.meta?.profile && resource.meta.profile.length > 0) {
 			profile = resource.meta.profile[0];
 		}
-		else if (resource?.resourceType && this.resources.value[resource?.resourceType]) {
-			profile = this.resources.value[resource.resourceType].profile.base;
+		else if (resource?.resourceType && resources.value[resource?.resourceType]) {
+			profile = resources.value[resource.resourceType].profile.base;
 		}
 		if (!profile) {
 			profile = 'http://hl7.org/fhir/StructureDefinition/' + resource?.resourceType;
@@ -102,14 +93,14 @@ class ResourceHandler {
 		return profile;
 	}
 
-	async loadProfiles(resourceType: ResourceType) {
-		const rs = this.resources.value[resourceType];
+	const loadProfiles = async (resourceType: ResourceType) => {
+		const rs = resources.value[resourceType];
 		// load cached profiles if available
 		if (rs.profile.definitions) {
 			return rs.profile.definitions;
 		}
 		// load profiles from server
-		const { search } = useFhir()
+		const { search } = useFhirClient()
 
 		const {
 			data
@@ -127,9 +118,17 @@ class ResourceHandler {
 			base: rs.profile.base === entry.resource?.url || false
 		})) || [];
 
-		this.resources.value[resourceType].profile.definitions = profiles;
+		resources.value[resourceType].profile.definitions = profiles;
 
 		return profiles;
 	}
 
+	await loadCapatibilityStatement();
+
+	return {
+		loadCapatibilityStatement,
+		getResources,
+		resolveProfile,
+		loadProfiles
+	};
 }
