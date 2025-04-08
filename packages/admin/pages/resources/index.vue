@@ -26,13 +26,13 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref, useResource, computed } from '#imports'
+	import { ref, useFhirCapatibilityStatement, computed } from '#imports'
 
 	const searchString = ref<string>('')
 
-	const resourceHandler = await useResource()
+	const { getResources } = await useFhirCapatibilityStatement()
 
-	const loadedResources = resourceHandler.getResources()
+	const loadedResources = getResources()
 
 	const filteredResources = computed(() =>{
 		if (!searchString.value) {

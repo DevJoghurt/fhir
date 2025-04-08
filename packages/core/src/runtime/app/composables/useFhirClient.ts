@@ -24,7 +24,7 @@ import type {
 } from '../../utils'
 import { FhirClient, encodeBase64 } from "../../utils"
 import type { ValueSetExpandParams } from '../../utils'
-import type { UseFetchOptions, AsyncData } from '#app'
+import type { UseFetchOptions, AsyncData , AsyncDataRequestStatus} from '#app'
 
 type SessionState = {
 	accessToken?: string
@@ -94,26 +94,30 @@ export async function runtimeFetch<T = any>(
 	const data = ref<T | null>(null);
 	const error = ref<any>(null);
 	const pending = ref<boolean>(true);
+	const status = ref<AsyncDataRequestStatus>('idle');
 
 	try {
 		pending.value = true;
+		status.value = 'pending';
 		data.value = await $fetch<T>(url.toString(), {
 			method: options.method || 'GET',
 			headers: options.headers,
 			body: options.body,
 		});
+		status.value = 'success';
 		error.value = null;
 	} catch (err) {
 		data.value = null;
+		status.value = 'error';
 		error.value = err;
 	} finally {
 		pending.value = false;
 	}
 
-	return { data, error, pending };
+	return { data, error, pending, status };
 }
 
-export function useFhir(options: UseFhirOptions = {
+export function useFhirClient(options: UseFhirOptions = {
 	useCredentials: false,
 	logLevel: 'info'
 }): {

@@ -1,93 +1,60 @@
 <template>
-	<UCard>
-		<UForm
-			ref="ResourceForm"
-			:state="resourceState"
-			@submit="handleSubmit"
-			class="space-y-2">
-			<UFormField
-				label="Resource Type"
-				name="resourceType"
-				size="sm"
-				>
-				<UInput name="resourceType" class="w-full" disabled v-model="resourceState.resourceType" />
-			</UFormField>
-			<UFormField
-				label="Id"
-				name="id"
-				size="sm"
-				>
-				<UInput name="id" class="w-full" disabled v-model="resourceState.id" />
-			</UFormField>
-			<div v-if="resourceDefintion" class="py-4 space-y-4">
-				<template v-for="element in resourceDefintion.element" :key="element.path">
-					<UFormField
-						:label="element.name"
-						:name="element.path"
-						:required="element.isRequired"
-						:description="element.description"
-						size="sm"
-						>
-						<component
-							:is="`FhirDataTypeForm-${element.type}`"
-							v-model="resourceState[element.path]"
-							:isArray="element.isArray"
-							:binding="element.binding"
-						/>
-					</UFormField>
-				</template>
-			</div>
-		</UForm>
-		<template #footer>
-			<div class="flex justify-end">
-				<UButton @click="form?.submit()" :loading="loading">Create</UButton>
-			</div>
-		</template>
-	</UCard>
+	<UForm
+		:state="resourceState"
+		class="space-y-2">
+		<UFormField
+			label="Resource Type"
+			name="resourceType"
+			size="sm"
+			>
+			<UInput name="resourceType" class="w-full" disabled v-model="resourceState.resourceType" />
+		</UFormField>
+		<UFormField
+			label="Id"
+			name="id"
+			size="sm"
+			>
+			<UInput name="id" class="w-full" disabled v-model="resourceState.id" />
+		</UFormField>
+		<div v-if="resourceDefintion" class="py-4 space-y-4">
+			<FhirDataTypeFormBackboneElement v-model="resourceState" @change="update" :nestedElements="resourceDefintion.element" />
+		</div>
+	</UForm>
 </template>
 <script lang="ts" setup>
-	import type { FormSubmitEvent } from '@nuxt/ui'
-	import { useFhir, ref, useStructureDefinition, useTemplateRef } from '#imports'
-	import type { Resource } from '@medplum/fhirtypes'
+	import { ref, useFhirResource } from '#imports'
+
+	/**
+	 * TODO: Refactor this component to use a class representation of the resource and provide and inject the class to the form items.
+	 * For this we need to write own form and field components that can handle the class representation of the resource.
+	 * This can also allow us to implement validation and other features in a more elegant way.
+	 * For now we are using the existing form and field components and passing the resource state as a prop to the form items.
+	 * This approach is working but is not ideal and can lead to issues with reactivity and performance.
+	 * Furthermore the logic is spread across multiple components and is not easy to follow.
+	 */
 
 	const props = defineProps<{
+		modelValue?: any,
 		resourceUrl: string
 	}>()
 
-	const emit = defineEmits<{
-		(e: 'submit', resource: Resource): void
-	}>()
-
-	const form = useTemplateRef('ResourceForm')
-
-	const { createResource } = useFhir()
-
-	let loading = ref(false)
+	const emit = defineEmits(['update:modelValue', 'change'])
 
 	const resourceUrl = ref(props?.resourceUrl || '')
 
-	const structureDefintion = useStructureDefinition()
+	const { loadResourceDefinition, createResourceState, generateResource } = useFhirResource()
 
 	// TODO: remove force reload if implementation is ready
-	const resourceDefintion = await structureDefintion.loadResourceDefinition(resourceUrl.value, true)
+	const resourceDefintion = await loadResourceDefinition(resourceUrl.value, true)
 	// END TODO
 
-	console.log(resourceDefintion)
+	const resourceState = createResourceState(resourceDefintion?.element || [], props.modelValue || {})
+	// add resourceType and id to the resource state
+	if(!resourceState.resourceType) resourceState.resourceType = resourceDefintion?.type || ''
+	if(!resourceState.id) resourceState.id = null
 
-	const resourceState = await structureDefintion.getResourceState(resourceUrl.value)
-	console.log(resourceState)
-
-	const handleSubmit = async (event: FormSubmitEvent<any>) => {
-		event.preventDefault()
-
-		const resource = await structureDefintion.createResource(resourceUrl.value, resourceState)
-		if(!resource){
-			return
-		}
-		loading.value = true
-		const { data } = await createResource<any>(resource)
-		loading.value = false
-		form.value?.clear()
-		emit('submit', data.value)
+	const update = () => {
+		const resource = generateResource(resourceDefintion, resourceState)
+		emit('update:modelValue', resource)
 	}
 </script>

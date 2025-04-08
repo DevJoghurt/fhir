@@ -5,14 +5,14 @@
 </template>
 <script setup lang="ts">
 	import type { Resource, ResourceType } from '@medplum/fhirtypes'
-	import { useFhir, operationOutcomeToString, useToast } from '#imports'
+	import { useFhirClient, operationOutcomeToString, useToast } from '#imports'
 	import type { Ref } from '#imports'
 
 	const props = defineProps<{
 		resourceType: ResourceType
 	}>()
 
-	const { deleteResource } = useFhir()
+	const { deleteResource } = useFhirClient()
 	const toast = useToast()
 
 	const tableKey = ref(props.resourceType || '') as Ref<string>

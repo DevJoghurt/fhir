@@ -58,17 +58,17 @@ export default defineNuxtModule<ModuleOptions>({
 
 		// add all app related things here
 		addImports([{
-			name: 'useFhir',
-			as: 'useFhir',
-			from: resolve('./runtime/app/composables/useFhir')
+			name: 'useFhirClient',
+			as: 'useFhirClient',
+			from: resolve('./runtime/app/composables/useFhirClient')
 		},{
-			name: 'useResource',
-			as: 'useResource',
-			from: resolve('./runtime/app/composables/useResource')
+			name: 'useFhirCapatibilityStatement',
+			as: 'useFhirCapatibilityStatement',
+			from: resolve('./runtime/app/composables/useFhirCapatibilityStatement')
 		}, {
-			name: 'useStructureDefinition',
-			as: 'useStructureDefinition',
-			from: resolve('./runtime/app/composables/useStructureDefinition')
+			name: 'useFhirResource',
+			as: 'useFhirResource',
+			from: resolve('./runtime/app/composables/useFhirResource')
 		}, {
 			name: 'operationOutcomeToString',
 			as: 'operationOutcomeToString',
@@ -76,9 +76,9 @@ export default defineNuxtModule<ModuleOptions>({
 		}]);
 
 		addServerImports([{
-			name: 'useFhir',
-			as: 'useFhir',
-			from: resolve('./runtime/server/utils/useFhir')
+			name: 'useFhirClient',
+			as: 'useFhirClient',
+			from: resolve('./runtime/server/utils/useFhirClient')
 		}]);
 		addComponentsDir({
 			path: resolve('./runtime/app/components'),

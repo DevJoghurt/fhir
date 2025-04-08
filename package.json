@@ -41,21 +41,21 @@
 		"@nhealth/auth": "workspace:*",
 		"@nhealth/questionaire": "workspace:*",
 		"@nhealth/admin": "workspace:*",
-		"nuxt": "3.16.1",
-		"@nuxt/ui": "3.0.1",
-		"@nuxt/kit": "3.16.1",
-		"@nuxt/schema": "3.16.1",
+		"nuxt": "3.16.2",
+		"@nuxt/ui": "3.0.2",
+		"@nuxt/kit": "3.16.2",
+		"@nuxt/schema": "3.16.2",
 		"typescript": "5.8.2",
 		"@typescript-eslint/typescript-estree": "8.26.0",
 		"vue-i18n": "11.1.0"
 	},
 	"devDependencies": {
-		"nuxt": "3.16.1",
+		"nuxt": "3.16.2",
 		"nhealth-cli": "*",
-		"vitest": "3.0.9",
+		"vitest": "3.1.1",
 		"rimraf": "6.0.1",
-		"@nuxt/module-builder": "0.8.4",
-		"typescript": "^5.8.2"
+		"@nuxt/module-builder": "1.0.0",
+		"typescript": "^5.8.3"
 	},
 	"pnpm": {
 		"overrides": {

@@ -160,7 +160,6 @@
 
 	// create default expandables
 	const items = createItems(resource, type);
-	console.log(items);
 	const defaultExpanded = items.map((element) => element.id) || [];
 
 	const transformedItems = transform(items);

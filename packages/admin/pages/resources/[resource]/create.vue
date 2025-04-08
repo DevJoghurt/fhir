@@ -32,13 +32,19 @@
 			</div>
 		</div>
 		<div class="p-8">
-			<FhirResourceForm @submit="onSubmit" :key="selectedProfileUrl" :resourceUrl="selectedProfileUrl" />
+			<UCard>
+				<FhirResourceForm v-model="state" :key="selectedProfileUrl" :resourceUrl="selectedProfileUrl" />
+				<template #footer>
+					<div class="flex justify-end">
+						<UButton :loading="loading" @click.prevent="onSubmit">Create</UButton>
+					</div>
+				</template>
+			</UCard>
 		</div>
 	</div>
 </template>
 <script setup lang="ts">
 	import type { StructureDefinition, ResourceType } from '@medplum/fhirtypes'
-	import type { Resource } from '@medplum/fhirtypes'
 
 	type Profile = Pick<StructureDefinition, 'name' | 'description' | 'publisher' | 'status' | 'url'> & { base: boolean }
 
@@ -46,6 +52,8 @@
 		resourceType: ResourceType,
 		profiles: Profile[]
 	}>()
+
+	const { createResource } = useFhirClient()
 
 
 	const profileItems = computed(() => {
@@ -59,9 +67,14 @@
 
 	const selectedProfileUrl = ref<string>(props?.profiles.find(profile => profile.base)?.url || '')
 
-	const onSubmit = (resp: Resource) => {
-		if(resp?.id){
-			navigateTo(`/resources/${props.resourceType}/${resp.id}`)
+	const loading = ref(false)
+
+	const state = ref(null)
+
+	const onSubmit = async () => {
+		const { data, status } = await createResource<any>(state.value)
+		if(status.value === 'success'){
+			navigateTo(`/resources/${props.resourceType}/${data.value.id}`)
 		}
 	}
 </script>

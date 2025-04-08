@@ -1,24 +1,27 @@
 <template>
 	<section>
-		<div class="flex bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4 space-x-4 items-center">
-			<ULink to="/resources">
-				<UButton icon="heroicons-chevron-left" variant="ghost">Back</UButton>
-			</ULink>
-			<h1 class="text-xl font-semibold">{{ resourceType }}</h1>
-		</div>
-		<div class="flex bg-gray-50 gap-4 items-center px-2">
-			<UNavigationMenu
-				class="w-full"
-				highlight-color="primary"
-				orientation="horizontal"
-				:items="menu"
-			/>
+		<!-- Header -->
+		<div class="overflow-hidden bg-white shadow-sm sticky top-0 z-10">
+			<div class="flex bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4 space-x-4 items-center">
+				<ULink to="/resources">
+					<UButton icon="heroicons-chevron-left" variant="ghost">Back</UButton>
+				</ULink>
+				<h1 class="text-xl font-semibold">{{ resourceType }}</h1>
+			</div>
+			<div class="flex bg-gray-50 gap-4 items-center px-2">
+				<UNavigationMenu
+					class="w-full"
+					highlight-color="primary"
+					orientation="horizontal"
+					:items="menu"
+				/>
+			</div>
 		</div>
 		<NuxtPage :resource-type="resourceType" :profiles="profiles" :resource-id="resourceId" />
 	</section>
 </template>
 <script setup lang="ts">
-	import { useResource } from '#imports'
+	import { useFhirCapatibilityStatement } from '#imports'
 	import type { FhirResource } from '#fhir/types'
 
 	const router = useRouter()
@@ -57,7 +60,7 @@
 	]])
 
 	// read CapabilityStatement and get profiles
-	const resourceHandler = await useResource()
+	const { loadProfiles } = await useFhirCapatibilityStatement()
 
-	const profiles = await resourceHandler.loadProfiles(resourceType.value)
+	const profiles = await loadProfiles(resourceType.value)
 </script>
