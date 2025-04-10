@@ -1,9 +1,11 @@
+type PackageType = 'dir' | 'tar'
+
 export interface FhirPofilePackage {
 	name: string;
-	version: string;
+	version?: string;
 	description?: string;
 	author?: string;
-	fhirVersions: string[];
+	fhirVersions?: string[];
 	dependencies?: Record<string, string>;
 }
 
@@ -18,6 +20,7 @@ export type PackageFile = {
 }
 
 export interface FhirProfilePackageMeta extends FhirPofilePackage {
+	type: PackageType;
 	normalizedName: string;
 	files: PackageFile[];
 }

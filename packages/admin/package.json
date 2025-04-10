@@ -18,10 +18,9 @@
 	},
 	"dependencies": {
 		"@nhealth/fhir": "workspace:*",
-		"@nuxtjs/i18n": "9.5.2",
+		"@nuxtjs/i18n": "9.5.3",
 		"@nuxt/image": "1.10.0",
 		"zod": "3.24.2",
-		"nuxt-queue": "0.1.10",
 		"@nuxt/kit": "3.16.2",
 		"globby": "14.1.0",
 		"pathe": "2.0.3",

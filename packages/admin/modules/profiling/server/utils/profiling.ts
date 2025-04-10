@@ -20,7 +20,7 @@ export async function loadFhirProfileIntoServer(resource: Resource) {
 	if(!needsToCreateSnapshot){
 		return resp;
 	}
-	if(resp.id === undefined){
+	if(!resp!.id){
 		throw new Error('Failed to create resource');
 	}
 	// create a snapshot if it does not exist and patch the resource

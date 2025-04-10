@@ -1,4 +1,4 @@
-import { defineEventHandler, useFhirClient, readValidatedBody, setResponseStatus, $useFlow, normalizeBundleResponse } from '#imports';
+import { defineEventHandler, useFhirClient, readValidatedBody, setResponseStatus, normalizeBundleResponse } from '#imports';
 import z from 'zod';
 
 const bodySchema = z.object({
@@ -82,17 +82,6 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
-	const { addFlow } = $useFlow()
-
-	await addFlow({
-		name: 'package-loader',
-		queueName: 'FhirIGPackageImporter',
-		children: [
-			{ name: 'load', data: createdObjects, queueName: 'FhirIGPackageImporter' },
-			{ name: 'analyse', data: createdObjects, queueName: 'FhirIGPackageImporter' },
-			{ name: 'ingest', data: createdObjects, queueName: 'FhirIGPackageImporter' }
-		]
-	})
 
 	return resp;
 })

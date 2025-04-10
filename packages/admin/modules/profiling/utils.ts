@@ -75,7 +75,9 @@ export async function analyzePackageDirs(profilingPaths: string[]) : Promise<Fhi
 				name: dir,
 				resolvedPath: join(profilingPath, dir)
 			})
-			const profilePackage = {} as FhirProfilePackageMeta
+			const profilePackage = {
+				type: 'dir'
+			} as FhirProfilePackageMeta
 			const profilingFiles = await globby(`${join(profilingPath, dir)}/**/*.{json,ts,js}`, {
 				deep: 2,
 			})
@@ -134,6 +136,32 @@ export async function analyzePackageDirs(profilingPaths: string[]) : Promise<Fhi
 				}
 			}
 
+			profilePackagesMeta.push(profilePackage)
+		}
+
+		// support tar files
+		const profilingPackagedFiles = await globby(`${profilingPath}/**/*.{tar,tgz}`, {
+			deep: 2,
+		})
+
+		for (const file of profilingPackagedFiles) {
+			const profilePackage = {
+				type: 'tar',
+				version: 'none'
+			} as FhirProfilePackageMeta
+			// get file name without path and extension
+			// e.g. package.tar -> package
+			const fileName = file.split('/').pop() || ''
+			const packageName = fileName.split('.').slice(0, -1).join('.')
+
+			profilePackage.name = packageName
+			profilePackage.normalizedName = 'package_' + packageName.replaceAll(/[\.\,#\/-]/g, '_')
+			profilePackage.files = []
+			// add tar file to assets
+			assets.push({
+				name: packageName,
+				resolvedPath: file
+			})
 			profilePackagesMeta.push(profilePackage)
 		}
 	}

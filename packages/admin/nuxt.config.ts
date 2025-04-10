@@ -2,17 +2,9 @@ import { defineNuxtConfig } from "nuxt/config"
 
 export default defineNuxtConfig({
 	modules: [
-		'nuxt-queue',
 		'@nhealth/fhir',
 		'@nuxtjs/i18n'
 	],
-	queue: {
-		ui: true,
-		redis: {
-			host: 'localhost',
-			port: 6379
-		}
-	},
 	i18n: {
 		lazy: true,
 		strategy: 'no_prefix',
@@ -29,5 +21,10 @@ export default defineNuxtConfig({
 			code: 'en',
 			file: './en.json'
 		}]
+	},
+	nitro: {
+		experimental: {
+			tasks: true
+		}
 	}
 })

@@ -16,11 +16,11 @@ export const createPackageProfileTemplate = (
 		profilingPackagesContent += `packages.push({meta: meta_${packageMeta.normalizedName}, package: "${packageMeta.name}"});\n`
 	}
 	profilingPackagesContent += `export type ProfilePackage = ${profilePackageMeta.map((meta) => "'" + meta.name + "'").join(' | ')};\n`
-	// Function to load a profile package meta
-	profilingPackagesContent += `export const loadFhirProfileMeta = (name: ProfilePackage) => packages.find(p => p.package === name)?.meta;\n`
-	// Function to load a json profile by package and nomralized name
-	profilingPackagesContent += `export const loadFhirProfileData = (name: ProfilePackage, normalizedName: string) => {
-		const packageMeta = loadFhirProfileMeta(name);
+	// Function to get a profile package meta
+	profilingPackagesContent += `export const getFhirProfileMeta = (name: ProfilePackage) => packages.find(p => p.package === name)?.meta;\n`
+	// Function to get a json profile by package and normalized name
+	profilingPackagesContent += `export const getFhirProfileData = (name: ProfilePackage, normalizedName: string) => {
+		const packageMeta = getFhirProfileMeta(name);
 		if(packageMeta){
 			const profile = packageMeta.files.find(f => f.normalizedName === normalizedName);
 			if(profile){
@@ -29,6 +29,15 @@ export const createPackageProfileTemplate = (
 		}
 		return null;
 	};\n`
+
+	profilingPackagesContent += `export const getFhirPackages = () => {
+		return packages.map(p => {
+			return {
+				name: p.package,
+				meta: p.meta
+			}
+		})
+	}\n`
 
 	addTemplate({
 		filename: 'profiling-packages.ts',

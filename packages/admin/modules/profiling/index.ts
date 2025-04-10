@@ -1,6 +1,7 @@
 import {
 	defineNuxtModule,
 	addServerImports,
+	addServerScanDir,
 	createResolver
   } from '@nuxt/kit'
 import { lstat } from 'node:fs/promises'
@@ -53,18 +54,21 @@ export default defineNuxtModule<ModuleOptions>({
 
 		addServerImports([
 			{
-				name: 'defineProfilePackage',
-				from: resolve('./handler/profile.ts')
-			},{
-				name: 'loadFhirProfileMeta',
-				as: 'loadFhirProfileMeta',
+				name: 'getFhirProfileMeta',
+				as: 'getFhirProfileMeta',
 				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
 			},{
-				name: 'loadFhirProfileData',
-				as: 'loadFhirProfileData',
+				name: 'getFhirProfileData',
+				as: 'getFhirProfileData',
+				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
+			},{
+				name: 'getFhirPackages',
+				as: 'getFhirPackages',
 				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
 			}
 		])
+
+		addServerScanDir(resolve('./server'))
 
 		// add profiles to server assets
 		for(const profileAsset of assets){

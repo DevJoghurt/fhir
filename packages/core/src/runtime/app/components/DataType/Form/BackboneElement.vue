@@ -21,11 +21,18 @@
 				@change="update"
 				:element="el" />
 		<!-- If the element a BackboneElement, render a BackboneElement -->
-		 <FhirDataTypeFormBackboneElement
-			v-else-if="el.type === 'BackboneElement'"
+		<div
+		 	v-else-if="el.type === 'BackboneElement'"
+			:class="{
+				'p-2 border-1 border-gray-200 rounded-md space-y-2': !el.isArray
+			}"
+		 >
+			<FhirDataTypeFormBackboneElement
 				v-model="state[el.name]"
 				@change="update"
-				:nestedElements="el.element" />
+				:nestedElements="el.element"
+			/>
+		</div>
 		<!-- If the element is a simple element, render the appropriate form items -->
 		<component
 			v-else
@@ -61,7 +68,7 @@
 		return reactive(generatedState)
 	}
 
-	const state = createElementState(props.nestedElements || [], props.modelValue)
+	const state = createElementState(props.nestedElements || [], props.modelValue || {})
 
 	const update = () => {
 		const resource = normalizeResource(props.nestedElements, state)
