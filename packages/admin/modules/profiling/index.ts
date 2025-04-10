@@ -2,7 +2,8 @@ import {
 	defineNuxtModule,
 	addServerImports,
 	addServerScanDir,
-	createResolver
+	createResolver,
+	addComponentsDir
   } from '@nuxt/kit'
 import { lstat } from 'node:fs/promises'
 import { analyzePackageDirs } from './utils'
@@ -27,6 +28,12 @@ export default defineNuxtModule<ModuleOptions>({
 		const { resolve } = createResolver(import.meta.url)
 
 		nuxt.options.alias['#fhirtypes/profiling'] = resolve('./types');
+
+		// activate websocket support
+		if(!nuxt.options.nitro.experimental){
+			nuxt.options.nitro.experimental = {}
+		}
+		nuxt.options.nitro.experimental.websocket = true
 
 		const profilingPaths = [] as string[]
 		for (const layer of nuxt.options._layers) {
@@ -69,6 +76,12 @@ export default defineNuxtModule<ModuleOptions>({
 		])
 
 		addServerScanDir(resolve('./server'))
+
+		addComponentsDir({
+			path: resolve('./app/components'),
+			prefix: 'Fhir',
+			global: true
+		})
 
 		// add profiles to server assets
 		for(const profileAsset of assets){

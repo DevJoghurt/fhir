@@ -20,7 +20,7 @@ services:
       - '5432'
   hapi:
     container_name: hapi
-    image: "hapiproject/hapi:latest"
+    image: "hapiproject/hapi:v8.0.0-1"
     ports:
       - "8080:8080"
     configs:

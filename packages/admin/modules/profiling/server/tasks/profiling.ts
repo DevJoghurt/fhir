@@ -6,15 +6,22 @@ export default defineTask({
 	  description: "Background task for FHIR profiling",
 	},
 	async run({ payload, context }) {
-	  console.log("Init profiling ...", payload);
+	  context.logMessage("Profiling has started");
 	  await wait(10000);
-	  console.log("Init profiling 2 ...");
+	  context.logMessage("Profiling has started 2");
 	  await wait(10000);
-	  console.log("Init profiling 3 ...");
+	  context.logMessage("Profiling has started 3");
+	  await wait(10000);
+	  context.logMessage("Profiling has started 4");
+	  await wait(10000);
+	  context.logMessage("Profiling has started 5");
+	  await wait(10000);
+	  context.logMessage("Profiling has started 6");
 	  if(payload?.job === 'init'){
-		console.log("Init profiling 4 ...");
-
+		context.logMessage("Profiling has started init");
 	  }
+	  context.setStatus("completed");
+	  context.logMessage("Profiling has completed");
 	  return { result: "Success" };
 	},
 });

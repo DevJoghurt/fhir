@@ -6,13 +6,14 @@ export default defineNitroPlugin(async (nitro) => {
 	// load the package meta hl7.fhir.r4.core
 	const packages = getFhirPackages()
 
+	const { run }  = useTask()
+
 	console.log('Packages:', packages)
 
 
-	runTask("profiling", {
-		payload: {
-			job: 'init'
-		}
+	run({
+		job: 'init',
+		packages: packages
 	});
 
 	console.log('Test')

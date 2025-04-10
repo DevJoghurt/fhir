@@ -15,7 +15,7 @@ export const createPackageProfileTemplate = (
 	for(const packageMeta of profilePackageMeta){
 		profilingPackagesContent += `packages.push({meta: meta_${packageMeta.normalizedName}, package: "${packageMeta.name}"});\n`
 	}
-	profilingPackagesContent += `export type ProfilePackage = ${profilePackageMeta.map((meta) => "'" + meta.name + "'").join(' | ')};\n`
+	profilingPackagesContent += `export type ProfilePackage = ${profilePackageMeta.map((meta) => "'" + meta.name + "'").join(' | ') || null};\n`
 	// Function to get a profile package meta
 	profilingPackagesContent += `export const getFhirProfileMeta = (name: ProfilePackage) => packages.find(p => p.package === name)?.meta;\n`
 	// Function to get a json profile by package and normalized name

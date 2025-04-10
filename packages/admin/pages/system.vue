@@ -2,6 +2,9 @@
 	<div>
 		<div class="bg-gray-50 border-b border-gray-200 flex justify-between px-6 py-4">
 			<h1 class="text-xl font-semibold">System</h1>
+			<div>
+				<FhirProfileLoaderState />
+			</div>
 		</div>
 		<div class="flex bg-gray-50 gap-4 items-center px-4">
 			<UNavigationMenu
