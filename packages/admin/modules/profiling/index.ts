@@ -83,6 +83,7 @@ export default defineNuxtModule<ModuleOptions>({
 			global: true
 		})
 
+		console.log(assets)
 		// add profiles to server assets
 		for(const profileAsset of assets){
 			if(nuxt.options.nitro.serverAssets === undefined){

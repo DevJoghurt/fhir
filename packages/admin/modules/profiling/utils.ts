@@ -75,95 +75,97 @@ export async function analyzePackageDirs(profilingPaths: string[]) : Promise<Fhi
 				name: dir,
 				resolvedPath: join(profilingPath, dir)
 			})
-			const profilePackage = {
-				type: 'dir'
-			} as FhirProfilePackageMeta
+			const profilePackage = {} as FhirProfilePackageMeta
+
+			// get all files if dir has profiling files
 			const profilingFiles = await globby(`${join(profilingPath, dir)}/**/*.{json,ts,js}`, {
 				deep: 2,
 			})
-			// find package meta file
-			const packageMeta = profilingFiles.find(file => file.endsWith('package.ts') || file.endsWith('package.json'))
-			if (packageMeta === undefined) {
-				console.warn(`No package meta file found in ${dir}`)
-				continue
-			}
-			let packageMetaDefaults = {} as FhirPofilePackage
-			if (packageMeta.endsWith('package.ts')) {
-				const mod = await loadFile(packageMeta)
-				const options =
-					mod.exports.default.$type === "function-call"
-						? mod.exports.default.$args[0]
-						: mod.exports.default;
-				if(options){
-					packageMetaDefaults = options
+			if(profilingFiles.length > 0){
+				profilePackage.type = 'dir'
+				// find package meta file
+				const packageMeta = profilingFiles.find(file => file.endsWith('package.ts') || file.endsWith('package.json'))
+				if (packageMeta === undefined) {
+					console.warn(`No package meta file found in ${dir}`)
+					continue
 				}
-			}
-			if (packageMeta.endsWith('package.json')) {
-				packageMetaDefaults = await require(packageMeta)
-			}
-			profilePackage.name = packageMetaDefaults.name || 'none'
-			// create a normalized name for the package by removing .,#,/,-
-			profilePackage.normalizedName = 'package_' + packageMetaDefaults.name.replaceAll(/[\.\,#\/-]/g, '_')
-			profilePackage.version = packageMetaDefaults.version || 'none'
-			// There seems to be a bug in magicast that doesn't allow for array defaults
-			profilePackage.fhirVersions = Array.isArray(packageMetaDefaults?.fhirVersions) ? packageMetaDefaults.fhirVersions : ['4.0.1']
-			profilePackage.author = packageMetaDefaults.author || 'none'
-			profilePackage.description = packageMetaDefaults.description || 'none'
-			profilePackage.dependencies = packageMetaDefaults.dependencies || {}
-			profilePackage.files = []
-			// filter all profiling files that are json and not package.json
-			const profilingFilesFiltered = profilingFiles.filter(file => file.endsWith('.json') && !file.endsWith('package.json') && !file.endsWith('.index.json'))
-			let fileNameMap = {} as Record<string, number>
-			for (const file of profilingFilesFiltered) {
-				const packageFile = await require(file)
-				const type = getProfileType(packageFile)
-				if(type){
-					const fileNormalizedName = packageFile?.id.replaceAll(/[\.\,#\/-]/g, '_')
-					if(fileNameMap[fileNormalizedName] === undefined){
-						fileNameMap[fileNormalizedName] = 0
-					}else{
-						fileNameMap[fileNormalizedName] += 1
+				let packageMetaDefaults = {} as FhirPofilePackage
+				if (packageMeta.endsWith('package.ts')) {
+					const mod = await loadFile(packageMeta)
+					const options =
+						mod.exports.default.$type === "function-call"
+							? mod.exports.default.$args[0]
+							: mod.exports.default;
+					if(options){
+						packageMetaDefaults = options
 					}
-					// File path needs to be relative to the profiling directory
-					const relativePath = file.replace(join(profilingPath, dir, '/'), '')
-					profilePackage.files.push({
-						type,
-						normalizedName: `f_${fileNormalizedName}${fileNameMap[fileNormalizedName] > 0 ? `_${fileNameMap[fileNormalizedName]}` : ''}`,
-						resource: packageFile?.resource || 'none',
-						snapshot: packageFile?.snapshot? true : false,
-						path: relativePath,
-					})
+				}
+				if (packageMeta.endsWith('package.json')) {
+					packageMetaDefaults = await require(packageMeta)
+				}
+				profilePackage.name = packageMetaDefaults.name || 'none'
+				// create a normalized name for the package by removing .,#,/,-
+				profilePackage.normalizedName = 'package_' + packageMetaDefaults.name.replaceAll(/[\.\,#\/-]/g, '_')
+				profilePackage.version = packageMetaDefaults.version || 'none'
+				// There seems to be a bug in magicast that doesn't allow for array defaults
+				profilePackage.fhirVersions = Array.isArray(packageMetaDefaults?.fhirVersions) ? packageMetaDefaults.fhirVersions : ['4.0.1']
+				profilePackage.author = packageMetaDefaults.author || 'none'
+				profilePackage.description = packageMetaDefaults.description || 'none'
+				profilePackage.dependencies = packageMetaDefaults.dependencies || {}
+				profilePackage.files = []
+				// filter all profiling files that are json and not package.json
+				const profilingFilesFiltered = profilingFiles.filter(file => file.endsWith('.json') && !file.endsWith('package.json') && !file.endsWith('.index.json'))
+				let fileNameMap = {} as Record<string, number>
+				for (const file of profilingFilesFiltered) {
+					const packageFile = await require(file)
+					const type = getProfileType(packageFile)
+					if(type){
+						const fileNormalizedName = packageFile?.id.replaceAll(/[\.\,#\/-]/g, '_')
+						if(fileNameMap[fileNormalizedName] === undefined){
+							fileNameMap[fileNormalizedName] = 0
+						}else{
+							fileNameMap[fileNormalizedName] += 1
+						}
+						// File path needs to be relative to the profiling directory
+						const relativePath = file.replace(join(profilingPath, dir, '/'), '')
+						profilePackage.files.push({
+							type,
+							normalizedName: `f_${fileNormalizedName}${fileNameMap[fileNormalizedName] > 0 ? `_${fileNameMap[fileNormalizedName]}` : ''}`,
+							resource: packageFile?.resource || 'none',
+							snapshot: packageFile?.snapshot? true : false,
+							path: relativePath,
+						})
+					}
+				}
+			}
+			// find all tar files in the directory
+			const profilingPackagedFiles = await globby(`${join(profilingPath, dir)}/**/*.{tar,tgz}`)
+			if((profilingPackagedFiles.length > 0) && (profilePackage?.type !== 'dir')){
+				profilePackage.type = 'tar'
+				for (const file of profilingPackagedFiles) {
+					console.log('Profiling packaged files:', file)
+					// get file name without path and extension
+					// e.g. package.tar -> package
+					const fileName = file.split('/').pop() || ''
+					const packageName = fileName.split('.').slice(0, -1).join('.')
+		
+					profilePackage.name = packageName
+					profilePackage.normalizedName = 'package_' + packageName.replaceAll(/[\.\,#\/-]/g, '_')
+					profilePackage.files = [{
+						type: 'tar',
+						normalizedName: `f_${packageName}`,
+						resource: 'none',
+						snapshot: false,
+						path: fileName
+					}]
 				}
 			}
 
-			profilePackagesMeta.push(profilePackage)
+			// if it is a vailid package, add it to the list of packages
+			if(profilePackage.type)
+				profilePackagesMeta.push(profilePackage)
 		}
 
-		// support tar files
-		const profilingPackagedFiles = await globby(`${profilingPath}/**/*.{tar,tgz}`, {
-			deep: 2,
-		})
-
-		for (const file of profilingPackagedFiles) {
-			const profilePackage = {
-				type: 'tar',
-				version: 'none'
-			} as FhirProfilePackageMeta
-			// get file name without path and extension
-			// e.g. package.tar -> package
-			const fileName = file.split('/').pop() || ''
-			const packageName = fileName.split('.').slice(0, -1).join('.')
-
-			profilePackage.name = packageName
-			profilePackage.normalizedName = 'package_' + packageName.replaceAll(/[\.\,#\/-]/g, '_')
-			profilePackage.files = []
-			// add tar file to assets
-			assets.push({
-				name: packageName,
-				resolvedPath: file
-			})
-			profilePackagesMeta.push(profilePackage)
-		}
 	}
 	return {
 		meta: profilePackagesMeta,

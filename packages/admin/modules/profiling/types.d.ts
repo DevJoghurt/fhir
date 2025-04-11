@@ -7,9 +7,10 @@ export interface FhirPofilePackage {
 	author?: string;
 	fhirVersions?: string[];
 	dependencies?: Record<string, string>;
+	files?: PackageFile[];
 }
 
-export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
+export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example' | 'tar';
 
 export type PackageFile = {
 	type: ProfileType;

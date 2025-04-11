@@ -1,3 +1,6 @@
+import * as tar from 'tar';
+import { Duplex } from 'node:stream';
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default defineTask({
@@ -7,21 +10,24 @@ export default defineTask({
 	},
 	async run({ payload, context }) {
 	  context.logMessage("Profiling has started");
-	  await wait(10000);
-	  context.logMessage("Profiling has started 2");
-	  await wait(10000);
-	  context.logMessage("Profiling has started 3");
-	  await wait(10000);
-	  context.logMessage("Profiling has started 4");
-	  await wait(10000);
-	  context.logMessage("Profiling has started 5");
-	  await wait(10000);
-	  context.logMessage("Profiling has started 6");
-	  if(payload?.job === 'init'){
-		context.logMessage("Profiling has started init");
+	  if(payload?.packages && payload?.packages.length > 0){
+		for(const packageItem of payload.packages){
+
+			// add folder to tmp folder
+			context.logMessage("TmpFolder" + tmpFolder);
+
+			const packageItem = payload.packages[0];
+			context.logMessage("PackageMeta" + JSON.stringify(payload.packages));
+			const packageFile = packageItem.meta.files[0]
+
+			context.logMessage("TmpFolder" + tmpFolder);
+			const filenames = []
+		}
+
+	  } else {
+		context.logMessage("No packages found");
 	  }
-	  context.setStatus("completed");
-	  context.logMessage("Profiling has completed");
+
 	  return { result: "Success" };
 	},
 });

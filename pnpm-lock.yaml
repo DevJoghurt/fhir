@@ -67,6 +67,9 @@ importers:
       pathe:
         specifier: 2.0.3
         version: 2.0.3
+      tar:
+        specifier: ^7.4.3
+        version: 7.4.3
       zod:
         specifier: 3.24.2
         version: 3.24.2
