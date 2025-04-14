@@ -1,12 +1,27 @@
 import { useFhirClient, useStorage } from '#imports';
 import type { Resource } from '@medplum/fhirtypes'
-import type { FhirPofilePackage, ProfileType } from '../../types';
+import type { FhirPofilePackage, ProfileType, PackageLink, RuntimePackageStore } from '../../types';
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
 import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
-import { globby } from 'globby'
+import { globby } from 'globby';
+import { defu } from 'defu';
+
+const TMP_FOLDER = 'nhealth_fhir_profiling';
+
+let runtimePackageStore = {} as RuntimePackageStore;
+
+// TODO: Make RuntimePackageStore based on sqlite to work with packages
+export function getRuntimePackageStore() : RuntimePackageStore {
+	return runtimePackageStore;
+}
+export function setRuntimePackageStore(name: string, packageLink: Partial<PackageLink>) : void {
+	runtimePackageStore = defu(runtimePackageStore, {
+		[name]: packageLink
+	});
+}
 
 export async function loadFhirProfileIntoServer(resource: Resource) {
 	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhirClient();
@@ -42,8 +57,6 @@ export async function loadFhirProfileIntoServer(resource: Resource) {
 	}
 	throw new Error('Failed to load snapshot');
 }
-
-const TMP_FOLDER = 'nhealth_fhir_profiling';
 
 export async function extractPackage(packageName: string, file: string) :Promise<string> {
 	const tmpFolder = join(tmpdir(), TMP_FOLDER, packageName);
@@ -111,8 +124,15 @@ function resolveProfileType(content: any) : ProfileType | null {
 	return null
 }
 
-export async function analyzePackageDir(dir: string) : Promise<FhirPofilePackage | null> {
-	const profilingFiles = await globby(`${dir}/**/*.json`, {
+export async function analyzePackage(packageLink: PackageLink) : Promise<FhirPofilePackage | null> {
+	if(packageLink.origin === 'remote'){
+		throw new Error('Package link origin must be downloaded first');
+	}
+	if(packageLink.type === 'compressed'){
+		throw new Error('Package link type must be uncompressed first');
+	}
+
+	const profilingFiles = await globby(`${packageLink.link}/**/*.json`, {
 		deep: 3,
 	})
 	const profilePackage = {} as FhirPofilePackage

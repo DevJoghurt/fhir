@@ -38,26 +38,26 @@
 	"dependencies": {
 		"@nuxt/kit": "*",
 		"@nuxt/schema": "*",
-		"@nuxt/ui": "3.0.0-beta.3",
-		"@nuxt/content": "2.13.2",
-		"@medplum/fhirtypes": "^4.0.3",
-		"@nuxt/icon": "^1.10.3",
-		"@vueuse/core": "^13.0.0",
+		"@nuxt/ui": "3.0.2",
+		"@nuxt/content": "3.4.0",
+		"@medplum/fhirtypes": "^4.0.4",
+		"@nuxt/icon": "^1.12.0",
+		"@vueuse/core": "^13.1.0",
 		"radix-vue": "^1.9.17",
 		"fsh-sushi": "3.11.1",
 		"globby": "^14.1.0",
 		"mdbox": "^0.1.1",
 		"defu": "^6.1.4",
-		"@nuxt/image": "^1.9.0",
+		"@nuxt/image": "^1.10.0",
 		"@iconify/utils": "^2.3.0",
 		"chokidar": "4.0.3",
 		"fs-extra": "^11.3.0",
-		"c12": "^3.0.2",
-		"shiki": "^3.1.0"
+		"c12": "^3.0.3",
+		"shiki": "^3.2.2"
 	},
 	"devDependencies": {
-		"typescript": "^5.8.2",
-		"@nuxt/module-builder": "0.8.4",
+		"typescript": "^5.8.3",
+		"@nuxt/module-builder": "1.0.1",
 		"@types/fs-extra": "11.0.4",
 		"unbuild": "^3.5.0"
 	}

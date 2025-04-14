@@ -10,7 +10,7 @@ export interface FhirPofilePackage {
 	files?: PackageFile[];
 }
 
-export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example' | 'tar';
+export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
 
 export type PackageFile = {
 	type: ProfileType;
@@ -25,3 +25,11 @@ export interface FhirProfilePackageMeta extends FhirPofilePackage {
 	normalizedName: string;
 	files: PackageFile[];
 }
+
+export type PackageLink = {
+	origin: 'remote' | 'storage',
+	type: 'compressed' | 'files',
+	link: string
+}
+
+export type RuntimePackageStore = Record<string, PackageLink>
