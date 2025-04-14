@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const eventStream = createEventStream(event)
 
-  const { onTaskStateChange } = useTask()
+  const { onTaskStateChange } = useProfilingTask()
 
   onTaskStateChange((state) => {
     eventStream.push(JSON.stringify(state)).catch((error) => {

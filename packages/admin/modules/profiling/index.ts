@@ -6,8 +6,16 @@ import {
 	addComponentsDir
   } from '@nuxt/kit'
 import { lstat } from 'node:fs/promises'
-import { analyzePackageDirs } from './utils'
-import { createPackageProfileTemplate } from './template'
+import { importLocalProfilingDirs } from './utils'
+import type { Package } from './types'
+
+declare module '@nuxt/schema' {
+	interface RuntimeConfig {
+	  profiling: {
+		packages: Package[];
+	  }
+	}
+}
 
 export type ModuleOptions = {
 	profilingDir: string;
@@ -50,30 +58,10 @@ export default defineNuxtModule<ModuleOptions>({
 		}
 
 		//TODO: exclude profiling paths from watch paths of nitro and nuxt -> nuxt.options.watch.exclude
-		// otherwsie it makes dev environment slow
+		// otherwise it makes dev environment slow
 
-		const {
-			meta,
-			assets
-		} = await analyzePackageDirs(profilingPaths)
+		await importLocalProfilingDirs(profilingPaths, nuxt.options)
 
-		createPackageProfileTemplate(meta)
-
-		addServerImports([
-			{
-				name: 'getFhirProfileMeta',
-				as: 'getFhirProfileMeta',
-				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
-			},{
-				name: 'getFhirProfileData',
-				as: 'getFhirProfileData',
-				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
-			},{
-				name: 'getFhirPackages',
-				as: 'getFhirPackages',
-				from: resolve(nuxt.options.buildDir, 'profiling-packages'),
-			}
-		])
 
 		addServerScanDir(resolve('./server'))
 
@@ -82,18 +70,6 @@ export default defineNuxtModule<ModuleOptions>({
 			prefix: 'Fhir',
 			global: true
 		})
-
-		console.log(assets)
-		// add profiles to server assets
-		for(const profileAsset of assets){
-			if(nuxt.options.nitro.serverAssets === undefined){
-				nuxt.options.nitro.serverAssets = []
-			}
-			nuxt.options.nitro.serverAssets.push({
-				baseName: profileAsset.name,
-				dir: profileAsset.resolvedPath
-			})
-		}
 
 	}
 })

@@ -1,15 +1,24 @@
 //import { runTask } from "#imports";
+import type { Package } from "../../types";
+import * as fastq from "fastq";
+import type { queueAsPromised } from "fastq";
 
-import { set } from "zod";
-import type { FhirProfilePackageMeta } from "../../types";
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 type TaskStatus = 'idle' | 'running' | 'completed' | 'failed';
+
 type TaskState = {
 	status: TaskStatus;
 	message?: string;
 }
 
-const eventListeners = [] as Array<(state: TaskState) => void>;
+type WorkerEvent = {
+	payload: RunTaskPayload;
+	context: {
+		logMessage: (message: string) => void;
+		setStatus: (status: TaskStatus) => void;
+	}
+}
 
 const taskState = {
 	status: 'idle',
@@ -18,10 +27,44 @@ const taskState = {
 
 type RunTaskPayload = {
 	job: string;
-	packages: FhirProfilePackageMeta[];
+	packages: Package[];
 }
 
-export const useTask = () => {
+const eventListeners = [] as Array<(state: TaskState) => void>;
+
+
+async function worker({payload, context}: WorkerEvent) {
+	context.logMessage("Profiling has started");
+	await wait(5000); // Simulate some delay
+	if(payload?.packages && payload?.packages.length > 0){
+	  for(const packageItem of payload.packages){
+		  // if there is a compressed package and it is not mounted, compress files and mount it
+		  if(packageItem.compressed && packageItem.mounted === false){
+			  context.logMessage(`Compressing package ${packageItem.identifier}`);
+			  // compress the package and mount it
+			  //const tmpDir = await extractPackage(packageItem);
+			  context.logMessage(`Package ${packageItem.identifier} compressed`);
+		  }
+		  await wait(5000);
+
+	  }
+	  await wait(5000);
+	} else {
+	  context.logMessage("No packages found");
+	}
+	// Simulate a long-running task
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			console.log('Task completed');
+			resolve({ result: "Success" });
+		}, 1000);
+	});
+}
+
+
+const queue: queueAsPromised<WorkerEvent> = fastq.promise(worker, 1)
+
+export const useProfilingTask = () => {
 
 	const onTaskStateChange = (listener: (state: TaskState) => void) => {
 		eventListeners.push(listener);
@@ -46,24 +89,26 @@ export const useTask = () => {
 		eventListeners.forEach(listener => listener(taskState));
 	}
 
-	const run = (payload: RunTaskPayload) => {
+	const addTask = (payload: RunTaskPayload) => {
 		taskState.status = 'running';
 		taskState.message = 'Profiling started';
 		eventListeners.forEach(listener => listener(taskState));
-		runTask("profiling", {
-			payload,
-			context: {
-				logMessage,
-				setStatus,
-			}
+		queue.push({ payload, context: { logMessage, setStatus } })
+			.then(() => {
+				taskState.status = 'completed';
+				taskState.message = 'Profiling completed';
+				eventListeners.forEach(listener => listener(taskState));
+			})
+			.catch((error) => {
+				taskState.status = 'failed';
+				taskState.message = `Profiling failed: ${error.message}`;
+				eventListeners.forEach(listener => listener(taskState));
 		});
 	}
 
 	return {
-		run,
+		addTask,
 		onTaskStateChange,
-		setStatus,
-		logMessage,
 		taskState
 	}
 }

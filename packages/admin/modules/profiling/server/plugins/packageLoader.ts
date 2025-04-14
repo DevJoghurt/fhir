@@ -1,19 +1,15 @@
-import { getFhirPackages } from '#imports'
-import type { Resource } from '@medplum/fhirtypes'
+import { useRuntimeConfig } from '#imports'
 
 export default defineNitroPlugin(async (nitro) => {
 
-	// load the package meta hl7.fhir.r4.core
-	const packages = getFhirPackages()
+	// local packages are referenced in the runtime config
+	const { packages } = useRuntimeConfig().profiling
 
-	const { run }  = useTask()
+	const { addTask }  = useProfilingTask()
 
-	console.log('Packages:', packages)
-
-
-	run({
+	addTask({
 		job: 'init',
-		packages: packages
+		packages: packages || []
 	});
 
 	console.log('Test')

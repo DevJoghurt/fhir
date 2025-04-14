@@ -1,29 +1,21 @@
 import { useFhirClient, useStorage } from '#imports';
-import type { Resource } from '@medplum/fhirtypes'
-import type { FhirPofilePackage, ProfileType, PackageLink, RuntimePackageStore } from '../../types';
+import type { NamingSystem, Resource, StructureDefinition } from '@medplum/fhirtypes'
+import type { ProfileType, Package } from '../../types';
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
 import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
 import { globby } from 'globby';
-import { defu } from 'defu';
 
 const TMP_FOLDER = 'nhealth_fhir_profiling';
 
-let runtimePackageStore = {} as RuntimePackageStore;
 
-// TODO: Make RuntimePackageStore based on sqlite to work with packages
-export function getRuntimePackageStore() : RuntimePackageStore {
-	return runtimePackageStore;
-}
-export function setRuntimePackageStore(name: string, packageLink: Partial<PackageLink>) : void {
-	runtimePackageStore = defu(runtimePackageStore, {
-		[name]: packageLink
-	});
+const isStructureDefinition = (resource: Resource): resource is StructureDefinition => {
+	return resource.resourceType === 'StructureDefinition';
 }
 
-export async function loadFhirProfileIntoServer(resource: Resource) {
+export async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingSystem) {
 	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhirClient();
 
 	// check if resource is StructureDefinition and has a snapshot
@@ -32,9 +24,11 @@ export async function loadFhirProfileIntoServer(resource: Resource) {
 	// Load the package into the server
 	// use url / name as the key to check if the resource already exists
 	// TODO: implement a version check to make updating resources easier
-	let query = `url=${resource?.url || ''}`;
-	// in R4 NamingSystem has no url, so we use name as the key
-	if(resource.resourceType === 'NamingSystem'){
+	let query = ''
+	
+	if(isStructureDefinition(resource)){
+		query = `url=${encodeURIComponent(resource?.url || '')}`;
+	} else if(resource.resourceType === 'NamingSystem'){ // Updated to use else if for clarity
 		query = `name=${encodeURIComponent(resource?.name || '')}`;
 
 	}
@@ -58,12 +52,16 @@ export async function loadFhirProfileIntoServer(resource: Resource) {
 	throw new Error('Failed to load snapshot');
 }
 
-export async function extractPackage(packageName: string, file: string) :Promise<string> {
-	const tmpFolder = join(tmpdir(), TMP_FOLDER, packageName);
+export async function extractPackage(cPackage: Package) :Promise<string> {
+	const compressedPackage = cPackage?.compressed;
+	if(!compressedPackage){
+		throw new Error('Package has no compressed file in storage');
+	}
+	const tmpFolder = join(tmpdir(), TMP_FOLDER, cPackage.identifier);
 	await mkdir(tmpFolder, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
-	const tarFileBuffer = await useStorage(`assets:${packageName}`).getItemRaw(file);
+	const tarFileBuffer = await useStorage(compressedPackage.baseName).getItemRaw(compressedPackage.file);
 	const stream = new Duplex();
 	stream.push(tarFileBuffer);
 	stream.push(null);
@@ -98,7 +96,7 @@ export async function extractPackage(packageName: string, file: string) :Promise
  * @param content
  * @returns ProfileType | null
  */
-function resolveProfileType(content: any) : ProfileType | null {
+function resolveProfileType(content: Resource) : ProfileType | null {
 	if(content?.resourceType === 'CodeSystem'){
 		return 'codeSystem'
 	}
@@ -124,9 +122,9 @@ function resolveProfileType(content: any) : ProfileType | null {
 	return null
 }
 
-export async function analyzePackage(packageLink: PackageLink) : Promise<FhirPofilePackage | null> {
+export async function analyzePackage(cPackage: Package) : Promise<FhirPofilePackage | null> {
 	if(packageLink.origin === 'remote'){
-		throw new Error('Package link origin must be downloaded first');
+		throw new Error('Package link origin must be downloaded and mounted first');
 	}
 	if(packageLink.type === 'compressed'){
 		throw new Error('Package link type must be uncompressed first');
@@ -137,17 +135,17 @@ export async function analyzePackage(packageLink: PackageLink) : Promise<FhirPof
 	})
 	const profilePackage = {} as FhirPofilePackage
 	if(profilingFiles.length > 0){
-		const packageMeta = profilingFiles.find(file => file.endsWith('package.json'))
-		if (packageMeta === undefined) {
-			console.warn(`No package meta file found in ${dir}`)
+		const storageKey = profilingFiles.find(file => file.endsWith('package.json'))
+		if (storageKey === undefined) {
+			console.warn(`No package meta file found in ${packageLink.link}`)
 			return null
 		}
-		if (packageMeta.endsWith('package.json')) {
-			packageMetaDefaults = await require(packageMeta)
+		let packageMetaDefaults = {} as FhirPofilePackage
+		if (storageKey.endsWith('package.json')) {
+			packageMetaDefaults = await useStorage().getItem(storageKey) as FhirPofilePackage
 		}
 		profilePackage.name = packageMetaDefaults.name || 'none'
 		// create a normalized name for the package by removing .,#,/,-
-		profilePackage.normalizedName = 'package_' + packageMetaDefaults.name.replaceAll(/[\.\,#\/-]/g, '_')
 		profilePackage.version = packageMetaDefaults.version || 'none'
 		// There seems to be a bug in magicast that doesn't allow for array defaults
 		profilePackage.fhirVersions = Array.isArray(packageMetaDefaults?.fhirVersions) ? packageMetaDefaults.fhirVersions : ['4.0.1']
@@ -169,7 +167,7 @@ export async function analyzePackage(packageLink: PackageLink) : Promise<FhirPof
 					fileNameMap[fileNormalizedName] += 1
 				}
 				// File path needs to be relative to the profiling directory
-				const relativePath = file.replace(join(dir, '/'), '')
+				const relativePath = file.replace(join(storageKey, '/'), '')
 				profilePackage.files.push({
 					type,
 					normalizedName: `f_${fileNormalizedName}${fileNameMap[fileNormalizedName] > 0 ? `_${fileNameMap[fileNormalizedName]}` : ''}`,

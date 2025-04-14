@@ -1,18 +1,15 @@
-type PackageType = 'dir' | 'tar'
+export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
 
-export interface FhirPofilePackage {
+export interface PofileMeta {
 	name: string;
 	version?: string;
 	description?: string;
 	author?: string;
 	fhirVersions?: string[];
 	dependencies?: Record<string, string>;
-	files?: PackageFile[];
 }
 
-export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
-
-export type PackageFile = {
+export type ProfileFile = {
 	type: ProfileType;
 	normalizedName: string;
 	resource: string;
@@ -20,16 +17,19 @@ export type PackageFile = {
 	snapshot: boolean;
 }
 
-export interface FhirProfilePackageMeta extends FhirPofilePackage {
-	type: PackageType;
-	normalizedName: string;
-	files: PackageFile[];
+export type CompressedPackage = {
+	baseName: string,
+	file: string
 }
 
-export type PackageLink = {
-	origin: 'remote' | 'storage',
-	type: 'compressed' | 'files',
-	link: string
+export type Package = {
+	identifier: string;
+	compressed?: CompressedPackage | null;
+	mounted: {
+		baseName: string;
+		dir: string;
+		paths: string[];
+	} | false;
+	meta?: PofileMeta;
+	files?: ProfileFile[];
 }
-
-export type RuntimePackageStore = Record<string, PackageLink>
