@@ -8,6 +8,7 @@ import {
 import { lstat } from 'node:fs/promises'
 import { importLocalProfilingDirs } from './utils'
 import type { Package } from './types'
+import { name } from 'tar/types'
 
 declare module '@nuxt/schema' {
 	interface RuntimeConfig {
@@ -41,7 +42,18 @@ export default defineNuxtModule<ModuleOptions>({
 		if(!nuxt.options.nitro.experimental){
 			nuxt.options.nitro.experimental = {}
 		}
-		nuxt.options.nitro.experimental.websocket = true
+		nuxt.options.nitro.experimental.database = true
+
+		// add profiling sqlite database
+		if(!nuxt.options.nitro.database){
+			nuxt.options.nitro.database = {}
+		}
+		nuxt.options.nitro.database.profiling = {
+			connector: 'sqlite',
+			options: {
+				name: 'profiling',
+			}
+		}
 
 		const profilingPaths = [] as string[]
 		for (const layer of nuxt.options._layers) {

@@ -1,18 +1,20 @@
-import { useRuntimeConfig } from '#imports'
+import { useRuntimeConfig, usePackageInstaller, usePackageStore, mountProfiling } from '#imports'
 
 export default defineNitroPlugin(async (nitro) => {
+
+	// mount profiling storage
+	mountProfiling()
 
 	// local packages are referenced in the runtime config
 	const { packages } = useRuntimeConfig().profiling
 
-	const { addTask }  = useProfilingTask()
+	const { initDatabase } = usePackageStore()
 
-	addTask({
-		job: 'init',
-		packages: packages || []
-	});
+	await initDatabase(packages || [])
 
-	console.log('Test')
+	const { install }  = usePackageInstaller()
+
+	install();
 
 	// load Value Sets, Code Systems, Extensions and Profiles into the server
 	/*

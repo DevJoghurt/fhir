@@ -31,11 +31,7 @@ export async function importLocalProfilingDirs(profilingPaths: string[], nuxtOpt
 			})
 			if(profilingFiles.length > 0){
 				cPackage.identifier = dir
-				cPackage.mounted = {
-					baseName: `assets:${dir}`,
-					dir: join(profilingPath, dir),
-					paths: profilingFiles.map(file => file.replace(`${profilingPath}/${dir}/`, ''))
-				}
+				cPackage.mounted = `assets:${dir}`
 				// add the package to the assets storage
 				nuxtOptions.nitro.serverAssets.push({
 					baseName: dir,
@@ -52,9 +48,9 @@ export async function importLocalProfilingDirs(profilingPaths: string[], nuxtOpt
 					cPackage.identifier = dir
 					cPackage.compressed = {
 						baseName: `assets:${dir}`,
-						file: profilingPackagedFiles[0].replace(`${profilingPath}/${dir}/`, '')
+						path: profilingPackagedFiles[0].replace(`${profilingPath}/${dir}/`, '')
 					}
-					cPackage.mounted = false
+					cPackage.mounted = null
 					nuxtOptions.nitro.serverAssets.push({
 						baseName: dir,
 						dir: join(profilingPath, dir)

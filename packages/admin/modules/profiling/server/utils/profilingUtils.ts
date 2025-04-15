@@ -1,12 +1,13 @@
 import { useFhirClient, useStorage } from '#imports';
 import type { NamingSystem, Resource, StructureDefinition } from '@medplum/fhirtypes'
-import type { ProfileType, Package } from '../../types';
+import type { ProfileType, Package, PofileMeta } from '../../types';
+import fsDriver from "unstorage/drivers/fs";
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
 import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
-import { globby } from 'globby';
+import type { Storage } from 'unstorage';
 
 const TMP_FOLDER = 'nhealth_fhir_profiling';
 
@@ -25,7 +26,7 @@ export async function loadFhirProfileIntoServer(resource: StructureDefinition | 
 	// use url / name as the key to check if the resource already exists
 	// TODO: implement a version check to make updating resources easier
 	let query = ''
-	
+
 	if(isStructureDefinition(resource)){
 		query = `url=${encodeURIComponent(resource?.url || '')}`;
 	} else if(resource.resourceType === 'NamingSystem'){ // Updated to use else if for clarity
@@ -52,33 +53,48 @@ export async function loadFhirProfileIntoServer(resource: StructureDefinition | 
 	throw new Error('Failed to load snapshot');
 }
 
-export async function extractPackage(cPackage: Package) :Promise<string> {
+export async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 	const compressedPackage = cPackage?.compressed;
-	if(!compressedPackage){
+	if (!compressedPackage || !cPackage.identifier) {
 		throw new Error('Package has no compressed file in storage');
 	}
 	const tmpFolder = join(tmpdir(), TMP_FOLDER, cPackage.identifier);
 	await mkdir(tmpFolder, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
-	const tarFileBuffer = await useStorage(compressedPackage.baseName).getItemRaw(compressedPackage.file);
+	const tarFileBuffer = await useStorage(compressedPackage.baseName).getItemRaw(compressedPackage.path);
 	const stream = new Duplex();
 	stream.push(tarFileBuffer);
 	stream.push(null);
-	stream.pipe(
-		tar.x({
-		C: tmpFolder
-		})
-	);
 
-	return await new Promise((resolve, reject) => {
-		stream.on('finish', () => {
+	return new Promise((resolve, reject) => {
+		const extractStream = tar.x({
+			C: tmpFolder,
+		});
+		extractStream.on('finish', () => {
 			resolve(tmpFolder);
 		});
-		stream.on('error', (err) => {
+		extractStream.on('error', (err) => {
 			reject(err);
 		});
+		stream.pipe(extractStream);
 	});
+}
+
+/**
+ * Function to mount the profiling folder in the storage.
+ * Root directory is always [os_tmp_folder]/TMP_FOLDER
+ */
+export function mountProfiling(): void {
+	const storage = useStorage()
+	const tmpFolder = join(tmpdir(), TMP_FOLDER);
+	storage.mount('profiling', fsDriver({
+		base: tmpFolder,
+		watchOptions: {
+			depth: 3
+		},
+		readOnly: true
+	}));
 }
 
 /**
@@ -122,18 +138,30 @@ function resolveProfileType(content: Resource) : ProfileType | null {
 	return null
 }
 
-export async function analyzePackage(cPackage: Package) : Promise<FhirPofilePackage | null> {
-	if(packageLink.origin === 'remote'){
-		throw new Error('Package link origin must be downloaded and mounted first');
+export async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<PofileMeta | null> {
+	const packageJsonFilePath = files.find(file => file.endsWith('package.json'))
+	if(!packageJsonFilePath){
+		console.error(`No package.json file found in ${storage}`);
+		return null
 	}
-	if(packageLink.type === 'compressed'){
-		throw new Error('Package link type must be uncompressed first');
+	const packageJsonFile = await storage.getItem(packageJsonFilePath) as any
+	if(!packageJsonFile){
+		console.error(`Failed to load package.json file from ${storage}`);
+		return null
 	}
+	const packageJson = {
+		name: packageJsonFile.name || 'none',
+		version: packageJsonFile.version || 'none',
+		description: packageJsonFile.description || 'none',
+		fhirVersions: packageJsonFile.fhirVersions || packageJsonFile['fhir-version-list'] || ['4.0.1'],
+		dependencies: packageJsonFile.dependencies || {},
+	} as PofileMeta
 
-	const profilingFiles = await globby(`${packageLink.link}/**/*.json`, {
-		deep: 3,
-	})
-	const profilePackage = {} as FhirPofilePackage
+	return packageJson
+}
+
+export async function analyzePackage(storage: Storage, files: string[]) : Promise<FhirPofilePackage | null> {
+	const profilePackage = {} as FhirPofile
 	if(profilingFiles.length > 0){
 		const storageKey = profilingFiles.find(file => file.endsWith('package.json'))
 		if (storageKey === undefined) {

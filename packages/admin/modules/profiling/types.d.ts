@@ -5,7 +5,7 @@ export interface PofileMeta {
 	version?: string;
 	description?: string;
 	author?: string;
-	fhirVersions?: string[];
+	fhirVersions: string[];
 	dependencies?: Record<string, string>;
 }
 
@@ -19,17 +19,15 @@ export type ProfileFile = {
 
 export type CompressedPackage = {
 	baseName: string,
-	file: string
+	path: string
 }
 
 export type Package = {
 	identifier: string;
+	status?: 'idle' | 'in-process' | 'error' | 'done';
+	ingested?: boolean;
 	compressed?: CompressedPackage | null;
-	mounted: {
-		baseName: string;
-		dir: string;
-		paths: string[];
-	} | false;
+	mounted: string | null;
 	meta?: PofileMeta;
 	files?: ProfileFile[];
 }

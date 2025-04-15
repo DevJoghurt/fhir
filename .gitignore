@@ -7,6 +7,10 @@ implementierung
 # Profiling
 packages/admin/server/profiling
 
+#Playground
+playground/demo/assets/img
+playground/demo/components
+
 # HL7 publisher
 playground/profiling/input-cache
 playground/profiling/temp
@@ -37,6 +41,7 @@ fsh-generated
 .output
 .output-*
 .gen
+.data
 
 # OSX
 .DS_Store
