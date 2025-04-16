@@ -1,6 +1,6 @@
 import { useFhirClient, useStorage } from '#imports';
 import type { NamingSystem, Resource, StructureDefinition } from '@medplum/fhirtypes'
-import type { ProfileType, Package, PofileMeta } from '../../types';
+import type { ProfileType, Package, PofileMeta, ProfileFile } from '#fhirtypes/profiling';
 import fsDriver from "unstorage/drivers/fs";
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
 import type { Storage } from 'unstorage';
+import { isArray } from 'node:util';
 
 const TMP_FOLDER = 'nhealth_fhir_profiling';
 
@@ -16,7 +17,7 @@ const isStructureDefinition = (resource: Resource): resource is StructureDefinit
 	return resource.resourceType === 'StructureDefinition';
 }
 
-export async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingSystem) {
+async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingSystem) {
 	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhirClient();
 
 	// check if resource is StructureDefinition and has a snapshot
@@ -53,7 +54,7 @@ export async function loadFhirProfileIntoServer(resource: StructureDefinition | 
 	throw new Error('Failed to load snapshot');
 }
 
-export async function extractPackage(cPackage: Partial<Package>): Promise<string> {
+async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 	const compressedPackage = cPackage?.compressed;
 	if (!compressedPackage || !cPackage.identifier) {
 		throw new Error('Package has no compressed file in storage');
@@ -85,7 +86,7 @@ export async function extractPackage(cPackage: Partial<Package>): Promise<string
  * Function to mount the profiling folder in the storage.
  * Root directory is always [os_tmp_folder]/TMP_FOLDER
  */
-export function mountProfiling(): void {
+function mountPackageStorage(): void {
 	const storage = useStorage()
 	const tmpFolder = join(tmpdir(), TMP_FOLDER);
 	storage.mount('profiling', fsDriver({
@@ -138,7 +139,7 @@ function resolveProfileType(content: Resource) : ProfileType | null {
 	return null
 }
 
-export async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<PofileMeta | null> {
+async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<PofileMeta | null> {
 	const packageJsonFilePath = files.find(file => file.endsWith('package.json'))
 	if(!packageJsonFilePath){
 		console.error(`No package.json file found in ${storage}`);
@@ -160,51 +161,41 @@ export async function resolvePackageMeta(storage: Storage,files: string[]) : Pro
 	return packageJson
 }
 
-export async function analyzePackage(storage: Storage, files: string[]) : Promise<FhirPofilePackage | null> {
-	const profilePackage = {} as FhirPofile
-	if(profilingFiles.length > 0){
-		const storageKey = profilingFiles.find(file => file.endsWith('package.json'))
-		if (storageKey === undefined) {
-			console.warn(`No package meta file found in ${packageLink.link}`)
-			return null
-		}
-		let packageMetaDefaults = {} as FhirPofilePackage
-		if (storageKey.endsWith('package.json')) {
-			packageMetaDefaults = await useStorage().getItem(storageKey) as FhirPofilePackage
-		}
-		profilePackage.name = packageMetaDefaults.name || 'none'
-		// create a normalized name for the package by removing .,#,/,-
-		profilePackage.version = packageMetaDefaults.version || 'none'
-		// There seems to be a bug in magicast that doesn't allow for array defaults
-		profilePackage.fhirVersions = Array.isArray(packageMetaDefaults?.fhirVersions) ? packageMetaDefaults.fhirVersions : ['4.0.1']
-		profilePackage.author = packageMetaDefaults.author || 'none'
-		profilePackage.description = packageMetaDefaults.description || 'none'
-		profilePackage.dependencies = packageMetaDefaults.dependencies || {}
-		profilePackage.files = []
+const normalizeResourceName = (type: ProfileType, resource: StructureDefinition | NamingSystem) => {
+	if(type === 'example'){
+		return resource?.id || 'none'
+	}
+	return resource?.name || resource?.id || 'none'
+}
+
+async function analyzePackage(storage: Storage, files: string[]) : Promise<ProfileFile[] | null> {
+	const packageFiles = [] as ProfileFile[]
+	if(files.length > 0){
 		// filter all profiling files that are json and not package.json
-		const profilingFilesFiltered = profilingFiles.filter(file => file.endsWith('.json') && !file.endsWith('package.json') && !file.endsWith('.index.json'))
-		let fileNameMap = {} as Record<string, number>
+		const profilingFilesFiltered = files.filter(file => file.endsWith('.json') && !file.endsWith('package.json') && !file.endsWith('.index.json'))
 		for (const file of profilingFilesFiltered) {
-			const packageFile = await require(file)
-			const type = resolveProfileType(packageFile)
-			if(type){
-				const fileNormalizedName = packageFile?.id.replaceAll(/[\.\,#\/-]/g, '_')
-				if(fileNameMap[fileNormalizedName] === undefined){
-					fileNameMap[fileNormalizedName] = 0
-				}else{
-					fileNameMap[fileNormalizedName] += 1
-				}
-				// File path needs to be relative to the profiling directory
-				const relativePath = file.replace(join(storageKey, '/'), '')
-				profilePackage.files.push({
+			const resource = await storage.getItem(file) as StructureDefinition | NamingSystem
+			const type = resolveProfileType(resource)
+			if(type && resource?.id){
+				packageFiles.push({
 					type,
-					normalizedName: `f_${fileNormalizedName}${fileNameMap[fileNormalizedName] > 0 ? `_${fileNameMap[fileNormalizedName]}` : ''}`,
-					resource: packageFile?.resource || 'none',
-					snapshot: packageFile?.snapshot? true : false,
-					path: relativePath,
+					name: normalizeResourceName(type, resource),
+					resourceType: resource?.resourceType || 'none',
+					snapshot: resource?.snapshot? true : false,
+					path: file,
 				})
 			}
 		}
 	}
-	return profilePackage;
+	return packageFiles;
+}
+
+export function usePackageUtils() {
+	return {
+		extractPackage,
+		mountPackageStorage,
+		resolvePackageMeta,
+		analyzePackage,
+		loadFhirProfileIntoServer,
+	}
 }

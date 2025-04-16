@@ -1,11 +1,6 @@
-import { defu } from 'defu';
 import type { Package } from '#fhirtypes/profiling';
 import { useDatabase } from '#imports';
-import z, { AnyZodObject } from 'zod';
-
-type RuntimePackageStore = Record<string, Partial<Package>>;
-
-let runtimePackageStore = {} as RuntimePackageStore;
+import z from 'zod';
 
 const PROFILING_DB_VERSION = 1; // version of the database schema
 const PROFILING_DB_NAME = 'profiling'; // name of the database file
@@ -13,12 +8,12 @@ const PROFILING_DB_NAME = 'profiling'; // name of the database file
 // Zod schema for package
 const PackageSchema = z.object({
     identifier: z.string(),
-    ingested: z.boolean().optional(),
-    status: z.enum(['idle', 'in-process', 'error', 'done']).optional().default('idle'),
+    ingested: z.boolean().nullable().optional(),
+    status: z.enum(['idle', 'in-process', 'error', 'done']).nullable().optional(),
     compressed: z.object({
         baseName: z.string(),
         path: z.string(),
-    }).optional().nullable(),
+    }).nullable().optional(),
     mounted: z.string().nullable().optional(),
     meta: z.object({
         name: z.string(),
@@ -27,14 +22,14 @@ const PackageSchema = z.object({
         author: z.string().optional(),
         fhirVersions: z.array(z.string()).optional(),
         dependencies: z.record(z.string()).optional(),
-    }).optional(),
+    }).nullable().optional(),
     files: z.array(z.object({
         type: z.enum(['extension', 'profile', 'codeSystem', 'valueSet', 'searchParameter', 'example']),
-        normalizedName: z.string(),
-        resource: z.string(),
+        name: z.string(),
+        resourceType: z.string(),
         path: z.string(),
         snapshot: z.boolean(),
-    })).optional()
+    })).nullable().optional()
 });
 // array of packages
 const PackagesSchema = z.array(PackageSchema);
@@ -72,29 +67,58 @@ export const usePackageStore = () => {
         }
     }
 
-    async function getPackages() {
-        const packageQuery = db.prepare(`SELECT
-            identifier,
-            compressed,
-            mounted,
-            meta
-            FROM packages`);
+    function parseAndValidatePackages(packages: any[], columns: (keyof Package)[]) {
+        const parsedPackages = packages.map(pkg => {
+            const parsedPkg: any = { ...pkg };
+            if (columns.includes('compressed') && pkg.compressed) {
+                parsedPkg.compressed = JSON.parse(pkg.compressed);
+            }
+            if (columns.includes('meta') && pkg.meta) {
+                parsedPkg.meta = JSON.parse(pkg.meta);
+            }
+            if (columns.includes('files') && pkg.files) {
+                parsedPkg.files = JSON.parse(pkg.files);
+            }
+            return parsedPkg;
+        });
+
+        const validationResult = PackagesSchema.safeParse(parsedPackages);
+        if (!validationResult.success) {
+            console.error('Invalid packages', validationResult.error);
+            throw new Error('Invalid packages');
+        }
+        return validationResult.data;
+    }
+
+    async function getPackages(columns: (keyof Package)[] = ['identifier', 'ingested', 'status', 'compressed', 'mounted', 'meta']) {
+        if (columns.length === 0) {
+            throw new Error('At least one column must be specified');
+        }
+
+        const selectedColumns = columns.join(', ');
+        const packageQuery = db.prepare(`SELECT ${selectedColumns} FROM packages`);
         const existingPackages = await packageQuery.all() as any[];
 
-        // Parse compressed and mounted fields from JSON strings to objects
-        const parsedPackages = existingPackages.map(pkg => ({
-            ...pkg,
-            compressed: pkg.compressed ? JSON.parse(pkg.compressed) : null,
-            meta: pkg.meta ? JSON.parse(pkg.meta) : null,
-        }));
+        return parseAndValidatePackages(existingPackages, columns);
+    }
 
-        // Validate the parsed packages against the schema
-        const existingPackagesResult = PackagesSchema.safeParse(parsedPackages);
-        if (!existingPackagesResult.success) {
-            console.error('Invalid existing packages', existingPackagesResult.error);
-            throw new Error('Invalid existing packages');
+    async function getPackageById(identifier: string, columns: (keyof Package)[] = ['identifier', 'compressed', 'mounted', 'meta']) {
+        if (!identifier) {
+            throw new Error('Package identifier is required');
         }
-        return existingPackagesResult?.data || [];
+        if (columns.length === 0) {
+            throw new Error('At least one column must be specified');
+        }
+
+        const selectedColumns = columns.join(', ');
+        const packageQuery = db.prepare(`SELECT ${selectedColumns} FROM packages WHERE identifier = ?`);
+        const packageResult = await packageQuery.get(identifier) as any;
+
+        if (!packageResult) {
+            throw new Error(`Package with identifier ${identifier} not found`);
+        }
+
+        return parseAndValidatePackages([packageResult], columns)[0];
     }
 
     async function updatePackage(identifier: string, pkg: Partial<Package>) {
@@ -119,9 +143,9 @@ export const usePackageStore = () => {
         return stmt.run(...values, identifier);
     }
 
-
     return {
         getPackages,
+        getPackageById,
         updatePackage,
         initDatabase
     };

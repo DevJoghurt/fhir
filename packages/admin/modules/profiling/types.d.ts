@@ -11,8 +11,8 @@ export interface PofileMeta {
 
 export type ProfileFile = {
 	type: ProfileType;
-	normalizedName: string;
-	resource: string;
+	name: string;
+	resourceType: string;
 	path: string;
 	snapshot: boolean;
 }

@@ -2,9 +2,6 @@
 	<div>
 		<div class="bg-gray-50 border-b border-gray-200 flex justify-between px-6 py-4">
 			<h1 class="text-xl font-semibold">System</h1>
-			<div>
-				<FhirProfileLoaderState />
-			</div>
 		</div>
 		<div class="flex bg-gray-50 gap-4 items-center px-4">
 			<UNavigationMenu
@@ -21,7 +18,7 @@
 	import { computed, useRoute } from '#imports'
 
 	const route = useRoute()
-	const isBasePath = computed(() => !['profiles'].some(el => route.path.includes(el)))
+	const isBasePath = computed(() => !['packages'].some(el => route.path.includes(el)))
 
 	const menu = computed(() => [
 		[
@@ -32,9 +29,10 @@
 				active: isBasePath.value ? true : false
 			},
 			{
-				label: 'Profiles',
-				to: '/system/profiles',
-				icon: 'heroicons-clipboard-document-check'
+				label: 'Packages',
+				to: '/system/packages',
+				icon: 'heroicons-clipboard-document-check',
+				active: computed(() => route.path.includes('/system/packages')).value
 			}
 		]
 	])

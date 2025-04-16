@@ -24,12 +24,12 @@ export async function importLocalProfilingDirs(profilingPaths: string[], nuxtOpt
 	for (const profilingPath of profilingPaths) {
 		const dirs = await getDirectories(profilingPath)
 		for (const dir of dirs) {
-			const cPackage = {} as Package
 			// get all files if dir has profiling files
 			const profilingFiles = await globby(`${join(profilingPath, dir)}/**/*.json`, {
 				deep: 2,
 			})
 			if(profilingFiles.length > 0){
+				const cPackage = {} as Package
 				cPackage.identifier = dir
 				cPackage.mounted = `assets:${dir}`
 				// add the package to the assets storage
@@ -40,27 +40,31 @@ export async function importLocalProfilingDirs(profilingPaths: string[], nuxtOpt
 				packages.push(cPackage)
 				continue
 			}
-			// It is also allowed to have a .tgz or .tar file in the directory with all the profiling files
+			// It is also allowed to have .tgz or .tar files in the directory with all the profiling files
 			else {
 				// find all tar files in the directory
 				const profilingPackagedFiles = await globby(`${join(profilingPath, dir)}/**/*.{tar,tgz}`)
-				if((profilingPackagedFiles.length > 0) && (profilingPackagedFiles.length === 1)){
-					cPackage.identifier = dir
+				if (profilingPackagedFiles.length === 0) {
+					continue
+				}
+				for (const profilingPackagedFile of profilingPackagedFiles) {
+					const cPackage = {} as Package
+					//use file name without extension as identifier
+					cPackage.identifier = profilingPackagedFile.split('/').pop()?.split('.').slice(0, -1).join('.') || profilingPackagedFile
 					cPackage.compressed = {
 						baseName: `assets:${dir}`,
-						path: profilingPackagedFiles[0].replace(`${profilingPath}/${dir}/`, '')
+						path: profilingPackagedFile.replace(`${profilingPath}/${dir}/`, '')
 					}
 					cPackage.mounted = null
-					nuxtOptions.nitro.serverAssets.push({
-						baseName: dir,
-						dir: join(profilingPath, dir)
-					})
 					packages.push(cPackage)
 				}
+				nuxtOptions.nitro.serverAssets.push({
+					baseName: dir,
+					dir: join(profilingPath, dir)
+				})
 			}
 		}
 	}
-
 	nuxtOptions.runtimeConfig.profiling = defu(nuxtOptions.runtimeConfig.profiling || {}, {
 		packages
 	})

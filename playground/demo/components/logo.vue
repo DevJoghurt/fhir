@@ -1,3 +1,5 @@
 <template>
-	 <img src="/logo.png" alt="Logo" width="auto" class="h-12" />
+	<div class="h-20">
+		<img src="~/assets/img/logo.png" alt="Racoon logo" />
+  	</div>
 </template>
