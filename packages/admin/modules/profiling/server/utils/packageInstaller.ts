@@ -1,10 +1,10 @@
 //import { runTask } from "#imports";
-import type { Package } from '#fhirtypes/profiling';
+import type { Package, StoragePackage } from '#fhirtypes/profiling';
 import * as fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import { usePackageStore, usePackageUtils } from "#imports";
+import defu from 'defu';
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 type PackageInstallerStatus = 'idle' | 'running' | 'completed' | 'failed';
 type LogType = 'info' | 'warning' | 'error';
@@ -34,39 +34,46 @@ const taskState = {
 const eventListeners = [] as Array<(state: PackageInstallerState) => void>;
 
 
-async function worker({context}: WorkerEvent) {
+async function installer({context}: WorkerEvent) {
 	const { logMessage } = context
 
 	logMessage('info',"Profiling started");
-	const { extractPackage, resolvePackageMeta, analyzePackage } = usePackageUtils()
+	const { extractPackage, resolvePackageMeta, analyzePackage, resolveStoragePath, PACKAGES_BASE_NAME } = usePackageUtils()
 	const { getPackages, updatePackage } = usePackageStore()
-	const packages = await getPackages(['identifier', 'compressed', 'mounted', 'meta', 'files'])
+	const packages = await getPackages(['identifier', 'compressedPackage', 'storage', 'meta', 'files'])
 	logMessage('info', `Install packages: ${packages.map(pkg => pkg.identifier).join(', ')}`)
 	if(packages && packages.length > 0){
 	  for(const pkg of packages){
 			// if there is a compressed package and it is not mounted, extract files and mount it
-			if(pkg.compressed && !pkg.mounted){
+			if(pkg.compressedPackage && !pkg.storage){
 				logMessage('info', `Extract package ${pkg.identifier}`);
 				// extract the package and mount it
 				let tmpDir = await extractPackage(pkg);
 				logMessage('info', `Extracted package: ${pkg.identifier} to ${tmpDir}`)
 				// add mount point to the package
-				pkg.mounted = `profiling:${pkg.identifier}`
+				pkg.storage = {
+					baseName: PACKAGES_BASE_NAME,
+					dir: pkg.identifier
+				} as StoragePackage
+				pkg.status = defu(pkg?.status || {}, {
+					extracted: true,
+				})
 				const resp = await updatePackage(pkg.identifier, {
-					mounted: `profiling:${pkg.identifier}`
+					storage: pkg.storage,
+					status: pkg.status
 				})
 				if(resp.success) logMessage('info', `Updated package compressed: ${pkg.identifier}`)
 					else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
 			}
 
 			// get the storage for the mounted directory
-			const storage = useStorage(pkg?.mounted || '')
+			const storage = useStorage(resolveStoragePath(pkg?.storage))
 			const files = await storage.getKeys()
 			// TODO: check if the mounted directory is empty and reset db entry if it is
 
 			// check if there is a package.json file in the mounted directory
 			// if pkg meta is not set, try to load it from the package.json file
-			if(pkg.mounted && !pkg.meta){
+			if(pkg.storage && !pkg.meta){
 				const profileMeta = await resolvePackageMeta(storage, files)
 				if(profileMeta){
 					// write meta to the database
@@ -80,13 +87,17 @@ async function worker({context}: WorkerEvent) {
 			}
 
 			// analyse all files in the mounted directory
-			if(pkg.mounted && pkg.meta && !pkg.files){
+			if(pkg.storage && pkg.meta && !pkg.files){
 				const packageFiles = await analyzePackage(storage, files)
 				if(packageFiles){
 					// write files to the database
 					pkg.files = packageFiles
+					pkg.status = defu(pkg?.status || {}, {
+						loaded: true,
+					})
 					const resp = await updatePackage(pkg.identifier, {
-						files: packageFiles
+						files: packageFiles,
+						status: pkg.status
 					})
 					if(resp.success) logMessage('info', `Updated package files: ${pkg.identifier}`)
 					else logMessage('error', `Failed to update package files: ${pkg.identifier}`)
@@ -121,7 +132,7 @@ async function worker({context}: WorkerEvent) {
 }
 
 
-const queue: queueAsPromised<WorkerEvent> = fastq.promise(worker, 1)
+const installerQueue: queueAsPromised<WorkerEvent> = fastq.promise(installer, 1)
 
 export const usePackageInstaller = () => {
 
@@ -161,7 +172,7 @@ export const usePackageInstaller = () => {
 	const install = () => {
 		taskState.status = 'running';
 		eventListeners.forEach(listener => listener(taskState));
-		queue.push({
+		installerQueue.push({
 			options: {},
 			context: {
 				logMessage,

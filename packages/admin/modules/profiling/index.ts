@@ -1,6 +1,5 @@
 import {
 	defineNuxtModule,
-	addServerImports,
 	addServerScanDir,
 	createResolver,
 	addComponentsDir
@@ -8,7 +7,6 @@ import {
 import { lstat } from 'node:fs/promises'
 import { importLocalProfilingDirs } from './utils'
 import type { Package } from './types'
-import { name } from 'tar/types'
 
 declare module '@nuxt/schema' {
 	interface RuntimeConfig {

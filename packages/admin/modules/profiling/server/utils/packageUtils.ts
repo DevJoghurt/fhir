@@ -1,6 +1,6 @@
 import { useFhirClient, useStorage } from '#imports';
 import type { NamingSystem, Resource, StructureDefinition } from '@medplum/fhirtypes'
-import type { ProfileType, Package, PofileMeta, ProfileFile } from '#fhirtypes/profiling';
+import type { ProfileType, Package, PackageMeta, ProfileFile, CompressedPackage, StoragePackage } from '#fhirtypes/profiling';
 import fsDriver from "unstorage/drivers/fs";
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
@@ -8,9 +8,9 @@ import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
 import type { Storage } from 'unstorage';
-import { isArray } from 'node:util';
 
-const TMP_FOLDER = 'nhealth_fhir_profiling';
+const TMP_FOLDER = 'nhealth_fhir_packages';
+const PACKAGES_BASE_NAME = 'packages';
 
 
 const isStructureDefinition = (resource: Resource): resource is StructureDefinition => {
@@ -54,8 +54,15 @@ async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingS
 	throw new Error('Failed to load snapshot');
 }
 
+function resolveStoragePath(storage: CompressedPackage | StoragePackage | undefined | null): string {
+	if(storage?.baseName && storage?.dir && (storage?.dir !== '')) {
+		return `${storage.baseName}:${storage.dir}`
+	}
+	return storage?.baseName || ''
+}
+
 async function extractPackage(cPackage: Partial<Package>): Promise<string> {
-	const compressedPackage = cPackage?.compressed;
+	const compressedPackage = cPackage?.compressedPackage;
 	if (!compressedPackage || !cPackage.identifier) {
 		throw new Error('Package has no compressed file in storage');
 	}
@@ -63,7 +70,7 @@ async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 	await mkdir(tmpFolder, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
-	const tarFileBuffer = await useStorage(compressedPackage.baseName).getItemRaw(compressedPackage.path);
+	const tarFileBuffer = await useStorage(resolveStoragePath(compressedPackage)).getItemRaw(compressedPackage.path);
 	const stream = new Duplex();
 	stream.push(tarFileBuffer);
 	stream.push(null);
@@ -89,7 +96,7 @@ async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 function mountPackageStorage(): void {
 	const storage = useStorage()
 	const tmpFolder = join(tmpdir(), TMP_FOLDER);
-	storage.mount('profiling', fsDriver({
+	storage.mount(PACKAGES_BASE_NAME, fsDriver({
 		base: tmpFolder,
 		watchOptions: {
 			depth: 3
@@ -139,7 +146,7 @@ function resolveProfileType(content: Resource) : ProfileType | null {
 	return null
 }
 
-async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<PofileMeta | null> {
+async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<PackageMeta | null> {
 	const packageJsonFilePath = files.find(file => file.endsWith('package.json'))
 	if(!packageJsonFilePath){
 		console.error(`No package.json file found in ${storage}`);
@@ -156,7 +163,7 @@ async function resolvePackageMeta(storage: Storage,files: string[]) : Promise<Po
 		description: packageJsonFile.description || 'none',
 		fhirVersions: packageJsonFile.fhirVersions || packageJsonFile['fhir-version-list'] || ['4.0.1'],
 		dependencies: packageJsonFile.dependencies || {},
-	} as PofileMeta
+	} as PackageMeta
 
 	return packageJson
 }
@@ -197,5 +204,7 @@ export function usePackageUtils() {
 		resolvePackageMeta,
 		analyzePackage,
 		loadFhirProfileIntoServer,
+		resolveStoragePath,
+		PACKAGES_BASE_NAME
 	}
 }

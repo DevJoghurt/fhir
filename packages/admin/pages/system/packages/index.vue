@@ -34,7 +34,11 @@
 		<div>
 			<NuxtLink v-for="(pkg, index) in packages" :key="index" :to="`/system/packages/${pkg.identifier}`" class="p-4 border-b border-gray-200 flex items-center justify-between">
 				<div class="flex items-center space-x-4">
-					<UAvatar :src="pkg.meta?.source" size="sm" />
+					<UChip
+						inset
+						color="error">
+						<UAvatar :src="pkg.meta?.source" icon="heroicons-squares-2x2" size="sm" />
+					</UChip>
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-900">{{ pkg?.meta?.name || pkg.identifier }}</div>
 						<div class="text-sm text-gray-500">{{ pkg?.meta?.description }}</div>

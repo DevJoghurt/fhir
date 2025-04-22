@@ -31,7 +31,7 @@
 			{
 				label: 'Packages',
 				to: '/system/packages',
-				icon: 'heroicons-clipboard-document-check',
+				icon: 'heroicons-squares-2x2',
 				active: computed(() => route.path.includes('/system/packages')).value
 			}
 		]

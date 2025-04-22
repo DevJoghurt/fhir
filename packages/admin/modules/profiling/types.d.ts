@@ -1,11 +1,11 @@
 export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
 
-export interface PofileMeta {
+export interface PackageMeta {
 	name: string;
 	version?: string;
 	description?: string;
 	author?: string;
-	fhirVersions: string[];
+	fhirVersions?: string[];
 	dependencies?: Record<string, string>;
 }
 
@@ -18,16 +18,28 @@ export type ProfileFile = {
 }
 
 export type CompressedPackage = {
-	baseName: string,
-	path: string
+	baseName: string;
+	dir: string;
+	path: string;
+}
+
+export type StoragePackage = {
+	baseName: string;
+	dir: string;
+}
+
+export type PackageStatus = {
+	downloaded?: boolean;
+	extracted?: boolean;
+	loaded?: boolean;
+	installed?: boolean;
 }
 
 export type Package = {
 	identifier: string;
-	status?: 'idle' | 'in-process' | 'error' | 'done';
-	ingested?: boolean;
-	compressed?: CompressedPackage | null;
-	mounted: string | null;
-	meta?: PofileMeta;
-	files?: ProfileFile[];
+	status?: PackageStatus | null;
+	compressedPackage?: CompressedPackage | null;
+	storage?: StoragePackage | null;
+	meta?: PackageMeta | null;
+	files?: ProfileFile[] | null;
 }
