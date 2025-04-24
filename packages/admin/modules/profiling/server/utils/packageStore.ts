@@ -9,6 +9,7 @@ const PROFILING_DB_NAME = 'profiling'; // name of the database file
 const PackageSchema = z.object({
     identifier: z.string(),
     status: z.object({
+        process: z.enum(['idle', 'running', 'completed', 'failed']).optional(),
         downloaded: z.boolean().optional(),
         extracted: z.boolean().optional(),
         loaded: z.boolean().optional(),
@@ -34,6 +35,10 @@ const PackageSchema = z.object({
     files: z.array(z.object({
         type: z.enum(['extension', 'profile', 'codeSystem', 'valueSet', 'searchParameter', 'example']),
         name: z.string(),
+        status: z.object({
+            type: z.enum(['loaded', 'installed', 'failed', 'skipped']),
+            message: z.any().optional(),
+        }),
         resourceType: z.string(),
         path: z.string(),
         snapshot: z.boolean(),

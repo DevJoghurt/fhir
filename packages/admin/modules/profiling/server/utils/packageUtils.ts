@@ -34,24 +34,52 @@ async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingS
 		query = `name=${encodeURIComponent(resource?.name || '')}`;
 
 	}
-	const resp = await createResourceIfNoneExist(resource, query);
+	let resp = null as StructureDefinition | NamingSystem | null;
+	try	{
+		resp = await createResourceIfNoneExist(resource, query);
+	}catch (e) {
+		return {
+			status: 'error',
+			data: e?.cause || e?.message || 'Failed to create resource',
+		}
+	}
 	if(!needsToCreateSnapshot){
-		return resp;
+		return {
+			status: 'success',
+			data: resp,
+		};
 	}
 	if(!resp!.id){
-		throw new Error('Failed to create resource');
+		return {
+			status: 'error',
+			data: 'Failed to create resource',
+		}
 	}
 	// create a snapshot if it does not exist and patch the resource
-	const sd = await readStructureDefinition(resp.id,'$snapshot');
+	let sd = null as StructureDefinition | null;
+	try	{
+		sd = await readStructureDefinition(resp.id, '$snapshot');
+	}catch (e) {
+		return {
+			status: 'error',
+			data: e?.cause || e?.message || 'Failed to create resource',
+		}
+	}
 	if(sd.snapshot){
 		const patchedResp = await patchResource('StructureDefinition', resp.id, [{
 			op: 'add',
 			path: '/snapshot',
 			value: sd.snapshot
 		}]);
-		return patchedResp;
+		return {
+			status: 'success',
+			data: patchedResp,
+		}
 	}
-	throw new Error('Failed to load snapshot');
+	return {
+		status: 'error',
+		data: 'Failed to create snapshot',
+	}
 }
 
 function resolveStoragePath(storage: CompressedPackage | StoragePackage | undefined | null): string {
@@ -187,6 +215,9 @@ async function analyzePackage(storage: Storage, files: string[]) : Promise<Profi
 				packageFiles.push({
 					type,
 					name: normalizeResourceName(type, resource),
+					status: {
+						type: 'loaded'
+					},
 					resourceType: resource?.resourceType || 'none',
 					snapshot: resource?.snapshot? true : false,
 					path: file,

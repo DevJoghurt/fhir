@@ -19,10 +19,15 @@
 				</div>
 				<div>
 					<ul>
-						<li v-for="(file, index) in packageFiles" :key="index" class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
-							<div class="flex items-center gap-2 px-4 py-2">
-								<UBadge size="sm">Loaded</UBadge>
+						<li v-for="(file, index) in packageFiles" :key="index" class="flex flex-col gap-2 px-4 py-4 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+							<div class="flex items-center gap-2">
+								<UBadge v-if="file?.status?.type === 'loaded'" size="sm">Loaded</UBadge>
+								<UBadge v-if="file?.status?.type === 'installed'" color="success" size="sm">Installed</UBadge>
+								<UBadge v-if="file?.status?.type === 'failed'" color="error" size="sm">Failed</UBadge>
 								<span class="text-sm font-medium text-gray-900 dark:text-white">{{ file.name || file.id }}</span>
+							</div>
+							<div v-if="file?.status?.type === 'failed'">
+								<span class="text-sm text-gray-500 dark:text-gray-400">{{ operationOutcomeToString(file?.status?.message) }}</span>
 							</div>
 						</li>
 					</ul>
@@ -50,6 +55,7 @@
 </template>
 <script setup lang="ts">
 	import type { TabsItem } from '@nuxt/ui'
+	import { useFhirUtils } from '#imports'
 
 	const items = ref<TabsItem[]>([
 	{
@@ -75,11 +81,13 @@
 	])
 	const route = useRoute()
 
+	const { operationOutcomeToString } = useFhirUtils()
+
 	const packageIdentifier = ref<string | null>(route.params.package as string)
 
 	const { data: pkg } = await useFetch(`/api/fhir/packages/${packageIdentifier.value}`, {
 		query: {
-			columns: ['identifier','meta', 'files'],
+			columns: ['identifier', 'status', 'meta', 'files'],
 		}
 	})
 

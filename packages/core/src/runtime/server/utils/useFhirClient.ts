@@ -89,10 +89,9 @@ export function useFhirClient(options: UseFhirOptions = {
 			onResponse({ response }) {
 				// TODO: Process the response data
 			},
-			onResponseError({ request, response, options }) {
-				if (response.status === 401) {
-					// handle unauthorized requests
-				}
+			async onResponseError(context) {
+				context.error = context.response._data as OperationOutcome
+
 			},
 		});
 	};

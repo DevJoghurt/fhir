@@ -70,6 +70,10 @@ export default defineNuxtModule<ModuleOptions>({
 			as: 'useFhirResource',
 			from: resolve('./runtime/app/composables/useFhirResource')
 		}, {
+			name: 'useFhirUtils',
+			as: 'useFhirUtils',
+			from: resolve('./runtime/app/composables/useFhirUtils')
+		}, {
 			name: 'operationOutcomeToString',
 			as: 'operationOutcomeToString',
 			from: resolve('./runtime/utils/outcomes')

@@ -11,6 +11,10 @@ export interface PackageMeta {
 
 export type ProfileFile = {
 	type: ProfileType;
+	status: {
+		type: 'loaded' | 'installed' | 'failed' | 'skipped';
+		message?: string;
+	},
 	name: string;
 	resourceType: string;
 	path: string;
@@ -29,6 +33,7 @@ export type StoragePackage = {
 }
 
 export type PackageStatus = {
+	process?: 'idle' | 'running' | 'completed' | 'failed';
 	downloaded?: boolean;
 	extracted?: boolean;
 	loaded?: boolean;

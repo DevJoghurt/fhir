@@ -106,6 +106,7 @@ export async function useFhirCapatibilityStatement() {
 			data
 		} = await search('StructureDefinition', {
 			url: rs.profile.supported.join(','),
+			_count: 100,
 			_elements: 'name,url,description,status,publisher'
 		})
 

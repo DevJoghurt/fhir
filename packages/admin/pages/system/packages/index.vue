@@ -36,7 +36,7 @@
 				<div class="flex items-center space-x-4">
 					<UChip
 						inset
-						color="error">
+						:color="resolveStatusColor(pkg.status)">
 						<UAvatar :src="pkg.meta?.source" icon="heroicons-squares-2x2" size="sm" />
 					</UChip>
 					<div class="flex flex-col">
@@ -52,11 +52,12 @@
 <script lang="ts" setup>
 	import { reactive, useTemplateRef } from '#imports'
 	import type { FormSubmitEvent } from '@nuxt/ui'
+	import type { PackageStatus } from '#fhirtypes/profiling'
 	import z from 'zod'
 
 	const { data: packages } = await useFetch('/api/fhir/packages', {
 		query: {
-			columns: ['identifier','meta'],
+			columns: ['identifier', 'status', 'meta'],
 		}
 	})
 
@@ -74,11 +75,24 @@
 
 	const form = useTemplateRef('packageForm')
 
+	function resolveStatusColor(status: PackageStatus) {
+		if(status?.installed) {
+			return 'success'
+		}
+		if(status?.loaded) {
+			return 'primary'
+		}
+		return 'error'
+	}
+
 	const onPackageSubmit = async (event: FormSubmitEvent<PackageSchema>) => {
+		/*
+		TODO: Add package logic here
 		const resp = await $fetch('/api/fhir/package-loader', {
 			method: 'POST',
 			body: event.data
 		})
 		console.log(resp)
+		*/
 	}
 </script>

@@ -1,14 +1,14 @@
 import { defineEventHandler, usePackageStore, getValidatedQuery } from '#imports';
 import z from 'zod';
 
-const ColumnsSchema = z.enum(['identifier', 'compressed', 'mounted', 'meta', 'files'])
+const ColumnsSchema = z.enum(['identifier', 'status', 'meta', 'files'])
 
 const QuerySchema = z.object({
   columns: z.union([ColumnsSchema, ColumnsSchema.array()]).transform((data) => {
 	return Array.isArray(data)
 	  ? data
 	  : [data]
-  }).default(['identifier', 'compressed', 'mounted', 'meta']),
+  }).default(['identifier', 'status', 'meta']),
 })
 
 export default defineEventHandler(async (event) => {
