@@ -37,12 +37,18 @@ const taskState = {
 
 const eventListeners = [] as Array<(state: PackageInstallerState) => void>;
 
+const MAX_RECURSIVE_DEPENDENCIES = 50;
+let INSTALLER_RECURSIVE_COUNT = 0;
 
 async function installer({options, context, packages}: InstallerParams) {
 	const { logMessage } = context
 	const { checkReinstallProfiles = false } = options || {}
 	const { extractPackage, resolvePackageMeta, analyzePackage, resolveStoragePath, loadFhirProfileIntoServer, PACKAGES_BASE_NAME } = usePackageUtils()
 	const { updatePackage } = usePackageStore()
+	
+	// check if the installer has to run recursively
+	let RERUN_INSTALLER = false
+
 	if(packages && packages.length > 0){
 	  for(const pkg of packages){
 			// if there is a compressed package and it is not mounted, extract files and mount it
@@ -128,6 +134,7 @@ async function installer({options, context, packages}: InstallerParams) {
 					if(missingDependenciesInstalled.length > 0){
 						// continue if some dependencies are not installed
 						logMessage('warning', `Missing INSTALLED dependencies for package ${pkg.identifier}: ${missingDependenciesInstalled.join(', ')}`)
+						RERUN_INSTALLER = true
 						continue;
 					}
 				}
@@ -137,7 +144,7 @@ async function installer({options, context, packages}: InstallerParams) {
 				const packageFiles = pkg.files.filter(file => file.status.type === 'loaded')
 				if((packageFiles && packageFiles.length > 0) || checkReinstallProfiles){
 					// load files with an order into the fhir server
-					const orderProfiles = ['codeSystem', 'valueSet', 'extension', 'profile', 'example'] as ProfileType[]
+					const orderProfiles = ['codeSystem', 'valueSet', 'extension', 'profile', 'searchParameter', 'example'] as ProfileType[]
 					for(const op of orderProfiles){
 						const files = pkg.files.filter(file => file.type === op)
 						// load the package into the fhir server
@@ -184,6 +191,17 @@ async function installer({options, context, packages}: InstallerParams) {
 	} else {
 	  logMessage('warning', "No packages found");
 	}
+
+	// check if there are any packages with dependencies that are not installed -> rerun the installer
+	if(RERUN_INSTALLER){
+		if(INSTALLER_RECURSIVE_COUNT < MAX_RECURSIVE_DEPENDENCIES){
+			logMessage('error', 'Max recursive dependencies reached for package')
+		}
+		logMessage('info', 'Reinstall dependencies for packages')
+		INSTALLER_RECURSIVE_COUNT++
+		return await installer({options, context, packages})
+	}
+
 
 	logMessage('info','Profiling completed');
 	return true
@@ -245,9 +263,12 @@ export const usePackageInstaller = () => {
 
 		logMessage('info', `Install packages: ${packages.map(packagesToInstall => packagesToInstall.identifier).join(', ')}`)
 
+		// reset the dependencies count
+		INSTALLER_RECURSIVE_COUNT = 0
+
 		installerQueue.push({
 			options: {
-				checkReinstallProfiles: false
+				checkReinstallProfiles: true
 			},
 			packages: packagesToInstall,
 			context: {

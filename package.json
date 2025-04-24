@@ -31,7 +31,7 @@
 		"demo:generate": "nuxi generate playground/demo",
 		"demo:preview": "nuxi preview playground/demo",
 		"typecheck": "tsc --noEmit",
-		"hapi": "docker compose -f ./docker/docker-compose.hapi.yml up --force-recreate --build"
+		"hapi": "docker-compose -f ./docker/docker-compose.hapi.yml up --force-recreate --build"
 	},
 	"resolutions": {
 		"nhealth-cli": "workspace:*",

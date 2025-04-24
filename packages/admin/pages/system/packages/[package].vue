@@ -75,6 +75,10 @@
 		value: 'extension'
 	},
 	{
+		label: 'SearchParameter',
+		value: 'searchParameter'
+	},
+	{
 		label: 'Example',
 		value: 'example'
 	}
