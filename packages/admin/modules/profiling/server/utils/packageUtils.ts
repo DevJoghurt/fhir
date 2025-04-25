@@ -18,7 +18,7 @@ const isStructureDefinition = (resource: Resource): resource is StructureDefinit
 }
 
 async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingSystem) {
-	const { createResourceIfNoneExist, patchResource, readStructureDefinition } = useFhirClient();
+	const { upsertResource, patchResource, readStructureDefinition } = useFhirClient();
 
 	// check if resource is StructureDefinition and has a snapshot
 	let needsToCreateSnapshot = resource.resourceType === 'StructureDefinition' && typeof resource?.snapshot === 'undefined';
@@ -36,7 +36,9 @@ async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingS
 	}
 	let resp = null as StructureDefinition | NamingSystem | null;
 	try	{
-		resp = await createResourceIfNoneExist(resource, query);
+		resp = await upsertResource(resource, query, {
+			clientIdStrategy: true
+		});
 	}catch (e) {
 		return {
 			status: 'error',

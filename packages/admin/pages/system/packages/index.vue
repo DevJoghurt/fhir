@@ -37,7 +37,9 @@
 					<UChip
 						inset
 						:color="resolveStatusColor(pkg.status)">
-						<UAvatar :src="pkg.meta?.source" icon="heroicons-squares-2x2" size="sm" />
+						<UAvatar v-if="pkg.status?.process === 'idle'" :src="pkg.meta?.source" icon="heroicons-squares-2x2" size="sm" />
+						<UButton v-else-if="pkg.status?.process === 'waiting'" size="sm" color="neutral" variant="outline" icon="heroicons-question-mark-circle" class="rounded-full" />
+						<UButton v-else-if="pkg.status?.process === 'running'" size="sm" color="neutral" variant="outline" loading class="rounded-full" />
 					</UChip>
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-900">{{ pkg?.meta?.name || pkg.identifier }}</div>

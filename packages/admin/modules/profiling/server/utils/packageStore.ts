@@ -9,7 +9,7 @@ const PROFILING_DB_NAME = 'profiling'; // name of the database file
 const PackageSchema = z.object({
     identifier: z.string(),
     status: z.object({
-        process: z.enum(['idle', 'running', 'completed', 'failed']).optional(),
+        process: z.enum(['idle', 'running', 'waiting']).optional(),
         downloaded: z.boolean().optional(),
         extracted: z.boolean().optional(),
         loaded: z.boolean().optional(),

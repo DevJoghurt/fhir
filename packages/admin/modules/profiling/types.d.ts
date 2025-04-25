@@ -32,8 +32,10 @@ export type StoragePackage = {
 	dir: string;
 }
 
+export type PackageStatusProcess = 'idle' | 'running' | 'waiting';
+
 export type PackageStatus = {
-	process?: 'idle' | 'running' | 'completed' | 'failed';
+	process?: PackageStatusProcess;
 	downloaded?: boolean;
 	extracted?: boolean;
 	loaded?: boolean;

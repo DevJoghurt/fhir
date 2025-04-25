@@ -1,5 +1,5 @@
 //import { runTask } from "#imports";
-import type { Package, StoragePackage, ProfileType } from '#fhirtypes/profiling';
+import type { Package, StoragePackage, ProfileType, PackageStatusProcess } from '#fhirtypes/profiling';
 import * as fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import { usePackageStore, usePackageUtils } from "#imports";
@@ -21,6 +21,7 @@ type PackageInstallerState = {
 type InstallerParams = {
 	options?: {
 		checkReinstallProfiles?: boolean;
+		ignoredDependencies?: string[];
 	},
 	packages: Package[];
 	context: {
@@ -42,15 +43,25 @@ let INSTALLER_RECURSIVE_COUNT = 0;
 
 async function installer({options, context, packages}: InstallerParams) {
 	const { logMessage } = context
-	const { checkReinstallProfiles = false } = options || {}
+	const {
+		checkReinstallProfiles = false,
+		ignoredDependencies = [],
+	} = options || {}
 	const { extractPackage, resolvePackageMeta, analyzePackage, resolveStoragePath, loadFhirProfileIntoServer, PACKAGES_BASE_NAME } = usePackageUtils()
 	const { updatePackage } = usePackageStore()
-	
+
 	// check if the installer has to run recursively
 	let RERUN_INSTALLER = false
 
 	if(packages && packages.length > 0){
 	  for(const pkg of packages){
+			// set the status to running
+			pkg.status = defu({
+				process: 'running' as PackageStatusProcess,
+			}, pkg?.status || {})
+			await updatePackage(pkg.identifier, {
+				status: pkg.status
+			})
 			// if there is a compressed package and it is not mounted, extract files and mount it
 			if(pkg.compressedPackage && !pkg.storage){
 				logMessage('info', `Extract package ${pkg.identifier}`);
@@ -62,9 +73,9 @@ async function installer({options, context, packages}: InstallerParams) {
 					baseName: PACKAGES_BASE_NAME,
 					dir: pkg.identifier
 				} as StoragePackage
-				pkg.status = defu(pkg?.status || {}, {
+				pkg.status = defu({
 					extracted: true,
-				})
+				}, pkg?.status || {})
 				const resp = await updatePackage(pkg.identifier, {
 					storage: pkg.storage,
 					status: pkg.status
@@ -99,9 +110,9 @@ async function installer({options, context, packages}: InstallerParams) {
 				if(packageFiles){
 					// write files to the database
 					pkg.files = packageFiles
-					pkg.status = defu(pkg?.status || {}, {
+					pkg.status = defu({
 						loaded: true,
-					})
+					}, pkg?.status || {})
 					const resp = await updatePackage(pkg.identifier, {
 						files: packageFiles,
 						status: pkg.status
@@ -114,18 +125,34 @@ async function installer({options, context, packages}: InstallerParams) {
 			if(pkg.files && pkg.files.length > 0){
 
 				// check if package needs dependencies first
-				const dependencies = pkg.meta?.dependencies || {}
-				if(Object.keys(dependencies).length > 0){
+				let dependencies = Object.keys(pkg.meta?.dependencies || {})
+				// remove ignored dependencies from the list if available
+				dependencies = dependencies.filter(dep => !ignoredDependencies.includes(dep))
+				if(dependencies.length > 0){
 					// check if a dependency is missing
-					const missingDependencies = Object.keys(dependencies).filter(dep => !packages.find(p => p.meta?.name === dep))
+					const missingDependencies = [] as string[]
+					for(const dep of dependencies){
+						const depPkg = packages.find(p => p.meta?.name === dep)
+						if(depPkg && depPkg.status && depPkg.status.loaded !== true){
+							missingDependencies.push(dep)
+						}
+					}
 					if(missingDependencies.length > 0){
 						logMessage('warning', `Missing LOADED dependencies for package ${pkg.identifier}: ${missingDependencies.join(', ')}`)
 						// cannot install package without dependencies -> TODO: add dependency if download of packages is implemented
+						RERUN_INSTALLER = true
+						// set the status to waiting after the package is installed
+						pkg.status = defu({
+							process: 'waiting' as PackageStatusProcess,
+						}, pkg?.status || {})
+						await updatePackage(pkg.identifier, {
+							status: pkg.status
+						})
 						continue;
 					}
 					// check if dependencies are installed
 					const missingDependenciesInstalled = [] as string[]
-					for(const dep of Object.keys(dependencies)){
+					for(const dep of dependencies){
 						const depPkg = packages.find(p => p.meta?.name === dep)
 						if(depPkg && depPkg.status && depPkg.status.installed !== true){
 							missingDependenciesInstalled.push(dep)
@@ -135,6 +162,13 @@ async function installer({options, context, packages}: InstallerParams) {
 						// continue if some dependencies are not installed
 						logMessage('warning', `Missing INSTALLED dependencies for package ${pkg.identifier}: ${missingDependenciesInstalled.join(', ')}`)
 						RERUN_INSTALLER = true
+						// set the status to waiting after the package is installed
+						pkg.status = defu({
+							process: 'waiting' as PackageStatusProcess,
+						}, pkg?.status || {})
+						await updatePackage(pkg.identifier, {
+							status: pkg.status
+						})
 						continue;
 					}
 				}
@@ -143,7 +177,7 @@ async function installer({options, context, packages}: InstallerParams) {
 				logMessage('info', `Installing package ${pkg.identifier}`)
 				const packageFiles = pkg.files.filter(file => file.status.type === 'loaded')
 				if((packageFiles && packageFiles.length > 0) || checkReinstallProfiles){
-					// load files with an order into the fhir server
+					// load files with an order into FHIR server
 					const orderProfiles = ['codeSystem', 'valueSet', 'extension', 'profile', 'searchParameter', 'example'] as ProfileType[]
 					for(const op of orderProfiles){
 						const files = pkg.files.filter(file => file.type === op)
@@ -157,7 +191,7 @@ async function installer({options, context, packages}: InstallerParams) {
 							const resource = await storage.getItem(file.path) as StructureDefinition | NamingSystem
 							let resp = await loadFhirProfileIntoServer(resource)
 							if(resp.status === 'success'){
-								logMessage('info', `Loaded ${file.type} ${file.name} into server`)
+								logMessage('info', `Installed ${file.type} ${file.name} into server`)
 								file.status = {
 									type: 'installed'
 								}
@@ -171,9 +205,10 @@ async function installer({options, context, packages}: InstallerParams) {
 							}
 						}
 					}
-					pkg.status = defu(pkg?.status || {}, {
+					pkg.status = defu({
+						process: 'idle' as PackageStatusProcess,
 						installed: true,
-					})
+					}, pkg?.status || {})
 					const resp = await updatePackage(pkg.identifier, {
 						status: pkg.status,
 						files: pkg.files
@@ -187,21 +222,29 @@ async function installer({options, context, packages}: InstallerParams) {
 			} else {
 				logMessage('warning', `No files found for package ${pkg.identifier}`)
 			}
+			// set the status to idle after the package is installed
+			pkg.status = defu({
+				process: 'idle' as PackageStatusProcess,
+			}, pkg?.status || {})
+			await updatePackage(pkg.identifier, {
+				status: pkg.status
+			})
 	  }
 	} else {
 	  logMessage('warning', "No packages found");
 	}
 
+	logMessage('info', `Rerun installer if needed for dependencies ${RERUN_INSTALLER}`)
 	// check if there are any packages with dependencies that are not installed -> rerun the installer
 	if(RERUN_INSTALLER){
-		if(INSTALLER_RECURSIVE_COUNT < MAX_RECURSIVE_DEPENDENCIES){
+		if(INSTALLER_RECURSIVE_COUNT >= MAX_RECURSIVE_DEPENDENCIES){
 			logMessage('error', 'Max recursive dependencies reached for package')
+			return true
 		}
 		logMessage('info', 'Reinstall dependencies for packages')
 		INSTALLER_RECURSIVE_COUNT++
 		return await installer({options, context, packages})
 	}
-
 
 	logMessage('info','Profiling completed');
 	return true
@@ -231,7 +274,7 @@ export const usePackageInstaller = () => {
 		};
 		// add console log for the message
 		if(type === 'info'){
-			console.info(message)
+			console.log(message)
 		} else if(type === 'warning'){
 			console.warn(message)
 		} else if(type === 'error'){
@@ -253,13 +296,7 @@ export const usePackageInstaller = () => {
 		// get current package store and check if there are any packages to install
 		const { getPackages } = usePackageStore()
 
-		const packages = await getPackages(['identifier', 'compressedPackage', 'storage', 'meta', 'files'])
-		const packagesToInstall = packages.filter(pkg => !pkg.status?.installed)
-		if(!packagesToInstall || packagesToInstall.length === 0){
-			// check if there are any packages to install
-			logMessage('info', "No packages to install")
-			return;
-		}
+		const packages = await getPackages(['identifier', 'status', 'compressedPackage', 'storage', 'meta', 'files'])
 
 		logMessage('info', `Install packages: ${packages.map(packagesToInstall => packagesToInstall.identifier).join(', ')}`)
 
@@ -268,9 +305,10 @@ export const usePackageInstaller = () => {
 
 		installerQueue.push({
 			options: {
-				checkReinstallProfiles: true
+				checkReinstallProfiles: false,
+				ignoredDependencies: ['hl7.fhir.extensions.r5'],
 			},
-			packages: packagesToInstall,
+			packages,
 			context: {
 				logMessage,
 				setStatus

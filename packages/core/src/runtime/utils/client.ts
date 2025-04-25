@@ -14,7 +14,7 @@ import type {
 	Bundle,
 	ValueSet
 } from '@medplum/fhirtypes'
-import consola from 'consola'
+import { consola } from 'consola'
 import type { FetchOptions as OfetchOptions } from 'ofetch';
 import { randomUUID } from "uncrypto";
 import type { UseFetchOptions, AsyncData } from '#app'
@@ -50,6 +50,12 @@ export type ExtendedFetchOptions = {
 	 * See: https://hl7.org/fhir/r4/async.html
 	 */
 	asynchRequest?: boolean
+
+	/**
+	 * If clientIdStrategy is true, the client will use the clientIdStrategy to determine the client ID.
+	 * This is used for upsert  operation, it adds the client id to the url
+	 */
+	clientIdStrategy?: boolean
 }
 
 type SharedFetchOptions<T> =  UseFetchOptions<T> | OfetchOptions
@@ -388,6 +394,7 @@ export class FhirClient {
 	 * @param options - Optional fetch options.
 	 * @returns The result of the create operation.
 	 */
+
 	createResourceIfNoneExist<T extends Resource>(resource: T, query: string, options?: FetchOptions<any>): AsyncData<T, any> | Promise<T> {
 		options = defu(options, { headers: { 'If-None-Exist': query } });
 		return this.fetchInternal<T>('POST', this.fhirUrl(resource.resourceType), {
@@ -419,10 +426,21 @@ export class FhirClient {
 	 * @returns The updated/created resource.
 	 */
 	upsertResource<T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>): AsyncData<T, any> | Promise<T> {
-		const url = this.fhirSearchUrl(resource.resourceType, query);
+		// remove clientIdStrategy from options if it exists
+		const { clientIdStrategy, ...restOptions } = options || {};
+		const path = [resource.resourceType] as string[];
+		if(clientIdStrategy && resource?.id){
+			// add clientIdStrategy to the paths
+			path.push(resource.id)
+		}
+		const url = this.fhirUrl(...path);
+		// add client id to the URL
+		if (query) {
+			url.search = getQueryString(query);
+		}
 		return this.fetchInternal<T>('PUT', url, {
 			body: JSON.stringify(resource),
-			...options
+			...restOptions
 		});
 	}
 

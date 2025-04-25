@@ -16,7 +16,8 @@ hapi:
         - '*'
     default_encoding: json
     version: R4
-    client_id_strategy: ANY
+    client_id_strategy: 'ANY'
+    server_id_mode: 'UUID'
     #ig_runtime_upload_enabled: true
     #enable_repository_validating_interceptor: false
     #install_transitive_ig_dependencies: true

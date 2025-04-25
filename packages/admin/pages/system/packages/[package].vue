@@ -27,7 +27,10 @@
 								<span class="text-sm font-medium text-gray-900 dark:text-white">{{ file.name || file.id }}</span>
 							</div>
 							<div v-if="file?.status?.type === 'failed'">
-								<span class="text-sm text-gray-500 dark:text-gray-400">{{ operationOutcomeToString(file?.status?.message) }}</span>
+								<span class="text-xs text-gray-500 dark:text-gray-400">{{ operationOutcomeToString(file?.status?.message) }}</span>
+							</div>
+							<div>
+								<span class="text-xs text-gray-500 dark:text-gray-400">Path: {{ file.path }}</span>
 							</div>
 						</li>
 					</ul>
