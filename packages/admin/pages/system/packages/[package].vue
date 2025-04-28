@@ -82,6 +82,10 @@
 		value: 'searchParameter'
 	},
 	{
+		label: 'CapabilityStatement',
+		value: 'capabilityStatement'
+	},
+	{
 		label: 'Example',
 		value: 'example'
 	}

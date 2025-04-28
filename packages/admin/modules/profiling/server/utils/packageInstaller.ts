@@ -47,14 +47,14 @@ async function installer({options, context, packages}: InstallerParams) {
 		checkReinstallProfiles = false,
 		ignoredDependencies = [],
 	} = options || {}
-	const { 
-		extractPackage, 
+	const {
+		extractPackage,
 		resolvePackageMeta,
-		analyzePackage, 
-		resolveStoragePath, 
+		analyzePackage,
+		resolveStoragePath,
 		loadFhirProfileIntoServer,
-		checkPackageDependencies, 
-		PACKAGES_BASE_NAME 
+		checkPackageDependencies,
+		PACKAGES_BASE_NAME
 	} = usePackageUtils()
 
 	const { updatePackage } = usePackageStore()
@@ -156,7 +156,7 @@ async function installer({options, context, packages}: InstallerParams) {
 				const packageFiles = pkg.files.filter(file => file.status.type === 'loaded')
 				if((packageFiles && packageFiles.length > 0) || checkReinstallProfiles){
 					// load files with an order into FHIR server
-					const orderProfiles = ['codeSystem', 'valueSet', 'extension', 'profile', 'searchParameter', 'example'] as ProfileType[]
+					const orderProfiles = ['codeSystem', 'valueSet', 'extension', 'profile', 'searchParameter', 'capabilityStatement', 'example'] as ProfileType[]
 					for(const op of orderProfiles){
 						const files = pkg.files.filter(file => file.type === op)
 						// load the package into the fhir server

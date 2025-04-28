@@ -1,4 +1,4 @@
-export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'example';
+export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'capabilityStatement' | 'example';
 
 export interface PackageMeta {
 	name: string;

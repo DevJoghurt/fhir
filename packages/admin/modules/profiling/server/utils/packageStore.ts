@@ -33,7 +33,7 @@ const PackageSchema = z.object({
         dependencies: z.record(z.string()).optional(),
     }).nullable().optional(),
     files: z.array(z.object({
-        type: z.enum(['extension', 'profile', 'codeSystem', 'valueSet', 'searchParameter', 'example']),
+        type: z.enum(['extension', 'profile', 'codeSystem', 'valueSet', 'searchParameter', 'capabilityStatement', 'example']),
         name: z.string(),
         status: z.object({
             type: z.enum(['loaded', 'installed', 'failed', 'skipped']),

@@ -168,8 +168,11 @@ function resolveProfileType(content: Resource) : ProfileType | null {
 		}
 		return 'profile'
 	}
+	if(content?.resourceType === 'CapabilityStatement'){
+		return 'capabilityStatement'
+	}
 	// currently filter out CapabilityStatement and OperationDefinition
-	if(['CapabilityStatement', 'OperationDefinition'].indexOf(content?.resourceType) !== -1){
+	if(['OperationDefinition'].indexOf(content?.resourceType) !== -1){
 		return null
 	}
 	if(content?.resourceType){
@@ -235,7 +238,7 @@ async function analyzePackage(storage: Storage, files: string[]) : Promise<Profi
 /**
  * This function checks if dependencies of a package are already installed.
  * If package status is NULL or package is only loaded and not installed, it will return false
- * 
+ *
  * @returns boolean
  * @param dependencies - dependencies of the package
  * @param packages - list of installed packages
@@ -253,10 +256,10 @@ type PackageDependency = {
 function checkPackageDependencies(dependencies: Record<string, string> | undefined, packages: Package[], options?: CheckPackageDependenciesOptions) : PackageDependency[] {
 	const { ignoreDependencies = [] } = options || {}
 
-	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({ 
-		package: key, 
+	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({
+		package: key,
 		version: value,
-		installed: false 
+		installed: false
 	})) as PackageDependency[];
 	transformedDependencies = transformedDependencies.filter(dep => !ignoreDependencies.includes(dep.package))
 
@@ -271,7 +274,7 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 			if(!satisfiesVersion){
 				continue
 			}
-			// check if 
+			// check if
 			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === true){
 				dep.installed = true
 			}
