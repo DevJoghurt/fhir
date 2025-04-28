@@ -6,6 +6,7 @@ implementierung
 
 # Profiling
 packages/admin/server/profiling
+playground/demo/server/profiling
 
 #Playground
 playground/demo/assets/img

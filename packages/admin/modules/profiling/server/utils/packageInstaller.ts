@@ -47,7 +47,16 @@ async function installer({options, context, packages}: InstallerParams) {
 		checkReinstallProfiles = false,
 		ignoredDependencies = [],
 	} = options || {}
-	const { extractPackage, resolvePackageMeta, analyzePackage, resolveStoragePath, loadFhirProfileIntoServer, PACKAGES_BASE_NAME } = usePackageUtils()
+	const { 
+		extractPackage, 
+		resolvePackageMeta,
+		analyzePackage, 
+		resolveStoragePath, 
+		loadFhirProfileIntoServer,
+		checkPackageDependencies, 
+		PACKAGES_BASE_NAME 
+	} = usePackageUtils()
+
 	const { updatePackage } = usePackageStore()
 
 	// check if the installer has to run recursively
@@ -124,53 +133,22 @@ async function installer({options, context, packages}: InstallerParams) {
 			// load data into fhir server
 			if(pkg.files && pkg.files.length > 0){
 
-				// check if package needs dependencies first
-				let dependencies = Object.keys(pkg.meta?.dependencies || {})
-				// remove ignored dependencies from the list if available
-				dependencies = dependencies.filter(dep => !ignoredDependencies.includes(dep))
-				if(dependencies.length > 0){
-					// check if a dependency is missing
-					const missingDependencies = [] as string[]
-					for(const dep of dependencies){
-						const depPkg = packages.find(p => p.meta?.name === dep)
-						if(depPkg && depPkg.status && depPkg.status.loaded !== true){
-							missingDependencies.push(dep)
-						}
-					}
-					if(missingDependencies.length > 0){
-						logMessage('warning', `Missing LOADED dependencies for package ${pkg.identifier}: ${missingDependencies.join(', ')}`)
-						// cannot install package without dependencies -> TODO: add dependency if download of packages is implemented
-						RERUN_INSTALLER = true
-						// set the status to waiting after the package is installed
-						pkg.status = defu({
-							process: 'waiting' as PackageStatusProcess,
-						}, pkg?.status || {})
-						await updatePackage(pkg.identifier, {
-							status: pkg.status
-						})
-						continue;
-					}
-					// check if dependencies are installed
-					const missingDependenciesInstalled = [] as string[]
-					for(const dep of dependencies){
-						const depPkg = packages.find(p => p.meta?.name === dep)
-						if(depPkg && depPkg.status && depPkg.status.installed !== true){
-							missingDependenciesInstalled.push(dep)
-						}
-					}
-					if(missingDependenciesInstalled.length > 0){
-						// continue if some dependencies are not installed
-						logMessage('warning', `Missing INSTALLED dependencies for package ${pkg.identifier}: ${missingDependenciesInstalled.join(', ')}`)
-						RERUN_INSTALLER = true
-						// set the status to waiting after the package is installed
-						pkg.status = defu({
-							process: 'waiting' as PackageStatusProcess,
-						}, pkg?.status || {})
-						await updatePackage(pkg.identifier, {
-							status: pkg.status
-						})
-						continue;
-					}
+				// check dependencies of the package
+				const missingDependencies = checkPackageDependencies(pkg.meta?.dependencies, packages, {
+					ignoreDependencies: ignoredDependencies,
+				})
+				if(missingDependencies.length > 0){
+					logMessage('warning', `Missing dependencies for package ${pkg.identifier}: ${missingDependencies.map(dep => `${dep.package}@${dep.version}`).join(', ')}`)
+					// cannot install package without dependencies -> TODO: add dependency if download of packages is implemented
+					RERUN_INSTALLER = true
+					// set the status to waiting after the package is installed
+					pkg.status = defu({
+						process: 'waiting' as PackageStatusProcess,
+					}, pkg?.status || {})
+					await updatePackage(pkg.identifier, {
+						status: pkg.status
+					})
+					continue;
 				}
 
 				// if there are no dependencies or there are no missing dependencies, install the package

@@ -92,7 +92,9 @@
 
 	const packageIdentifier = ref<string | null>(route.params.package as string)
 
-	const { data: pkg } = await useFetch(`/api/fhir/packages/${packageIdentifier.value}`, {
+	console.log(packageIdentifier.value)
+
+	const { data: pkg } = await useFetch(`/api/fhir/packages/${encodeURIComponent(packageIdentifier.value || '')}`, {
 		query: {
 			columns: ['identifier', 'status', 'meta', 'files'],
 		}

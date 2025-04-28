@@ -32,7 +32,7 @@
 			</div>
 		</div>
 		<div>
-			<NuxtLink v-for="(pkg, index) in packages" :key="index" :to="`/system/packages/${pkg.identifier}`" class="p-4 border-b border-gray-200 flex items-center justify-between">
+			<NuxtLink v-for="(pkg, index) in packages" :key="index" :to="`/system/packages/${encodeURIComponent(pkg.identifier)}`" class="p-4 border-b border-gray-200 flex items-center justify-between">
 				<div class="flex items-center space-x-4">
 					<UChip
 						inset

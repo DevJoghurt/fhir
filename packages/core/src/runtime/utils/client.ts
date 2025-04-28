@@ -56,6 +56,11 @@ export type ExtendedFetchOptions = {
 	 * This is used for upsert  operation, it adds the client id to the url
 	 */
 	clientIdStrategy?: boolean
+
+	/**
+	 * This is used for upsert  operation, it uses a POST method if the resource does not have an id.
+	 */
+	forceOnMissingId?: boolean
 }
 
 type SharedFetchOptions<T> =  UseFetchOptions<T> | OfetchOptions
@@ -427,7 +432,11 @@ export class FhirClient {
 	 */
 	upsertResource<T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>): AsyncData<T, any> | Promise<T> {
 		// remove clientIdStrategy from options if it exists
-		const { clientIdStrategy, ...restOptions } = options || {};
+		const { 
+			clientIdStrategy, 
+			forceOnMissingId = false, 
+			...restOptions } = options || {};
+			
 		const path = [resource.resourceType] as string[];
 		if(clientIdStrategy && resource?.id){
 			// add clientIdStrategy to the paths
@@ -438,7 +447,12 @@ export class FhirClient {
 		if (query) {
 			url.search = getQueryString(query);
 		}
-		return this.fetchInternal<T>('PUT', url, {
+		let method: FetchMethod = 'PUT';
+		if(!resource?.id && forceOnMissingId === true){
+			// if the resource does not have an id, use POST method -> otherwise it will fail
+			method = 'POST';
+		}
+		return this.fetchInternal<T>(method, url, {
 			body: JSON.stringify(resource),
 			...restOptions
 		});

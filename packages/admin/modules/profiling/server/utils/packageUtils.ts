@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { mkdir } from "node:fs";
 import * as tar from 'tar';
 import type { Storage } from 'unstorage';
+import semver from 'semver';
 
 const TMP_FOLDER = 'nhealth_fhir_packages';
 const PACKAGES_BASE_NAME = 'packages';
@@ -37,7 +38,8 @@ async function loadFhirProfileIntoServer(resource: StructureDefinition | NamingS
 	let resp = null as StructureDefinition | NamingSystem | null;
 	try	{
 		resp = await upsertResource(resource, query, {
-			clientIdStrategy: true
+			clientIdStrategy: true,
+			forceOnMissingId: true
 		});
 	}catch (e) {
 		return {
@@ -213,7 +215,7 @@ async function analyzePackage(storage: Storage, files: string[]) : Promise<Profi
 		for (const file of profilingFilesFiltered) {
 			const resource = await storage.getItem(file) as StructureDefinition | NamingSystem
 			const type = resolveProfileType(resource)
-			if(type && resource?.id){
+			if(type){
 				packageFiles.push({
 					type,
 					name: normalizeResourceName(type, resource),
@@ -230,6 +232,54 @@ async function analyzePackage(storage: Storage, files: string[]) : Promise<Profi
 	return packageFiles;
 }
 
+/**
+ * This function checks if dependencies of a package are already installed.
+ * If package status is NULL or package is only loaded and not installed, it will return false
+ * 
+ * @returns boolean
+ * @param dependencies - dependencies of the package
+ * @param packages - list of installed packages
+ * @param options - options for the function
+ * @example checkPackageDependencies({ 'package-name': '1.0.0' }, [{ name: 'package-name', version: '1.0.0' }])
+ */
+type CheckPackageDependenciesOptions = {
+	ignoreDependencies?: string[]
+}
+type PackageDependency = {
+	package: string;
+	version: string;
+	installed: boolean;
+}
+function checkPackageDependencies(dependencies: Record<string, string> | undefined, packages: Package[], options?: CheckPackageDependenciesOptions) : PackageDependency[] {
+	const { ignoreDependencies = [] } = options || {}
+
+	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({ 
+		package: key, 
+		version: value,
+		installed: false 
+	})) as PackageDependency[];
+	transformedDependencies = transformedDependencies.filter(dep => !ignoreDependencies.includes(dep.package))
+
+	if(transformedDependencies.length === 0){
+		return []
+	}
+	for (const dep of transformedDependencies) {
+		const packagesFound = packages.filter(pkg => pkg.meta?.name === dep.package)
+
+		for (const depPkg of packagesFound) {
+			const satisfiesVersion = semver.satisfies(depPkg.meta?.version || '', dep.version)
+			if(!satisfiesVersion){
+				continue
+			}
+			// check if 
+			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === true){
+				dep.installed = true
+			}
+		}
+	}
+	return transformedDependencies.filter(dep => dep.installed === false)
+}
+
 export function usePackageUtils() {
 	return {
 		extractPackage,
@@ -238,6 +288,7 @@ export function usePackageUtils() {
 		analyzePackage,
 		loadFhirProfileIntoServer,
 		resolveStoragePath,
+		checkPackageDependencies,
 		PACKAGES_BASE_NAME
 	}
 }

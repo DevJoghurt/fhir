@@ -14,13 +14,14 @@ const QuerySchema = z.object({
 export default defineEventHandler(async (event) => {
 	const { getPackageById } = usePackageStore();
 
-	const id = await getRouterParam(event, 'id') || null
+	let id = await getRouterParam(event, 'id') || null
 	if(!id) throw createError({ statusCode: 400, statusMessage: 'Missing package id' })
 
 	// Extract and validate columns filter from query parameters
 	const parsedQuery = await getValidatedQuery(event, query => QuerySchema.safeParse(query))
 
 	// Fetch packages with the specified columns
+	id = decodeURIComponent(id as string)
 	const packages = await getPackageById(id, parsedQuery.data?.columns);
 	return packages;
 });

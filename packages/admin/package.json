@@ -25,9 +25,11 @@
 		"globby": "14.1.0",
 		"pathe": "2.0.3",
 		"tar": "^7.4.3",
-		"fastq": "^1.19.1"
+		"fastq": "^1.19.1",
+		"semver": "7.7.1"
 	},
 	"devDependencies": {
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"@types/semver": "7.7.0"
 	}
 }
