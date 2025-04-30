@@ -1,6 +1,6 @@
 import { useFhirClient, useStorage } from '#imports';
 import type { NamingSystem, Resource, StructureDefinition } from '@medplum/fhirtypes'
-import type { ProfileType, Package, PackageMeta, ProfileFile, CompressedPackage, StoragePackage } from '#fhirtypes/profiling';
+import type { ProfileType, Package, PackageMeta, ProfileFile, CompressedPackage, StoragePackage, DownloadPackage } from '#fhirtypes/profiling';
 import fsDriver from "unstorage/drivers/fs";
 import { join } from "pathe";
 import { Duplex } from 'node:stream';
@@ -9,9 +9,11 @@ import { mkdir } from "node:fs";
 import * as tar from 'tar';
 import type { Storage } from 'unstorage';
 import semver from 'semver';
+import { fileTypeFromBuffer } from 'file-type';
 
 const TMP_FOLDER = 'nhealth_fhir_packages';
 const PACKAGES_BASE_NAME = 'packages';
+const DOWNLOADS_BASE_NAME = 'downloads';
 
 
 const isStructureDefinition = (resource: Resource): resource is StructureDefinition => {
@@ -93,6 +95,31 @@ function resolveStoragePath(storage: CompressedPackage | StoragePackage | undefi
 	return storage?.baseName || ''
 }
 
+async function downloadPackage(pkg: DownloadPackage) : Promise<CompressedPackage | null> {
+	let fileName = `${pkg.name}#${pkg.version}`
+	const { downloadPackage : dP } = usePackageLoader()
+	const storage = useStorage(DOWNLOADS_BASE_NAME)
+
+	try {
+		const pkgFileBuffer = await dP(pkg.name, pkg.version)
+		const buffer = Buffer.from(pkgFileBuffer);
+		const fileType = await fileTypeFromBuffer(buffer);
+		if(fileType?.ext){
+			fileName += `.${fileType.ext}`
+		}
+		await storage.setItemRaw(fileName, buffer);
+	} catch (error) {
+		return null
+	}
+	finally {
+		return {
+			baseName: DOWNLOADS_BASE_NAME,
+			dir: '',
+			path: fileName,
+		}
+	}
+}
+
 async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 	const compressedPackage = cPackage?.compressedPackage;
 	if (!compressedPackage || !cPackage.identifier) {
@@ -124,16 +151,25 @@ async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 /**
  * Function to mount the profiling folder in the storage.
  * Root directory is always [os_tmp_folder]/TMP_FOLDER
+ * TODO: add support for other storage drivers like S3
  */
 function mountPackageStorage(): void {
 	const storage = useStorage()
 	const tmpFolder = join(tmpdir(), TMP_FOLDER);
+	// mount packages folder in the storage
 	storage.mount(PACKAGES_BASE_NAME, fsDriver({
 		base: tmpFolder,
 		watchOptions: {
 			depth: 3
 		},
 		readOnly: true
+	}));
+	// mount downloads folder in the storage
+	storage.mount(DOWNLOADS_BASE_NAME, fsDriver({
+		base: tmpFolder,
+		watchOptions: {
+			depth: 3
+		}
 	}));
 }
 
@@ -251,6 +287,7 @@ type CheckPackageDependenciesOptions = {
 type PackageDependency = {
 	package: string;
 	version: string;
+	loaded: boolean;
 	installed: boolean;
 }
 function checkPackageDependencies(dependencies: Record<string, string> | undefined, packages: Package[], options?: CheckPackageDependenciesOptions) : PackageDependency[] {
@@ -259,6 +296,7 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({
 		package: key,
 		version: value,
+		loaded: false,
 		installed: false
 	})) as PackageDependency[];
 	transformedDependencies = transformedDependencies.filter(dep => !ignoreDependencies.includes(dep.package))
@@ -274,13 +312,18 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 			if(!satisfiesVersion){
 				continue
 			}
-			// check if
+			// check if the package is installed and loaded
 			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === true){
 				dep.installed = true
+				dep.loaded = true
+			}
+			// check if the package is loaded and not installed
+			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === false){
+				dep.loaded = true
 			}
 		}
 	}
-	return transformedDependencies.filter(dep => dep.installed === false)
+	return transformedDependencies
 }
 
 export function usePackageUtils() {
@@ -292,6 +335,7 @@ export function usePackageUtils() {
 		loadFhirProfileIntoServer,
 		resolveStoragePath,
 		checkPackageDependencies,
+		downloadPackage,
 		PACKAGES_BASE_NAME
 	}
 }

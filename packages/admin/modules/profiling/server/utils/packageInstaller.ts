@@ -1,5 +1,5 @@
 //import { runTask } from "#imports";
-import type { Package, StoragePackage, ProfileType, PackageStatusProcess } from '#fhirtypes/profiling';
+import type { Package, StoragePackage, ProfileType, PackageStatusProcess, DownloadPackage } from '#fhirtypes/profiling';
 import * as fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import { usePackageStore, usePackageUtils } from "#imports";
@@ -38,7 +38,7 @@ const taskState = {
 
 const eventListeners = [] as Array<(state: PackageInstallerState) => void>;
 
-const MAX_RECURSIVE_DEPENDENCIES = 5;
+const MAX_RECURSIVE_DEPENDENCIES = 50;
 let INSTALLER_RECURSIVE_COUNT = 0;
 
 async function installer({options, context, packages}: InstallerParams) {
@@ -54,10 +54,14 @@ async function installer({options, context, packages}: InstallerParams) {
 		resolveStoragePath,
 		loadFhirProfileIntoServer,
 		checkPackageDependencies,
+		downloadPackage,
 		PACKAGES_BASE_NAME
 	} = usePackageUtils()
 
-	const { updatePackage } = usePackageStore()
+	const { 
+		updatePackage, 
+		addDownloadPackage 
+	} = usePackageStore()
 
 	const { findPackage } = usePackageLoader()
 
@@ -73,10 +77,47 @@ async function installer({options, context, packages}: InstallerParams) {
 			await updatePackage(pkg.identifier, {
 				status: pkg.status
 			})
+			
 			// implement downloading of packages from the server
-
-			//const availablePackages = await findPackage('de.medizininformatikinitiative.kerndatensatz.medikation')
-
+			if(pkg.download && !pkg.status.downloaded){
+				logMessage('info', `Download package ${pkg.identifier}`)
+				const findPackageResp = await findPackage(pkg.download.name, pkg.download.version)
+				if(findPackageResp.status === 'success'){
+					// add the compressed package to the package
+					logMessage('info', `Found package ${pkg.identifier} on server: ${findPackageResp.package?.name}#${findPackageResp.package?.version}`)
+					// download package to storage
+					const downloadPkg = {
+						name: findPackageResp.package?.name,
+						version: findPackageResp.package?.version,
+					} as DownloadPackage
+					const compressedPackage = await downloadPackage(downloadPkg)
+					if(compressedPackage){
+						logMessage('info', `Downloaded package ${pkg.identifier} to storage: ${compressedPackage.baseName}:${compressedPackage.path}`)
+						// add the compressed package to the package
+						pkg.compressedPackage = compressedPackage
+						pkg.status = defu({
+							downloaded: true,
+						}, pkg?.status || {})
+						const resp = await updatePackage(pkg.identifier, {
+							compressedPackage,
+							status: pkg.status
+						})
+						if(resp.success) logMessage('info', `Updated package compressed: ${pkg.identifier}`)
+							else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
+					}
+				} else {
+					logMessage('error', `Failed to download package ${pkg.identifier}: ${JSON.stringify(findPackageResp.message)}`)
+					// set the status to failed after the package is installed
+					pkg.status = defu({
+						downloaded: false,
+						process: 'idle' as PackageStatusProcess,
+					}, pkg?.status || {})
+					await updatePackage(pkg.identifier, {
+						status: pkg.status
+					})
+					continue;
+				}
+			}
 
 			// if there is a compressed package and it is not mounted, extract files and mount it
 			if(pkg.compressedPackage && !pkg.storage){
@@ -140,13 +181,29 @@ async function installer({options, context, packages}: InstallerParams) {
 			// load data into fhir server
 			if(pkg.files && pkg.files.length > 0){
 
-				// check dependencies of the package
-				const missingDependencies = checkPackageDependencies(pkg.meta?.dependencies, packages, {
+				// check the availability of dependencies in the package
+				const checkedDependencies = checkPackageDependencies(pkg.meta?.dependencies, packages, {
 					ignoreDependencies: ignoredDependencies,
 				})
+				const missingDependencies = checkedDependencies.filter(dep => ((dep.installed === false) || (dep.loaded === false)))
 				if(missingDependencies.length > 0){
 					logMessage('warning', `Missing dependencies for package ${pkg.identifier}: ${missingDependencies.map(dep => `${dep.package}@${dep.version}`).join(', ')}`)
-					// cannot install package without dependencies -> TODO: add dependency if download of packages is implemented
+					// get the dependencies that are not loaded
+					const missingDependenciesLoaded = missingDependencies.filter(dep => dep.loaded === false)
+					for(const dep of missingDependenciesLoaded){
+						// add the missing dependency to the download
+						const downloadPkg = {
+							name: dep.package,
+							version: dep.version,
+						} as DownloadPackage
+						const newPackage = await addDownloadPackage(downloadPkg.name, downloadPkg.version)
+						if(newPackage){
+							logMessage('info', `Added missing dependency ${dep.package}@${dep.version} to download`)
+							packages.push(newPackage)
+						} else {
+							logMessage('error', `Failed to add missing dependency ${dep.package}@${dep.version} to download`)
+						}
+					}
 					RERUN_INSTALLER = true
 					// set the status to waiting after the package is installed
 					pkg.status = defu({
@@ -281,7 +338,7 @@ export const usePackageInstaller = () => {
 		// get current package store and check if there are any packages to install
 		const { getPackages } = usePackageStore()
 
-		const packages = await getPackages(['identifier', 'status', 'compressedPackage', 'storage', 'meta', 'files'])
+		const packages = await getPackages(['identifier', 'status', 'download', 'compressedPackage', 'storage', 'meta', 'files'])
 
 		logMessage('info', `Install packages: ${packages.map(packagesToInstall => packagesToInstall.identifier).join(', ')}`)
 

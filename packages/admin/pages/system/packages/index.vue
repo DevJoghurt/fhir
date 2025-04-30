@@ -3,30 +3,42 @@
 		<div class="flex h-16 justify-between w-full bg-gray-100 border-b border-gray-200 mx-auto px-4 py-4 space-x-4 items-center">
 			<div></div>
 			<div class="flex items-center">
-				<UModal title="Add Package" size="lg">
-					<UButton color="primary" size="sm" icon="heroicons-plus">Add Package</UButton>
+				<UModal>
+					<UButton
+						label="Search Package"
+						color="neutral"
+						variant="subtle"
+						icon="i-lucide-search"
+					/>
 
-					<template #body>
-						<div class="p-4">
-							<UForm
-								ref="packageForm"
-								class="space-y-4"
-								:schema="packageSchema"
-								:state="packageState"
-								@submit="onPackageSubmit">
-								<UFormField label="Package Name" name="package" required>
-									<UInput v-model="packageState.package" class="w-full" />
-								</UFormField>
-								<UFormField label="Package Version" name="version" required>
-									<UInput v-model="packageState.version" class="w-full" />
-								</UFormField>
-							</UForm>
-						</div>
-					</template>
-					<template #footer>
-						<div class="flex justify-end w-full">
-							<UButton color="primary" icon="heroicons:arrow-down-on-square" class="cursor-pointer" @click="form?.submit()">Add Profile</UButton>
-						</div>
+					<template #content>
+						<UCommandPalette
+							v-model:search-term="searchTerm"
+							:loading="status === 'pending'"
+							:groups="groups"
+							placeholder="Search Package"
+							class="h-80"
+						>
+							<template #item="{ item }">
+								<div class="flex justify-between space-x-2 w-full">
+									<div class="flex flex-col items-start">
+										<div class="text-sm font-medium text-gray-900">{{ item.label }}</div>
+										<div class="line-clamp-2 text-xs text-left text-gray-500">{{ item.suffix }}</div>
+									</div>
+									<div class="flex items-center">
+										<UButton
+											label="Install"
+											size="sm"
+											color="neutral"
+											variant="subtle"
+											icon="i-lucide-plus"
+											@click=""
+											>
+										</UButton>
+									</div>
+								</div>
+							</template>
+						</UCommandPalette>
 					</template>
 				</UModal>
 			</div>
@@ -52,7 +64,7 @@
 	</section>
 </template>
 <script lang="ts" setup>
-	import { reactive, useTemplateRef } from '#imports'
+	import { reactive, ref } from '#imports'
 	import type { FormSubmitEvent } from '@nuxt/ui'
 	import type { PackageStatus } from '#fhirtypes/profiling'
 	import z from 'zod'
@@ -75,7 +87,40 @@
 		version: undefined
 	})
 
-	const form = useTemplateRef('packageForm')
+	const searchTerm = ref('')
+
+	type PackageSearchResponse = {
+		status: string;
+		message: string;
+		packages: Array<{
+			Name: string;
+			Value: string;
+			Description: string;
+		}>;
+	}
+
+	const { data: packageSearch, status } = await useFetch('/api/fhir/packages/search', {
+		key: 'fhir-packages-search',
+		method: 'POST',
+		body: { 
+			search: searchTerm 
+		},
+		transform: (data: PackageSearchResponse) => {
+			return data?.packages?.map(pkg => ({ 
+				id: pkg.Name, 
+				label: pkg.Value, 
+				suffix: pkg.Description
+			})) || []
+		},
+		lazy: true
+	})
+
+	const groups = computed(() => [{
+		id: 'packages',
+		label: searchTerm.value ? `Packages matching “${searchTerm.value}”...` : 'Packages...',
+		items: packageSearch.value || [],
+		ignoreFilter: true
+	}])
 
 	function resolveStatusColor(status: PackageStatus) {
 		if(status?.installed) {

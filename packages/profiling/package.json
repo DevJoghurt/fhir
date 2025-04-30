@@ -38,9 +38,9 @@
 	"dependencies": {
 		"@nuxt/kit": "*",
 		"@nuxt/schema": "*",
-		"@nuxt/ui": "3.0.2",
+		"@nuxt/ui": "3.1.0",
 		"@nuxt/content": "3.4.0",
-		"@medplum/fhirtypes": "^4.0.4",
+		"@medplum/fhirtypes": "^4.1.2",
 		"@nuxt/icon": "^1.12.0",
 		"@vueuse/core": "^13.1.0",
 		"radix-vue": "^1.9.17",
@@ -53,7 +53,7 @@
 		"chokidar": "4.0.3",
 		"fs-extra": "^11.3.0",
 		"c12": "^3.0.3",
-		"shiki": "^3.2.2"
+		"shiki": "^3.3.0"
 	},
 	"devDependencies": {
 		"typescript": "^5.8.3",

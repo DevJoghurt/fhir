@@ -15,6 +15,10 @@ const PackageSchema = z.object({
         loaded: z.boolean().optional(),
         installed: z.boolean().optional(),
     }).nullable().optional(),
+    download: z.object({
+        name: z.string(),
+        version: z.string(),
+    }).nullable().optional(),
     compressedPackage: z.object({
         baseName: z.string(),
         dir: z.string(),
@@ -57,9 +61,11 @@ export const usePackageStore = () => {
         await db.sql`INSERT OR REPLACE INTO _meta (key, value) VALUES ('version', ${PROFILING_DB_VERSION})`;
 
         // init package table
-        await db.sql`CREATE TABLE IF NOT EXISTS packages ("identifier" TEXT PRIMARY KEY, "status" TEXT,  "compressedPackage" TEXT, "storage" TEXT, "meta" TEXT, "files" TEXT)`;
+        await db.sql`CREATE TABLE IF NOT EXISTS packages 
+            ("identifier" TEXT PRIMARY KEY, "status" TEXT, "download" TEXT, "compressedPackage" TEXT, "storage" TEXT, "meta" TEXT, "files" TEXT)`;
         await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_identifier ON packages (identifier)`;
         await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_status ON packages (status)`;
+        await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_download ON packages (download)`;
         await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_compressed_package ON packages (compressedPackage)`;
         await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_storage ON packages (storage)`;
         await db.sql`CREATE INDEX IF NOT EXISTS idx_packages_meta ON packages (meta)`;
@@ -84,6 +90,9 @@ export const usePackageStore = () => {
             const parsedPkg: any = { ...pkg };
             if (columns.includes('status') && pkg.status) {
                 parsedPkg.status = JSON.parse(pkg.status);
+            }
+            if (columns.includes('download') && pkg.download) {
+                parsedPkg.download = JSON.parse(pkg.download);
             }
             if (columns.includes('compressedPackage') && pkg.compressedPackage) {
                 parsedPkg.compressedPackage = JSON.parse(pkg.compressedPackage);
@@ -112,15 +121,28 @@ export const usePackageStore = () => {
         if (!name || !version) {
             throw new Error('Package name and version are required');
         }
-        const downloadPackage = { name, version };
-        const downloadPackageString = JSON.stringify(downloadPackage);
-        const query = `UPDATE packages SET download = ? WHERE identifier = ?`;
-        const stmt = db.prepare(query);
-        return stmt.run(downloadPackageString, name);
-
+        // check if the package already exists in the database
+        const existingPackage = await db.prepare(`SELECT * FROM packages WHERE identifier = ?`).get(`${name}#${version}`) as any;
+        if (existingPackage) {
+            return existingPackage;
+        }
+        // create a new package entry in the database
+        const newPackage = {
+            identifier: `${name}#${version}`,
+            status: JSON.stringify({ process: 'idle', downloaded: false, extracted: false, loaded: false, installed: false }),
+            download: JSON.stringify({ name, version }),
+            compressedPackage: null,
+            storage: null,
+            meta: null,
+            files: null
+        };
+        // insert the new package into the database
+        await db.sql`INSERT INTO packages (identifier, status, download, compressedPackage, storage, meta, files) VALUES (${newPackage.identifier}, ${newPackage.status}, ${newPackage.download}, ${newPackage.compressedPackage}, ${newPackage.storage}, ${newPackage.meta}, ${newPackage.files})`;
+        
+        return newPackage;
     }
 
-    async function getPackages(columns: (keyof Package)[] = ['identifier', 'status', 'compressedPackage', 'storage', 'meta']) {
+    async function getPackages(columns: (keyof Package)[] = ['identifier', 'status', 'download', 'compressedPackage', 'storage', 'meta']) {
         if (columns.length === 0) {
             throw new Error('At least one column must be specified');
         }
@@ -132,7 +154,7 @@ export const usePackageStore = () => {
         return parseAndValidatePackages(existingPackages, columns);
     }
 
-    async function getPackageById(identifier: string, columns: (keyof Package)[] = ['identifier', 'status', 'compressedPackage', 'storage', 'meta']) {
+    async function getPackageById(identifier: string, columns: (keyof Package)[] = ['identifier', 'status', 'download', 'compressedPackage', 'storage', 'meta']) {
         if (!identifier) {
             throw new Error('Package identifier is required');
         }
@@ -176,6 +198,7 @@ export const usePackageStore = () => {
     return {
         getPackages,
         getPackageById,
+        addDownloadPackage,
         updatePackage,
         initDatabase
     };

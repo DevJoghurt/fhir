@@ -30,7 +30,7 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "*",
-		"@medplum/fhirtypes": "4.0.4",
+		"@medplum/fhirtypes": "4.1.2",
 		"hookable": "^5.5.3",
 		"defu": "^6.1.4",
 		"uncrypto": "0.1.3"

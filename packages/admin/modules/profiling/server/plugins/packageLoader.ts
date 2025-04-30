@@ -10,11 +10,13 @@ export default defineNitroPlugin(async (nitro) => {
 	// local packages are referenced in the runtime config
 	const { packages, downloadPackages } = useRuntimeConfig().profiling
 
-	console.log('Packages to load:', packages, downloadPackages)
-
-	const { initDatabase } = usePackageStore()
+	const { initDatabase, addDownloadPackage } = usePackageStore()
 
 	await initDatabase(packages || [])
+
+	for (const [name, version] of Object.entries(downloadPackages)) {
+		await addDownloadPackage(name, version || 'latest');
+	}
 
 	const { install }  = usePackageInstaller()
 

@@ -20,16 +20,18 @@
 		"@nhealth/fhir": "workspace:*",
 		"@nuxtjs/i18n": "9.5.3",
 		"@nuxt/image": "1.10.0",
-		"zod": "3.24.2",
-		"@nuxt/kit": "3.16.2",
+		"zod": "3.24.3",
+		"@nuxt/kit": "3.17.1",
 		"globby": "14.1.0",
 		"pathe": "2.0.3",
 		"tar": "^7.4.3",
 		"fastq": "^1.19.1",
-		"semver": "7.7.1"
+		"semver": "7.7.1",
+		"file-type": "^20.5.0"
 	},
 	"devDependencies": {
 		"typescript": "^5.8.3",
-		"@types/semver": "7.7.0"
+		"@types/semver": "7.7.0",
+		"@types/file-type": "^10.9.3"
 	}
 }

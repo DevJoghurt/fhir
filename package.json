@@ -41,18 +41,18 @@
 		"@nhealth/auth": "workspace:*",
 		"@nhealth/questionaire": "workspace:*",
 		"@nhealth/admin": "workspace:*",
-		"nuxt": "3.16.2",
-		"@nuxt/ui": "3.0.2",
-		"@nuxt/kit": "3.16.2",
-		"@nuxt/schema": "3.16.2",
+		"nuxt": "3.17.1",
+		"@nuxt/ui": "3.1.0",
+		"@nuxt/kit": "3.17.1",
+		"@nuxt/schema": "3.17.1",
 		"typescript": "5.8.2",
 		"@typescript-eslint/typescript-estree": "8.26.0",
 		"vue-i18n": "11.1.0"
 	},
 	"devDependencies": {
-		"nuxt": "3.16.2",
+		"nuxt": "3.17.1",
 		"nhealth-cli": "*",
-		"vitest": "3.1.1",
+		"vitest": "3.1.2",
 		"rimraf": "6.0.1",
 		"@nuxt/module-builder": "1.0.1",
 		"typescript": "^5.8.3"
@@ -72,7 +72,7 @@
 			]
 		}
 	},
-	"packageManager": "pnpm@10.6.2",
+	"packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
 	"engines": {
 		"node": "^16.10.0 || >=18.0.0"
 	}

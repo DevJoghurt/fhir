@@ -15,6 +15,15 @@ export default defineNuxtConfig({
 
   },
 
+  profiling: {
+    downloadPackages: {
+      'hl7.fhir.r4.core': '4.0.1',
+      'de.medizininformatikinitiative.kerndatensatz.person': '2025.0.0',
+      'de.medizininformatikinitiative.kerndatensatz.studie': '2025.0.0',
+      'de.medizininformatikinitiative.kerndatensatz.bildgebung': '2025.0.0',
+    }
+  },
+
   ui: {
     fonts: true
   },
