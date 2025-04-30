@@ -51,7 +51,7 @@ export const usePackageStore = () => {
 
     const db = useDatabase(PROFILING_DB_NAME);
 
-    async function initDatabase(defaults: Package[]) : Promise<void> {
+    async function initDatabase(localPackages: Package[]) : Promise<void> {
         // add database version to a _meta table
         await db.sql`CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)`;
         await db.sql`INSERT OR REPLACE INTO _meta (key, value) VALUES ('version', ${PROFILING_DB_VERSION})`;
@@ -67,7 +67,7 @@ export const usePackageStore = () => {
         // check if the package already exists in the database
         const existingPackages = await getPackages();
         // check if the package already exists in the database
-        for (const pkg of defaults) {
+        for (const pkg of localPackages) {
             const existingPkg = existingPackages.find((p) => p.identifier === pkg.identifier)
             if(!existingPkg){
                 console.log(`Adding package ${pkg.identifier} to the database`);
@@ -106,6 +106,18 @@ export const usePackageStore = () => {
             throw new Error('Invalid packages');
         }
         return validationResult.data;
+    }
+
+    async function addDownloadPackage(name: string, version: string) {
+        if (!name || !version) {
+            throw new Error('Package name and version are required');
+        }
+        const downloadPackage = { name, version };
+        const downloadPackageString = JSON.stringify(downloadPackage);
+        const query = `UPDATE packages SET download = ? WHERE identifier = ?`;
+        const stmt = db.prepare(query);
+        return stmt.run(downloadPackageString, name);
+
     }
 
     async function getPackages(columns: (keyof Package)[] = ['identifier', 'status', 'compressedPackage', 'storage', 'meta']) {

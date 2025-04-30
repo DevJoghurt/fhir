@@ -8,7 +8,9 @@ export default defineNitroPlugin(async (nitro) => {
 	mountPackageStorage()
 
 	// local packages are referenced in the runtime config
-	const { packages } = useRuntimeConfig().profiling
+	const { packages, downloadPackages } = useRuntimeConfig().profiling
+
+	console.log('Packages to load:', packages, downloadPackages)
 
 	const { initDatabase } = usePackageStore()
 

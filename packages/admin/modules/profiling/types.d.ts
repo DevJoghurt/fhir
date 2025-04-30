@@ -32,6 +32,11 @@ export type StoragePackage = {
 	dir: string;
 }
 
+export type DownloadPackage = {
+	name: string;
+	version: string;
+}
+
 export type PackageStatusProcess = 'idle' | 'running' | 'waiting';
 
 export type PackageStatus = {
@@ -45,6 +50,7 @@ export type PackageStatus = {
 export type Package = {
 	identifier: string;
 	status?: PackageStatus | null;
+	download?: DownloadPackage | null;
 	compressedPackage?: CompressedPackage | null;
 	storage?: StoragePackage | null;
 	meta?: PackageMeta | null;

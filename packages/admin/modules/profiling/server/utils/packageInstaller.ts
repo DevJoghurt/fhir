@@ -38,7 +38,7 @@ const taskState = {
 
 const eventListeners = [] as Array<(state: PackageInstallerState) => void>;
 
-const MAX_RECURSIVE_DEPENDENCIES = 50;
+const MAX_RECURSIVE_DEPENDENCIES = 5;
 let INSTALLER_RECURSIVE_COUNT = 0;
 
 async function installer({options, context, packages}: InstallerParams) {
@@ -59,6 +59,8 @@ async function installer({options, context, packages}: InstallerParams) {
 
 	const { updatePackage } = usePackageStore()
 
+	const { findPackage } = usePackageLoader()
+
 	// check if the installer has to run recursively
 	let RERUN_INSTALLER = false
 
@@ -71,6 +73,11 @@ async function installer({options, context, packages}: InstallerParams) {
 			await updatePackage(pkg.identifier, {
 				status: pkg.status
 			})
+			// implement downloading of packages from the server
+
+			//const availablePackages = await findPackage('de.medizininformatikinitiative.kerndatensatz.medikation')
+
+
 			// if there is a compressed package and it is not mounted, extract files and mount it
 			if(pkg.compressedPackage && !pkg.storage){
 				logMessage('info', `Extract package ${pkg.identifier}`);

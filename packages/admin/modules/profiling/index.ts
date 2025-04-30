@@ -6,11 +6,13 @@ import {
   } from '@nuxt/kit'
 import { lstat } from 'node:fs/promises'
 import { importLocalProfilingDirs } from './utils'
+import { defu } from 'defu'
 import type { Package } from './types'
 
 declare module '@nuxt/schema' {
 	interface RuntimeConfig {
 	  profiling: {
+		downloadPackages: Record<string, string>;
 		packages: Package[];
 	  }
 	}
@@ -18,6 +20,7 @@ declare module '@nuxt/schema' {
 
 export type ModuleOptions = {
 	profilingDir: string;
+	downloadPackages: Record<string, string>;
 }
 
 const meta = {
@@ -52,6 +55,9 @@ export default defineNuxtModule<ModuleOptions>({
 				name: 'profiling',
 			}
 		}
+		nuxt.options.runtimeConfig.profiling = defu(nuxt.options.runtimeConfig.profiling || {}, {
+			downloadPackages: options?.downloadPackages || {},
+		})
 
 		const profilingPaths = [] as string[]
 		for (const layer of nuxt.options._layers) {
