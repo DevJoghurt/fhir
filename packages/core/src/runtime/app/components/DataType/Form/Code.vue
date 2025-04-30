@@ -41,6 +41,23 @@
 	}, {
 		key: props?.element.binding?.valueSet || '',
 		transform: (data: ValueSet) => {
+			// ValueSet expansions can have the data in compose.include or expansion.contains
+			// https://www.hl7.org/fhir/valueset-expansion.html#ValueSet.expansion
+
+			// first check if the data is in compose.include
+			if (data?.compose?.include && data?.compose?.include.length > 0) {
+				// check if there are concepts in the first include
+				if(data?.compose?.include[0]?.concept) {
+					// if there are data, return the concepts
+					return data?.compose?.include?.flatMap(include => include?.concept)?.map(valueSet => ({
+						label: valueSet?.display || valueSet?.code || '',
+						value: valueSet?.code || '',
+						system: valueSet?.system || ''
+					}))
+				}
+			}
+
+			// if not, check if the data is in expansion.contains
 			return data?.expansion?.contains?.map(valueSet => ({
 				label: valueSet?.display || valueSet?.code || '',
 				value: valueSet?.code || '',
