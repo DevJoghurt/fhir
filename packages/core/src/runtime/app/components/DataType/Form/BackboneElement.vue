@@ -34,12 +34,13 @@
 			/>
 		</div>
 		<!-- If the element is a simple element, render the appropriate form items -->
-		<component
-			v-else
+		 <div v-else>
+			<component
 				:is="`FhirDataTypeForm-${el.type}`"
 				v-model="state[el.name]"
 				@change="update"
 				:element="el" />
+		</div>
 	</UFormField>
 </template>
 <script lang="ts" setup>

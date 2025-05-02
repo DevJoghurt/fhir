@@ -64,7 +64,9 @@
 				system: valueSet?.system || ''
 			}))
 		},
-		lazy: true
+		// currently the v-model value is not set to the valueSet code, to the crrent value we set lazy to false
+		// TODO: check how to fix that
+		lazy: false
 	})
 
 	const update = () => {
