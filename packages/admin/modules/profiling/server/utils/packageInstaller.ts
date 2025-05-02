@@ -4,7 +4,6 @@ import * as fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import { usePackageStore, usePackageUtils } from "#imports";
 import type { StructureDefinition, NamingSystem } from '@medplum/fhirtypes'
-import defu from 'defu';
 
 
 type PackageInstallerStatus = 'idle' | 'running' | 'completed' | 'failed';
@@ -58,9 +57,11 @@ async function installer({options, context, packages}: InstallerParams) {
 		PACKAGES_BASE_NAME
 	} = usePackageUtils()
 
-	const { 
-		updatePackage, 
-		addDownloadPackage 
+	const {
+		updatePackage,
+		addDownloadPackage,
+		setPackageProcess,
+		setPackageStatus
 	} = usePackageStore()
 
 	const { findPackage } = usePackageLoader()
@@ -71,15 +72,11 @@ async function installer({options, context, packages}: InstallerParams) {
 	if(packages && packages.length > 0){
 	  for(const pkg of packages){
 			// set the status to running
-			pkg.status = defu({
-				process: 'running' as PackageStatusProcess,
-			}, pkg?.status || {})
-			await updatePackage(pkg.identifier, {
-				status: pkg.status
-			})
-			
+			pkg.process = 'running' as PackageStatusProcess
+			await setPackageProcess(pkg.identifier, 'running' as PackageStatusProcess)
+
 			// implement downloading of packages from the server
-			if(pkg.download && !pkg.status.downloaded){
+			if(pkg.download && !pkg.status?.downloaded){
 				logMessage('info', `Download package ${pkg.identifier}`)
 				const findPackageResp = await findPackage(pkg.download.name, pkg.download.version)
 				if(findPackageResp.status === 'success'){
@@ -95,32 +92,28 @@ async function installer({options, context, packages}: InstallerParams) {
 						logMessage('info', `Downloaded package ${pkg.identifier} to storage: ${compressedPackage.baseName}:${compressedPackage.path}`)
 						// add the compressed package to the package
 						pkg.compressedPackage = compressedPackage
-						pkg.status = defu({
-							downloaded: true,
-						}, pkg?.status || {})
+						pkg.status = await setPackageStatus(pkg.identifier, {
+							downloaded: true
+						})
 						const resp = await updatePackage(pkg.identifier, {
-							compressedPackage,
-							status: pkg.status
+							compressedPackage
 						})
 						if(resp.success) logMessage('info', `Updated package compressed: ${pkg.identifier}`)
 							else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
 					}
 				} else {
-					logMessage('error', `Failed to download package ${pkg.identifier}: ${JSON.stringify(findPackageResp.message)}`)
+					logMessage('info', `Failed to download package ${pkg.identifier}: ${JSON.stringify(findPackageResp.message)}`)
 					// set the status to failed after the package is installed
-					pkg.status = defu({
-						downloaded: false,
-						process: 'idle' as PackageStatusProcess,
-					}, pkg?.status || {})
-					await updatePackage(pkg.identifier, {
-						status: pkg.status
+					await setPackageProcess(pkg.identifier, 'idle')
+					pkg.status = await setPackageStatus(pkg.identifier, {
+						downloaded: false
 					})
 					continue;
 				}
 			}
 
 			// if there is a compressed package and it is not mounted, extract files and mount it
-			if(pkg.compressedPackage && !pkg.storage){
+			if(pkg.compressedPackage && !pkg.status?.extracted){
 				logMessage('info', `Extract package ${pkg.identifier}`);
 				// extract the package and mount it
 				let tmpDir = await extractPackage(pkg);
@@ -130,15 +123,16 @@ async function installer({options, context, packages}: InstallerParams) {
 					baseName: PACKAGES_BASE_NAME,
 					dir: pkg.identifier
 				} as StoragePackage
-				pkg.status = defu({
-					extracted: true,
-				}, pkg?.status || {})
 				const resp = await updatePackage(pkg.identifier, {
-					storage: pkg.storage,
-					status: pkg.status
+					storage: pkg.storage
 				})
-				if(resp.success) logMessage('info', `Updated package compressed: ${pkg.identifier}`)
-					else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
+				if(resp.success) {
+					pkg.status = await setPackageStatus(pkg.identifier, {
+						extracted: true
+					})
+					logMessage('info', `Updated package compressed: ${pkg.identifier}`)
+				}
+				else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
 			}
 
 			// get the storage for the mounted directory
@@ -148,7 +142,7 @@ async function installer({options, context, packages}: InstallerParams) {
 
 			// check if there is a package.json file in the mounted directory
 			// if pkg meta is not set, try to load it from the package.json file
-			if(pkg.storage && !pkg.meta){
+			if(pkg.storage && !pkg.status?.loaded){
 				const profileMeta = await resolvePackageMeta(storage, files)
 				if(profileMeta){
 					// write meta to the database
@@ -156,25 +150,31 @@ async function installer({options, context, packages}: InstallerParams) {
 					const resp = await updatePackage(pkg.identifier, {
 						meta: profileMeta
 					})
-					if(resp.success) logMessage('info', `Updated package meta: ${pkg.identifier}`)
+					if(resp.success) {
+						pkg.status = await setPackageStatus(pkg.identifier, {
+							loaded: true
+						})
+						logMessage('info', `Updated package meta: ${pkg.identifier}`)
+					}
 					else logMessage('error', `Failed to update package meta: ${pkg.identifier}`)
 				}
 			}
 
 			// analyse all files in the mounted directory
-			if(pkg.storage && pkg.meta && !pkg.files){
+			if(pkg.storage && pkg.status?.loaded && !pkg.status?.analyzed){
 				const packageFiles = await analyzePackage(storage, files)
 				if(packageFiles){
 					// write files to the database
 					pkg.files = packageFiles
-					pkg.status = defu({
-						loaded: true,
-					}, pkg?.status || {})
 					const resp = await updatePackage(pkg.identifier, {
-						files: packageFiles,
-						status: pkg.status
+						files: packageFiles
 					})
-					if(resp.success) logMessage('info', `Updated package files: ${pkg.identifier}`)
+					if(resp.success) {
+						pkg.status = await setPackageStatus(pkg.identifier, {
+							analyzed: true
+						})
+						logMessage('info', `Updated package files: ${pkg.identifier}`)
+					}
 					else logMessage('error', `Failed to update package files: ${pkg.identifier}`)
 				}
 			}
@@ -185,11 +185,11 @@ async function installer({options, context, packages}: InstallerParams) {
 				const checkedDependencies = checkPackageDependencies(pkg.meta?.dependencies, packages, {
 					ignoreDependencies: ignoredDependencies,
 				})
-				const missingDependencies = checkedDependencies.filter(dep => ((dep.installed === false) || (dep.loaded === false)))
+				const missingDependencies = checkedDependencies.filter(dep => ((dep.status === 'missing') || (dep.status === 'loaded')))
 				if(missingDependencies.length > 0){
-					logMessage('warning', `Missing dependencies for package ${pkg.identifier}: ${missingDependencies.map(dep => `${dep.package}@${dep.version}`).join(', ')}`)
+					logMessage('warning', `Some dependencies for package ${pkg.identifier}: ${missingDependencies.map(dep => `${dep.package}@${dep.version}`).join(', ')} are not installed`)
 					// get the dependencies that are not loaded
-					const missingDependenciesLoaded = missingDependencies.filter(dep => dep.loaded === false)
+					const missingDependenciesLoaded = missingDependencies.filter(dep => dep.status === 'missing')
 					for(const dep of missingDependenciesLoaded){
 						// add the missing dependency to the download
 						const downloadPkg = {
@@ -206,12 +206,7 @@ async function installer({options, context, packages}: InstallerParams) {
 					}
 					RERUN_INSTALLER = true
 					// set the status to waiting after the package is installed
-					pkg.status = defu({
-						process: 'waiting' as PackageStatusProcess,
-					}, pkg?.status || {})
-					await updatePackage(pkg.identifier, {
-						status: pkg.status
-					})
+					await setPackageProcess(pkg.identifier, 'waiting')
 					continue;
 				}
 
@@ -247,16 +242,17 @@ async function installer({options, context, packages}: InstallerParams) {
 							}
 						}
 					}
-					pkg.status = defu({
-						process: 'idle' as PackageStatusProcess,
-						installed: true,
-					}, pkg?.status || {})
 					const resp = await updatePackage(pkg.identifier, {
-						status: pkg.status,
 						files: pkg.files
 					})
-					if(resp.success) logMessage('info', `Installed package into server: ${pkg.identifier}`)
-						else logMessage('error', `Failed to install package into server: ${pkg.identifier}`)
+					if(resp.success){
+						pkg.status = await setPackageStatus(pkg.identifier, {
+							installed: true
+						})
+						await setPackageProcess(pkg.identifier, 'idle' as PackageStatusProcess)
+						logMessage('info', `Installed package into server: ${pkg.identifier}`)
+					}
+					else logMessage('error', `Failed to install package into server: ${pkg.identifier}`)
 				} else {
 					logMessage('info', `All files installed for ${pkg.identifier}`)
 				}
@@ -265,12 +261,7 @@ async function installer({options, context, packages}: InstallerParams) {
 				logMessage('warning', `No files found for package ${pkg.identifier}`)
 			}
 			// set the status to idle after the package is installed
-			pkg.status = defu({
-				process: 'idle' as PackageStatusProcess,
-			}, pkg?.status || {})
-			await updatePackage(pkg.identifier, {
-				status: pkg.status
-			})
+			await setPackageProcess(pkg.identifier, 'idle')
 	  }
 	} else {
 	  logMessage('warning', "No packages found");

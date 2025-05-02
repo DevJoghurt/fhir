@@ -40,15 +40,16 @@ export type DownloadPackage = {
 export type PackageStatusProcess = 'idle' | 'running' | 'waiting';
 
 export type PackageStatus = {
-	process?: PackageStatusProcess;
 	downloaded?: boolean;
 	extracted?: boolean;
 	loaded?: boolean;
+	analyzed?: boolean;
 	installed?: boolean;
 }
 
 export type Package = {
 	identifier: string;
+	process?: PackageStatusProcess | null;
 	status?: PackageStatus | null;
 	download?: DownloadPackage | null;
 	compressedPackage?: CompressedPackage | null;

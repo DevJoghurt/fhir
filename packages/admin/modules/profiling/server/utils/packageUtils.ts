@@ -125,7 +125,7 @@ async function extractPackage(cPackage: Partial<Package>): Promise<string> {
 	if (!compressedPackage || !cPackage.identifier) {
 		throw new Error('Package has no compressed file in storage');
 	}
-	const tmpFolder = join(tmpdir(), TMP_FOLDER, cPackage.identifier);
+	const tmpFolder = join(tmpdir(), TMP_FOLDER, PACKAGES_BASE_NAME, cPackage.identifier);
 	await mkdir(tmpFolder, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
@@ -158,7 +158,7 @@ function mountPackageStorage(): void {
 	const tmpFolder = join(tmpdir(), TMP_FOLDER);
 	// mount packages folder in the storage
 	storage.mount(PACKAGES_BASE_NAME, fsDriver({
-		base: tmpFolder,
+		base: join(tmpFolder, PACKAGES_BASE_NAME),
 		watchOptions: {
 			depth: 3
 		},
@@ -166,7 +166,7 @@ function mountPackageStorage(): void {
 	}));
 	// mount downloads folder in the storage
 	storage.mount(DOWNLOADS_BASE_NAME, fsDriver({
-		base: tmpFolder,
+		base: join(tmpFolder, DOWNLOADS_BASE_NAME),
 		watchOptions: {
 			depth: 3
 		}
@@ -287,17 +287,19 @@ type CheckPackageDependenciesOptions = {
 type PackageDependency = {
 	package: string;
 	version: string;
+	status: 'missing' | 'loaded' | 'installed';
 	loaded: boolean;
 	installed: boolean;
 }
 function checkPackageDependencies(dependencies: Record<string, string> | undefined, packages: Package[], options?: CheckPackageDependenciesOptions) : PackageDependency[] {
 	const { ignoreDependencies = [] } = options || {}
+	// deep clone packages to avoid mutating the original array
+	const packagesClone = JSON.parse(JSON.stringify(packages)) as Package[]
 
 	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({
 		package: key,
 		version: value,
-		loaded: false,
-		installed: false
+		status: 'missing'
 	})) as PackageDependency[];
 	transformedDependencies = transformedDependencies.filter(dep => !ignoreDependencies.includes(dep.package))
 
@@ -305,7 +307,7 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 		return []
 	}
 	for (const dep of transformedDependencies) {
-		const packagesFound = packages.filter(pkg => pkg.meta?.name === dep.package)
+		const packagesFound = packagesClone.filter(pkg => pkg.meta?.name === dep.package)
 
 		for (const depPkg of packagesFound) {
 			const satisfiesVersion = semver.satisfies(depPkg.meta?.version || '', dep.version)
@@ -314,12 +316,11 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 			}
 			// check if the package is installed and loaded
 			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === true){
-				dep.installed = true
-				dep.loaded = true
+				dep.status = 'installed'
 			}
 			// check if the package is loaded and not installed
 			if(depPkg && depPkg.status && depPkg.status.loaded === true && depPkg.status.installed === false){
-				dep.loaded = true
+				dep.status = 'loaded'
 			}
 		}
 	}
