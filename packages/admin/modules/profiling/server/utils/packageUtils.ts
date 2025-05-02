@@ -293,8 +293,6 @@ type PackageDependency = {
 }
 function checkPackageDependencies(dependencies: Record<string, string> | undefined, packages: Package[], options?: CheckPackageDependenciesOptions) : PackageDependency[] {
 	const { ignoreDependencies = [] } = options || {}
-	// deep clone packages to avoid mutating the original array
-	const packagesClone = JSON.parse(JSON.stringify(packages)) as Package[]
 
 	let transformedDependencies = Object.entries(dependencies || {}).map(([key, value]) => ({
 		package: key,
@@ -307,7 +305,7 @@ function checkPackageDependencies(dependencies: Record<string, string> | undefin
 		return []
 	}
 	for (const dep of transformedDependencies) {
-		const packagesFound = packagesClone.filter(pkg => pkg.meta?.name === dep.package)
+		const packagesFound = packages.filter(pkg => pkg.meta?.name === dep.package)
 
 		for (const depPkg of packagesFound) {
 			const satisfiesVersion = semver.satisfies(depPkg.meta?.version || '', dep.version)
