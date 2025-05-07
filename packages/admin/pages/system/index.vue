@@ -16,7 +16,7 @@
 							<UIcon name="heroicons-server" class="text-xl" />
 							<h3 class="text-md font-normal">Server Information</h3>
 						</div>
-						<UBadge :color="statusColorMapping[capabilityStatement.status]">{{ capabilityStatement.status }}</UBadge>
+						<UBadge :color="statusColorMapping[capabilityStatement?.status || 'neutral']">{{ capabilityStatement?.status || 'none' }}</UBadge>
 					</div>
 				</template>
 				<div>
@@ -43,7 +43,7 @@
 				</template>
 				<div class="overflow-y-auto h-80 p-4 sm:p-4">
 					<ul>
-						<li v-for="item in history.entry" :key="item.id" class="border-b border-gray-200 flex justify-between gap-2 py-2">
+						<li v-for="item in history?.entry || []" :key="item.id" class="border-b border-gray-200 flex justify-between gap-2 py-2">
 							<div class="flex gap-2">
 								<div class="w-18">
 									<UBadge :color="methodColorMapping[item.request?.method || 'PATCH']">{{ item.request?.method }}</UBadge>
