@@ -11,16 +11,15 @@
     "type": "module",
 	"exports": {
 		".": {
-		  "types": "./dist/types.d.ts",
-		  "import": "./dist/module.mjs",
-		  "require": "./dist/module.cjs"
+		  "types": "./dist/types.d.mts",
+		  "import": "./dist/module.mjs"
 		}
 	},
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/module.cjs",
-	"types": "./dist/types.d.ts",
+	"main": "./dist/module.mjs",
+	"types": "./dist/types.d.mts",
 	"files": [
 		"dist"
 	],
@@ -30,7 +29,7 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "*",
-		"@medplum/fhirtypes": "4.1.2",
+		"@medplum/fhirtypes": "4.1.4",
 		"hookable": "^5.5.3",
 		"defu": "^6.1.4",
 		"uncrypto": "0.1.3"

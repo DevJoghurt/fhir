@@ -131,11 +131,13 @@ export default defineNuxtModule<ModuleOptions>({
 		})
 
 		// Set node:crypto as unenv external
+		/*
 		nuxt.options.nitro.unenv ||= {}
 		nuxt.options.nitro.unenv.external ||= []
 		if (!nuxt.options.nitro.unenv.external.includes('node:crypto')) {
 			nuxt.options.nitro.unenv.external.push('node:crypto')
 		}
+		*/
 
 		// Runtime Config
 		const runtimeConfig = nuxt.options.runtimeConfig
