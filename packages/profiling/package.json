@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/fhir-profiling",
-	"version": "0.0.29",
+	"version": "0.0.30",
 	"description": "FHIR profiling module for Nuxt based on sushi and fsh",
 	"repository": {
 		"type": "git",
