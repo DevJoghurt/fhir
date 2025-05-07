@@ -64,7 +64,7 @@ async function installer({options, context, packages}: InstallerParams) {
 		setPackageStatus
 	} = usePackageStore()
 
-	const { findPackage } = usePackageLoader()
+	const { resolvePackageVersion } = usePackageLoader()
 
 	// check if the installer has to run recursively
 	let RERUN_INSTALLER = false
@@ -78,14 +78,14 @@ async function installer({options, context, packages}: InstallerParams) {
 			// implement downloading of packages from the server
 			if(pkg.download && !pkg.status?.downloaded){
 				logMessage('info', `Download package ${pkg.identifier}`)
-				const findPackageResp = await findPackage(pkg.download.name, pkg.download.version)
-				if(findPackageResp.status === 'success'){
+				const resolvedPackageVersion = await resolvePackageVersion(pkg.download.name, pkg.download.version)
+				if(resolvedPackageVersion.status === 'success'){
 					// add the compressed package to the package
-					logMessage('info', `Found package ${pkg.identifier} on server: ${findPackageResp.package?.name}#${findPackageResp.package?.version}`)
+					logMessage('info', `Found package ${pkg.identifier} on server: ${resolvedPackageVersion.package?.name}#${resolvedPackageVersion.package?.version}`)
 					// download package to storage
 					const downloadPkg = {
-						name: findPackageResp.package?.name,
-						version: findPackageResp.package?.version,
+						name: resolvedPackageVersion.package?.name,
+						version: resolvedPackageVersion.package?.version,
 					} as DownloadPackage
 					const compressedPackage = await downloadPackage(downloadPkg)
 					if(compressedPackage){
@@ -102,7 +102,7 @@ async function installer({options, context, packages}: InstallerParams) {
 							else logMessage('error', `Failed to update package compressed: ${pkg.identifier}`)
 					}
 				} else {
-					logMessage('info', `Failed to download package ${pkg.identifier}: ${JSON.stringify(findPackageResp.message)}`)
+					logMessage('info', `Failed to download package ${pkg.identifier}: ${JSON.stringify(resolvedPackageVersion.message)}`)
 					// set the status to failed after the package is installed
 					await setPackageProcess(pkg.identifier, 'idle')
 					pkg.status = await setPackageStatus(pkg.identifier, {

@@ -1,3 +1,7 @@
+/**
+ * Package installation reference types
+ */
+
 export type ProfileType = 'extension' | 'profile' | 'codeSystem' | 'valueSet' | 'searchParameter' | 'capabilityStatement' | 'example';
 
 export interface PackageMeta {
@@ -56,4 +60,38 @@ export type Package = {
 	storage?: StoragePackage | null;
 	meta?: PackageMeta | null;
 	files?: ProfileFile[] | null;
+}
+
+/*
+ * Package loader types @simplifier https://simplifier.net/packages
+ */
+export type PackageLoaderVersion = {
+	name: string;
+	version: string;
+	description: string;
+	dist: {
+		shasum: string;
+		tarball: string;
+	},
+	fhirVersion: string;
+	url: string;
+	unlisted?: string;
+}
+
+export type PackageLoaderResponse = {
+	_id: string;
+	name: string;
+	description: string;
+	'dist-tags': Record<string, string>;
+	versions: Record<string,PackageLoaderVersion>;
+}
+
+export type PackageSearchResponse = {
+	status: string;
+	message: string;
+	packages: Array<{
+		Name: string;
+		Value: string;
+		Description: string;
+	}>;
 }

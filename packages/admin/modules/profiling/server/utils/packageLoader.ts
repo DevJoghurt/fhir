@@ -1,5 +1,6 @@
 import { $fetch } from 'ofetch';
 import { maxSatisfying } from 'semver';
+import type { PackageLoaderResponse } from '#fhirtypes/profiling';
 
 const FHIR_PACKAGES_ENDPOINT = 'https://packages.fhir.org';
 const SIMPLIFIER_ENDPOINT = 'https://simplifier.net';
@@ -20,13 +21,14 @@ export function usePackageLoader() {
 				method: 'GET',
 				query: {
 					term: searchString,
-					take: limit
+					take: 100
 				}
 			})
+			const filteredPackages = resp.filter((item: any) => item.Name === 'package');
 			return {
 				status: 'success',
 				message: 'Package found',
-				packages: resp
+				packages: filteredPackages
 			}
 		}
 		catch (e) {
@@ -38,7 +40,31 @@ export function usePackageLoader() {
 		}
 	}
 
-	async function findPackage(name: string, version: string) {
+
+
+	async function findPackage(name: string) {
+		try {
+			const resp = await $fetch<PackageLoaderResponse>(name,{
+				baseURL: FHIR_PACKAGES_ENDPOINT,
+				method: 'GET',
+				responseType: 'json'
+			})
+			return {
+				status: 'success',
+				message: 'Package found',
+				package: resp
+			}
+		}
+		catch (e) {
+			return {
+				status: 'error',
+				message: 'Package not found',
+				error: e
+			}
+		}
+	}
+
+	async function resolvePackageVersion(name: string, version: string) {
 		try {
 			let resolvedVersion = version;
 			const data = await $fetch(name,{
@@ -86,6 +112,7 @@ export function usePackageLoader() {
 
 	return {
 		downloadPackage,
+		resolvePackageVersion,
 		findPackage,
 		searchPackage
 	}
