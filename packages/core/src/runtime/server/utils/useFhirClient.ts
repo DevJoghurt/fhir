@@ -56,12 +56,13 @@ export function useFhirClient(options: UseFhirOptions = {
 	patchResource: <K extends ResourceType>(resourceType: K, id: string, operations: PatchOperation[], options?: FetchOptions<any>) => Promise<ExtractResource<K>>;
 	deleteResource: (resourceType: ResourceType, id: string, options?: FetchOptions<any>) => Promise<any>;
 	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => Promise<Bundle>;
+	getConfig: () => UseFhirOptions;
 } {
 
 	const config = defu(
 		options,
-		useRuntimeConfig().public?.fhir || {},
-		useRuntimeConfig()?.fhir || {}
+		useRuntimeConfig()?.fhir || {},
+		useRuntimeConfig().public?.fhir || {}
 	);
 
 	const fetch = async <T = any>(method: FetchMethod = 'GET', url: URL | string, fetchOptions?: FetchOptions<any>): Promise<T> => {
@@ -121,6 +122,9 @@ export function useFhirClient(options: UseFhirOptions = {
 		updateResource: client.updateResource.bind(client),
 		patchResource: client.patchResource.bind(client),
 		deleteResource: client.deleteResource.bind(client),
-		executeBatch: client.executeBatch.bind(client)
+		executeBatch: client.executeBatch.bind(client),
+		getConfig: () => {
+			return config;
+		}
 	};
 }

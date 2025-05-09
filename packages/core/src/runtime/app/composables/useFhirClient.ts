@@ -140,13 +140,14 @@ export function useFhirClient(options: UseFhirOptions = {
 	patchResource: <K extends ResourceType>(resourceType: K, id: string, operations: PatchOperation[], options?: FetchOptions<any>) => AsyncData<ExtractResource<K>, any>;
 	deleteResource: (resourceType: ResourceType, id: string, options?: FetchOptions<any>) => AsyncData<any, any>;
 	executeBatch: (bundle: Bundle, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
+	getConfig: () => UseFhirOptions;
 } {
 
 	// Merge configuration options from multiple sources: local options, public runtime config, and private runtime config (only on server).
 	const config = defu(
 		options,
-		useRuntimeConfig().public?.fhir || {},
-		import.meta.server ? useRuntimeConfig()?.fhir || {} : {}
+		import.meta.server ? useRuntimeConfig()?.fhir || {} : {},
+		useRuntimeConfig().public?.fhir || {}
 	)
 
 	const sessionState = useState<SessionState>('fhir-session', () => ({}))
@@ -237,6 +238,9 @@ export function useFhirClient(options: UseFhirOptions = {
 		updateResource: client.updateResource.bind(client),
 		patchResource: client.patchResource.bind(client),
 		deleteResource: client.deleteResource.bind(client),
-		executeBatch: client.executeBatch.bind(client)
+		executeBatch: client.executeBatch.bind(client),
+		getConfig: () => {
+			return config;
+		}
 	}
 }

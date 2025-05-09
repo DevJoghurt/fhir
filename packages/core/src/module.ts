@@ -16,9 +16,15 @@ type Medplum = {
 	clientId: string;
 	clientSecret: string;
 }
+
+type ServerUrl = string | {
+	server: string;
+	browser: string;
+}
+
 export type ModuleOptions = {
 	server: ServerType;
-	serverUrl?: string;
+	serverUrl?: ServerUrl;
 	basePath?: string;
 	medplum?: Medplum;
 }
@@ -26,6 +32,7 @@ export type ModuleOptions = {
 declare module '@nuxt/schema' {
 	interface RuntimeConfig {
 		fhir: {
+			serverUrl: ServerUrl;
 			medplum?: Medplum;
 		}
 	}
@@ -96,11 +103,14 @@ export default defineNuxtModule<ModuleOptions>({
 
 		runtimeConfig.public.fhir = defu(runtimeConfig.public.fhir || {}, {
 			server: options.server,
-			serverUrl: options.serverUrl,
+			serverUrl: typeof options.serverUrl === 'string' ? options.serverUrl : options.serverUrl?.browser || options.serverUrl?.server,
 			basePath: options.basePath
 		});
 
-		runtimeConfig.fhir = runtimeConfig.fhir || {};
+		runtimeConfig.fhir = defu(runtimeConfig.fhir || {}, {
+			serverUrl: typeof options.serverUrl === 'string' ? options.serverUrl : options.serverUrl?.server || options.serverUrl?.browser,
+			basePath: options.basePath
+		});
 		runtimeConfig.fhir.medplum = defu(runtimeConfig.fhir?.medplum || {}, options?.medplum || {});
 	}
 });

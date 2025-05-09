@@ -327,7 +327,7 @@ export const usePackageInstaller = () => {
 
 		logMessage('info',"Profiling started");
 		// check if FHIR server is running
-		const { readCapabilityStatement } = useFhirClient();
+		const { readCapabilityStatement, getConfig } = useFhirClient();
 		let isServerRunning = false;
 		// TODO: make it configurable
 		const maxRetries = Math.floor(90 / 5);
@@ -339,7 +339,7 @@ export const usePackageInstaller = () => {
 				break;
 			} catch (error) {
 				retries++;
-				logMessage('warning', `Failed to connect to FHIR server, retrying in 5 seconds... (${retries}/${maxRetries})`);
+				logMessage('warning', `Failed to connect to FHIR server (${getConfig().serverUrl}), retrying in 5 seconds... (${retries}/${maxRetries})`);
 				// wait 5 seconds before retrying
 				await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
 			}
