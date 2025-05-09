@@ -27,7 +27,8 @@ services:
       - source: hapi
         target: /app/config/application.yaml
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
   redis:
     image: redis:7
     container_name: redis

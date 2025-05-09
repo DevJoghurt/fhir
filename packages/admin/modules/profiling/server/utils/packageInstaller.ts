@@ -2,7 +2,7 @@
 import type { Package, StoragePackage, ProfileType, PackageStatusProcess, DownloadPackage } from '#fhirtypes/profiling';
 import * as fastq from "fastq";
 import type { queueAsPromised } from "fastq";
-import { usePackageStore, usePackageUtils } from "#imports";
+import { usePackageStore, usePackageUtils, useFhirClient } from "#imports";
 import type { StructureDefinition, NamingSystem } from '@medplum/fhirtypes'
 
 
@@ -326,6 +326,30 @@ export const usePackageInstaller = () => {
 		eventListeners.forEach(listener => listener(taskState));
 
 		logMessage('info',"Profiling started");
+		// check if FHIR server is running
+		const { readCapabilityStatement } = useFhirClient();
+		let isServerRunning = false;
+		// TODO: make it configurable
+		const maxRetries = Math.floor(90 / 5);
+		let retries = 0;
+		while (retries < maxRetries) {
+			try {
+				await readCapabilityStatement();
+				isServerRunning = true;
+				break;
+			} catch (error) {
+				retries++;
+				logMessage('warning', `Failed to connect to FHIR server, retrying in 5 seconds... (${retries}/${maxRetries})`);
+				// wait 5 seconds before retrying
+				await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+			}
+		}
+		if (!isServerRunning) {
+			logMessage('error', 'FHIR server is not running');
+			taskState.status = 'failed';
+			eventListeners.forEach(listener => listener(taskState));
+			return;
+		}
 		// get current package store and check if there are any packages to install
 		const { getPackages } = usePackageStore()
 
