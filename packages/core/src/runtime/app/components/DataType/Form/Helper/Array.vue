@@ -100,8 +100,8 @@
 			if (typeof item === 'object' && item !== null) {
 				delete item._id
 			}
-			// if it is not an BackboneElement, re-transform the object to an flat array
-			if (props.element.type !== 'BackboneElement') {
+			// if it is not an BackboneElement, HumanName, re-transform the object to an flat array
+			if (['BackboneElement', 'HumanName'].indexOf(props.element.type) === -1) {
 				data[index] = item?.value || null
 			}
 		})

@@ -46,7 +46,7 @@ export async function useFhirCapatibilityStatement() {
 			return false;
 		}
 		const rest = capabilityStatement.value?.rest || []
-		const restResources = rest[0].resource || []
+		const restResources = rest[0]?.resource || []
 		for (const resource of restResources) {
 			resources.value[resource.type as ResourceType] = {
 				name: resource.type as string,
@@ -96,7 +96,7 @@ export async function useFhirCapatibilityStatement() {
 	const loadProfiles = async (resourceType: ResourceType) => {
 		const rs = resources.value[resourceType];
 		// load cached profiles if available
-		if (rs.profile.definitions) {
+		if (rs?.profile?.definitions) {
 			return rs.profile.definitions;
 		}
 		// load profiles from server
@@ -105,20 +105,23 @@ export async function useFhirCapatibilityStatement() {
 		const {
 			data
 		} = await search('StructureDefinition', {
-			url: rs.profile.supported.join(','),
+			url: rs?.profile?.supported.join(','),
 			_count: 100,
 			_elements: 'name,url,description,status,publisher'
 		})
 
-		const profiles = data.value.entry?.map((entry) => ({
-			name: entry.resource?.name || '',
-			description: entry.resource?.description || '',
-			publisher: entry.resource?.publisher || '',
-			url: entry.resource?.url || '',
-			status: entry.resource?.status || 'unknown',
-			base: rs.profile.base === entry.resource?.url || false
+		const profiles = data.value?.entry?.map((entry) => ({
+			name: entry?.resource?.name || '',
+			description: entry?.resource?.description || '',
+			publisher: entry?.resource?.publisher || '',
+			url: entry?.resource?.url || '',
+			status: entry?.resource?.status || 'unknown',
+			base: rs?.profile?.base === entry?.resource?.url || false
 		})) || [];
 
+		if(!profiles || profiles.length === 0) {
+			return null;
+		}
 		resources.value[resourceType].profile.definitions = profiles;
 
 		return profiles;

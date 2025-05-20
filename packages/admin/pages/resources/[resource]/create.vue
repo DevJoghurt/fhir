@@ -58,7 +58,7 @@
 
 
 	const profileItems = computed(() => {
-		return props.profiles.map(profile => {
+		return props.profiles?.map(profile => {
 			return {
 				label: profile.name,
 				url: profile.url
@@ -66,11 +66,11 @@
 		})
 	})
 
-	const selectedProfileUrl = ref<string>(props?.profiles.find(profile => profile.base)?.url || '')
+	const selectedProfileUrl = ref<string>(props?.profiles?.find(profile => profile.base)?.url || '')
 
 	const loading = ref(false)
 
-	const state = reactive({})
+	const state = ref(null)
 
 	const onSubmit = async () => {
 		const { data, status } = await createResource<any>(state.value)

@@ -35,9 +35,6 @@
 
 	const { valueSetExpand } = useFhirClient()
 
-	//const valueSets = ref<any[]>([])
-	//const status = ref('pending')
-
 	// TODO: Cache data
 	const { data: valueSets, status } = await valueSetExpand({
 		url: props?.element.binding?.valueSet
@@ -56,7 +53,7 @@
 						label: valueSet?.display || valueSet?.code || '',
 						value: valueSet?.code || '',
 						system: valueSet?.system || ''
-					}))
+					})) || []
 				}
 			}
 
@@ -65,7 +62,7 @@
 				label: valueSet?.display || valueSet?.code || '',
 				value: valueSet?.code || '',
 				system: valueSet?.system || ''
-			}))
+			})) || []
 		},
 		// currently the v-model value is not set to the valueSet code, to the crrent value we set lazy to false
 		// TODO: check how to fix that
