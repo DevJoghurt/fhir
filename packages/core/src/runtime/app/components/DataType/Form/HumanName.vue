@@ -10,7 +10,7 @@
 <script lang="ts" setup>
 	import type { HumanName } from '@medplum/fhirtypes'
 	import { ref } from '#imports'
-	import type { Ref } from 'vue'
+	import type { Ref } from '#imports'
 	import type { InternalSchemaElement } from '../../../composables/useFhirResource'
 
 	type FlattenedHumanName = {

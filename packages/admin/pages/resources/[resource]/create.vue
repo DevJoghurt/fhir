@@ -16,7 +16,7 @@
 				>
 					<template #default="{ modelValue }">
 						<div v-if="modelValue" class="flex flex-col items-start  overflow-hidden">
-							<div class="">{{ profileItems.find((profile) => profile.url === modelValue)?.label }}</div>
+							<div>{{ profileItems.find((profile) => profile.url === modelValue)?.label }}</div>
 							<div class="text-xs font-thin truncate">{{ modelValue }}</div>
 						</div>
 						<div v-else class="flex flex-col items-start">
@@ -45,6 +45,7 @@
 </template>
 <script setup lang="ts">
 	import type { StructureDefinition, ResourceType } from '@medplum/fhirtypes'
+	import { FhirResourceForm, UCard, USelectMenu, UButton } from '#components'
 
 	type Profile = Pick<StructureDefinition, 'name' | 'description' | 'publisher' | 'status' | 'url'> & { base: boolean }
 
@@ -69,7 +70,7 @@
 
 	const loading = ref(false)
 
-	const state = ref(null)
+	const state = reactive({})
 
 	const onSubmit = async () => {
 		const { data, status } = await createResource<any>(state.value)

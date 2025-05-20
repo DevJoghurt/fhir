@@ -35,6 +35,9 @@
 
 	const { valueSetExpand } = useFhirClient()
 
+	//const valueSets = ref<any[]>([])
+	//const status = ref('pending')
+
 	// TODO: Cache data
 	const { data: valueSets, status } = await valueSetExpand({
 		url: props?.element.binding?.valueSet

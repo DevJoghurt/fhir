@@ -44,7 +44,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { ref } from '#imports'
+	import { computed } from '#imports'
 	import type { InternalSchemaElement } from '../../../../composables/useFhirResource'
 
 	const props = defineProps<{

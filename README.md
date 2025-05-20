@@ -24,4 +24,4 @@ Each package and project is designed to work together, providing a comprehensive
 
 ## TODO
 - Test with Open Servers: https://confluence.hl7.org/spaces/FHIR/pages/35718859/Public+Test+Servers
-- Explore Google FHIR Gateway as an alternative for authentication: see [repo](https://github.com/google/fhir-gateway) or [docs](https://google.github.io/fhir-gateway/)
+- Checkout Synthea: https://synthetichealth.github.io/synthea/

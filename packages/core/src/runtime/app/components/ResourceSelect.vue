@@ -6,9 +6,8 @@
 		class="min-w-48" />
 </template>
 <script setup lang="ts">
-	import { onMounted, ref } from '#imports'
+	import { onMounted, ref, fhirResourceList } from '#imports'
 	import type { FhirResource } from '../../types'
-	import {fhirResourceList } from '../../utils/resources'
 
 	const emit = defineEmits<{
 		(event: 'update:modelValue', value: FhirResource): void

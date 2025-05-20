@@ -93,26 +93,6 @@ export function getOutcomeStatus(outcome: OperationOutcome): number {
     return 200;
 }
 
-/**
- * Asserts that the operation completed successfully and that the resource is defined.
- * @param outcome - The operation outcome.
- * @param resource - The resource that may or may not have been returned.
- */
-export function assertOk<T>(outcome: OperationOutcome, resource: T | undefined): asserts resource is T {
-  if (!isOk(outcome) || resource === undefined) {
-    throw new OperationOutcomeError(outcome);
-  }
-}
-
-export class OperationOutcomeError extends Error {
-  readonly outcome: OperationOutcome;
-
-  constructor(outcome: OperationOutcome, cause?: unknown) {
-    super(operationOutcomeToString(outcome));
-    this.outcome = outcome;
-    this.cause = cause;
-  }
-}
 
 /**
  * Normalizes an error object into a displayable error string.

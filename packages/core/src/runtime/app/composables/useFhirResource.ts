@@ -159,7 +159,8 @@ export function useFhirResource() {
 	 * 	@param defaultState - The default state of the resource
 	 * 	@returns The resource state
 	 **/
-	const createResourceState = (elements: InternalSchemaElement[], state: ElementState = {}): ElementState => {
+	const createResourceState = (elements: InternalSchemaElement[], defaultState: ElementState = {}): ElementState => {
+		const state: ElementState = reactive({ ...defaultState });
 		for (const element of elements) {
 			if (element.isArray) {
 				state[element.name] = state[element.name] || [];
@@ -167,7 +168,13 @@ export function useFhirResource() {
 				state[element.name] = state[element.name] || null;
 			}
 		}
-		return reactive(state);
+		if(!state.id){
+			state.id = null;
+		}
+		if(!state.resourceType){
+			state.resourceType = elements[0]?.path?.split('.')[0] || null;
+		}
+		return state;
 	}
 
 	const generateResource = (resourceDefinition: InternalTypeSchema | null, resourceState: ElementState): Resource | null => {

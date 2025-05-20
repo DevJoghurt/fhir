@@ -5,7 +5,7 @@
 </template>
 <script lang="ts" setup>
 	import type { HumanName } from '@medplum/fhirtypes'
-	import { formatHumanName, type HumanNameFormatOptions } from '../../utils'
+	import { formatHumanName, type HumanNameFormatOptions } from '#imports'
 
 	const props = defineProps<{
 		name?: HumanName | HumanName[]

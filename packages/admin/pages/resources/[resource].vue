@@ -21,10 +21,8 @@
 	</section>
 </template>
 <script setup lang="ts">
-	import { useFhirCapatibilityStatement } from '#imports'
+	import { useFhirCapatibilityStatement, ref, computed } from '#imports'
 	import type { FhirResource } from '#fhir/types'
-
-	const router = useRouter()
 
 	const route = useRoute()
 

@@ -4,7 +4,7 @@
 			<li v-for="profile in profiles" :key="profile?.url" class="flex justify-between items-center p-4">
 				<div>
 					<h2 class="text-lg font-semibold">{{ profile?.name }}</h2>
-					<p class="text-sm text-gray-500">{{ profile?.description }}</p>
+					<div class="text-sm text-gray-500">{{ profile?.description }}</div>
 					<p class="text-sm text-gray-500">{{ profile?.publisher }}</p>
 					<p class="mt-2 text-xs text-gray-500">{{ profile?.url }}</p>
 				</div>

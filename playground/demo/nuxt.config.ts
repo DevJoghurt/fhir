@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   fhir: {
-
+    serverUrl: 'http://localhost:8082',
   },
 
   profiling: {

@@ -37,11 +37,11 @@
 	"dependencies": {
 		"@nuxt/kit": "*",
 		"@nuxt/schema": "*",
-		"@nuxt/ui": "3.1.1",
+		"@nuxt/ui": "3.1.2",
 		"@nuxt/content": "3.4.0",
 		"@medplum/fhirtypes": "^4.1.4",
-		"@nuxt/icon": "^1.12.0",
-		"@vueuse/core": "^13.1.0",
+		"@nuxt/icon": "^1.13.0",
+		"@vueuse/core": "^13.2.0",
 		"radix-vue": "^1.9.17",
 		"fsh-sushi": "3.11.1",
 		"globby": "^14.1.0",
@@ -51,12 +51,12 @@
 		"@iconify/utils": "^2.3.0",
 		"chokidar": "4.0.3",
 		"fs-extra": "^11.3.0",
-		"c12": "^3.0.3",
-		"shiki": "^3.4.0"
+		"c12": "^3.0.4",
+		"shiki": "^3.4.2"
 	},
 	"devDependencies": {
 		"typescript": "^5.8.3",
-		"@nuxt/module-builder": "1.0.1",
+		"@nuxt/module-builder": "0.8.4",
 		"@types/fs-extra": "11.0.4",
 		"unbuild": "^3.5.0"
 	}

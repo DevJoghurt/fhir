@@ -7,14 +7,14 @@
 			name="resourceType"
 			size="sm"
 			>
-			<UInput name="resourceType" class="w-full" disabled v-model="resourceState.resourceType" />
+			<UInput class="w-full" disabled v-model="resourceState.resourceType" />
 		</UFormField>
 		<UFormField
 			label="Id"
 			name="id"
 			size="sm"
 			>
-			<UInput name="id" class="w-full" disabled v-model="resourceState.id" />
+			<UInput class="w-full" disabled v-model="resourceState.id" />
 		</UFormField>
 		<div v-if="resourceDefintion" class="py-4 space-y-4">
 			<FhirDataTypeFormBackboneElement v-model="resourceState" @change="update" :nestedElements="resourceDefintion.element" />
@@ -22,7 +22,8 @@
 	</UForm>
 </template>
 <script lang="ts" setup>
-	import { ref, useFhirResource } from '#imports'
+	import { ref, useFhirResource, reactive } from '#imports'
+	import { FhirDataTypeFormBackboneElement, UForm, UFormField, UInput } from '#components'
 
 	/**
 	 * TODO: Refactor this component to use a class representation of the resource and provide and inject the class to the form items.
@@ -47,11 +48,7 @@
 	// TODO: remove force reload if implementation is ready
 	const resourceDefintion = await loadResourceDefinition(resourceUrl.value, true)
 	// END TODO
-
 	const resourceState = createResourceState(resourceDefintion?.element || [], props.modelValue || {})
-	// add resourceType and id to the resource state
-	if(!resourceState.resourceType) resourceState.resourceType = resourceDefintion?.type || ''
-	if(!resourceState.id) resourceState.id = null
 
 	const update = () => {
 		const resource = generateResource(resourceDefintion, resourceState)

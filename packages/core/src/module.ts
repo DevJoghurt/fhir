@@ -3,6 +3,7 @@ import {
 	createResolver,
 	addImports,
 	addComponentsDir,
+	addImportsDir,
 	addServerImports,
 	addServerImportsDir
   } from '@nuxt/kit'
@@ -80,10 +81,6 @@ export default defineNuxtModule<ModuleOptions>({
 			name: 'useFhirUtils',
 			as: 'useFhirUtils',
 			from: resolve('./runtime/app/composables/useFhirUtils')
-		}, {
-			name: 'operationOutcomeToString',
-			as: 'operationOutcomeToString',
-			from: resolve('./runtime/utils/outcomes')
 		}]);
 
 		addServerImports([{
@@ -97,6 +94,7 @@ export default defineNuxtModule<ModuleOptions>({
 			global: true
 		});
 
+		addImportsDir(resolve('./runtime/utils'));
 		addServerImportsDir(resolve('./runtime/utils'))
 
 		const runtimeConfig = nuxt.options.runtimeConfig || {};

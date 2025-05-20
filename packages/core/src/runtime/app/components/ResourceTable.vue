@@ -2,8 +2,8 @@
 	<div class="w-full space-y-4 pb-4">
 	  	<UTable
 			ref="table"
-			:data="items"
-			:columns="columns"
+			:data="items || []"
+			:columns="columns || []"
 			:loading="status === 'pending'"
 			loading-color="primary"
 			class="flex-1">
@@ -50,8 +50,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { useFhirClient, computed, useTemplateRef, ref, h } from '#imports'
-	import { formatHumanName, formatDateTime, isHumanName } from '../../utils'
+	import { useFhirClient, computed, useTemplateRef, ref, h, formatHumanName, formatDateTime, isHumanName } from '#imports'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
