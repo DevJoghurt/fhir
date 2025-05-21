@@ -1,56 +1,69 @@
 <template>
-	<div class="w-full space-y-4 pb-4">
-	  	<UTable
-			ref="table"
-			:data="items || []"
-			:columns="columns || []"
-			:loading="status === 'pending'"
-			loading-color="primary"
-			class="flex-1">
-			<template #id-cell="{ row }">
-				<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ row.getValue('id') }}</ULink>
-			</template>
-			<template #name-cell="{ row }">
-				<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ formatName(row.getValue('name')) }}</ULink>
-			</template>
-			<template #actions-cell="{ row }">
-				<UDropdownMenu
-					:content="{
-						align: 'end',
-					}",
-					:items="[
-						{
-							label: 'Details',
-							onSelect: () => emit('select', row.original)
-						},
-						{
-							label: 'Delete',
-							onSelect: () => emit('delete', row.original)
-						}
-					]"
-				>
-					<UButton
-						icon="i-lucide-ellipsis-vertical"
-						color="neutral"
-						variant="ghost"
-						class="ml-auto cursor-pointer"
-					/>
-				</UDropdownMenu>
+	<div>
+		<div class="flex justify-between items-center mb-4">
 
-			</template>
-		</UTable>
-	  	<div class="flex justify-between border-t border-(--ui-border) px-4 py-4">
-			<UPagination
-				:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-				:items-per-page="table?.tableApi?.getState().pagination.pageSize"
-				:total="table?.tableApi?.getFilteredRowModel().rows.length"
-				@update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
-			/>
-    	</div>
+		</div>
+		<div class="w-full space-y-4 pb-4">
+			<UTable
+				ref="table"
+				v-model:pagination="pagination"
+				:data="items || []"
+				:columns="columns || []"
+				:loading="status === 'pending'"
+				loading-color="primary"
+				:pagination-options="{
+        			getPaginationRowModel: getPaginationRowModel(),
+					manualPagination: true,
+					rowCount: data?.total || 0,
+      			}"
+				class="flex-1">
+				<template #id-cell="{ row }">
+					<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ row.getValue('id') }}</ULink>
+				</template>
+				<template #name-cell="{ row }">
+					<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ formatName(row.getValue('name')) }}</ULink>
+				</template>
+				<template #actions-cell="{ row }">
+					<UDropdownMenu
+						:content="{
+							align: 'end',
+						}",
+						:items="[
+							{
+								label: 'Details',
+								onSelect: () => emit('select', row.original)
+							},
+							{
+								label: 'Delete',
+								onSelect: () => emit('delete', row.original)
+							}
+						]"
+					>
+						<UButton
+							icon="i-lucide-ellipsis-vertical"
+							color="neutral"
+							variant="ghost"
+							class="ml-auto cursor-pointer"
+						/>
+					</UDropdownMenu>
+
+				</template>
+			</UTable>
+			<div class="flex justify-between border-t border-(--ui-border) px-4 py-4">
+				<UPagination
+					:page="(table?.tableApi?.getState().pagination.pageIndex || 1)"
+					:default-page="(table?.tableApi?.getState().pagination.pageIndex || 1)"
+					:items-per-page="table?.tableApi?.getState().pagination.pageSize"
+ 					:total="data?.total || 0"
+					@update:page="setPagination"
+				/>
+			</div>
+		</div>
 	</div>
 </template>
 <script lang="ts" setup>
-	import { useFhirClient, computed, useTemplateRef, ref, h, formatHumanName, formatDateTime, isHumanName } from '#imports'
+	import { useFhirClient, computed, useTemplateRef, ref, h, formatHumanName, formatDateTime, isHumanName, useRoute, useRouter } from '#imports'
+	import { getPaginationRowModel } from '@tanstack/vue-table'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
 	import { UDropdownMenu, UButton } from '#components'
@@ -66,16 +79,37 @@
 
 	const table = useTemplateRef('table')
 
-	const pagination = ref({
-		pageIndex: 0,
-		pageSize: 5
-	})
-
 	const resource = ref(props.resourceType)
 
 	const { search } = useFhirClient()
 
-	const { data, status } = await search(resource.value)
+	const route = useRoute()
+	const router = useRouter()
+
+	const pagination = ref({
+		pageIndex: route.query.page ? parseInt(route.query.page as string) : 0,
+		pageSize: 20
+	})
+	const pageSize = computed(() => pagination.value.pageSize)
+	const offset = computed(() => pagination.value.pageIndex * pagination.value.pageSize)
+
+	const setPagination = (pageIndex: number) => {
+		table.value?.tableApi?.setPageIndex(pageIndex)
+		router.replace({
+				query: {
+				...route.query,
+				page: pageIndex,
+			},
+  		})
+	}
+
+	const { data, status } = await search(resource.value, {
+		_count: pageSize,
+		_offset: offset,
+		_total: "accurate"
+	}, {
+		watch: [pagination],
+	})
 
 	const items = computed(() => data.value?.entry?.map((entry: any) => {
 		const {resourceType, ...item} = entry.resource
