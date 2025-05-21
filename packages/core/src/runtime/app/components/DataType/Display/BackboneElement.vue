@@ -37,6 +37,4 @@
 		resource: Resource
 		nestedElements?: InternalSchemaElement[]
 	}>()
-
-
 </script>

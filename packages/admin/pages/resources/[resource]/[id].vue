@@ -20,7 +20,7 @@
 							side: 'bottom',
 							sideOffset: 8
 						}">
-						<UButton icon="i-lucide-menu" color="neutral" variant="outline" />
+						<UButton icon="i-lucide:ellipsis-vertical" color="neutral" variant="outline" />
 					</UDropdownMenu>
 				</div>
 			</div>
@@ -44,4 +44,5 @@
 		label: 'Delete',
 		icon: 'i-heroicons-trash'
 	}]
+
 </script>

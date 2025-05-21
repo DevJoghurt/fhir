@@ -4,7 +4,6 @@
 			<div class="flex items-center">
 				<h1 class="text-md font-semibold">Edit {{ resourceType }}</h1>
 			</div>
-
 		</div>
 		<div class="p-8">
 			<UCard>
