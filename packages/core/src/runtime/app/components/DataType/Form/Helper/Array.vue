@@ -44,7 +44,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { computed } from '#imports'
+	import { computed, onBeforeUnmount } from '#imports'
 	import type { InternalSchemaElement } from '../../../../composables/useFhirResource'
 
 	const props = defineProps<{
@@ -60,8 +60,10 @@
 
 	// add id to each element in the array
 	const elementValue = computed(() => {
-		if (Array.isArray(props.modelValue)) {
-			return props.modelValue.map((item) => {
+		// TODO: evaluate if this can be a problem in FHIR datatypes
+		const arrayItems = JSON.parse(JSON.stringify(props.modelValue))
+		if (Array.isArray(arrayItems)) {
+			return arrayItems.map((item) => {
 				if (typeof item === 'object' && item !== null) {
 					item._id = Math.random().toString(36).substring(2, 15)
 				}
@@ -101,7 +103,7 @@
 				delete item._id
 			}
 			// if it is not an BackboneElement, HumanName, re-transform the object to an flat array
-			if (['BackboneElement', 'HumanName'].indexOf(props.element.type) === -1) {
+			if (['BackboneElement', 'HumanName', 'Identifier'].indexOf(props.element.type) === -1) {
 				data[index] = item?.value || null
 			}
 		})

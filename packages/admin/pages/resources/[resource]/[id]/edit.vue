@@ -7,7 +7,7 @@
 		</div>
 		<div class="p-8">
 			<UCard>
-				<FhirResourceForm v-model="resource" :resourceUrl="resourceUrl" />
+				<FhirResourceForm v-model="resource" :resourceUrl="resourceUrl" :viewType="viewType" />
 				<template #footer>
 					<div class="flex justify-end">
 						<UButton :loading="loading" @click.prevent="onSubmit">Update</UButton>
@@ -23,6 +23,7 @@
 	const props = defineProps<{
 		resourceType: string
 		resourceId: string
+		viewType: 'data' | 'json'
 	}>()
 
 	const { readResource, updateResource } = useFhirClient()

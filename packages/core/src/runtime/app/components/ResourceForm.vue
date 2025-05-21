@@ -1,28 +1,37 @@
 <template>
-	<UForm
-		:state="resourceState"
-		class="space-y-2">
-		<UFormField
-			label="Resource Type"
-			name="resourceType"
-			size="sm"
-			>
-			<UInput class="w-full" disabled v-model="resourceState.resourceType" />
-		</UFormField>
-		<UFormField
-			label="Id"
-			name="id"
-			size="sm"
-			>
-			<UInput class="w-full" disabled v-model="resourceState.id" />
-		</UFormField>
-		<div v-if="resourceDefintion" class="py-4 space-y-4">
-			<FhirDataTypeFormBackboneElement v-model="resourceState" @change="update" :nestedElements="resourceDefintion.element" />
-		</div>
-	</UForm>
+	<div>
+		<UForm
+			v-if="viewType == 'data'"
+			:state="resourceState"
+			class="space-y-2">
+			<UFormField
+				label="Resource Type"
+				name="resourceType"
+				size="sm"
+				>
+				<UInput class="w-full" disabled v-model="resourceState.resourceType" />
+			</UFormField>
+			<UFormField
+				label="Id"
+				name="id"
+				size="sm"
+				>
+				<UInput class="w-full" disabled v-model="resourceState.id" />
+			</UFormField>
+			<div v-if="resourceDefintion" class="py-4 space-y-4">
+				<FhirDataTypeFormBackboneElement v-model="resourceState" @change="update" :nestedElements="resourceDefintion.element" />
+			</div>
+		</UForm>
+		<JsonEditorVue
+			v-else-if="viewType == 'json'"
+			v-model="dataRef"
+			:main-menu-bar="false"
+			mode="tree"
+		/>
+	</div>
 </template>
 <script lang="ts" setup>
-	import { ref, useFhirResource, reactive } from '#imports'
+	import { ref, useFhirResource, computed, watch, toRef } from '#imports'
 	import { FhirDataTypeFormBackboneElement, UForm, UFormField, UInput } from '#components'
 
 	/**
@@ -35,20 +44,38 @@
 	 */
 
 	const props = defineProps<{
-		modelValue?: any,
+		modelValue?: any
 		resourceUrl: string
+		viewType?: 'data' | 'json'
 	}>()
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
 	const resourceUrl = ref(props?.resourceUrl || '')
+	const viewType = computed(() => props.viewType || 'data')
 
 	const { loadResourceDefinition, createResourceState, generateResource } = useFhirResource()
 
 	// TODO: remove force reload if implementation is ready
 	const resourceDefintion = await loadResourceDefinition(resourceUrl.value, true)
 	// END TODO
-	const resourceState = createResourceState(resourceDefintion?.element || [], props.modelValue || {})
+	let resourceState = createResourceState(resourceDefintion?.element || [], props.modelValue || {})
+
+	const dataRef = toRef(resourceState)
+
+	watch(dataRef, (newValue) => {
+		const resource = generateResource(resourceDefintion, newValue)
+		emit('update:modelValue', resource)
+	}, { deep: true })
+
+	watch(viewType, (type) => {
+		if (type === 'data') {
+			resourceState = createResourceState(resourceDefintion?.element || [], dataRef.value || {})
+		}
+		if (type === 'json') {
+			dataRef.value = createResourceState(resourceDefintion?.element || [], resourceState || {})
+		}
+	})
 
 	const update = () => {
 		const resource = generateResource(resourceDefintion, resourceState)
