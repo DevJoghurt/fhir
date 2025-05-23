@@ -73,7 +73,7 @@
 	const state = createElementState(props.nestedElements || [], props.modelValue || {})
 
 	const update = () => {
-		const resource = normalizeResource(props.nestedElements, state)
+		const resource = normalizeResource(props.nestedElements, state, props.modelValue)
 		emit('update:modelValue', resource)
 		emit('change', resource)
 	}

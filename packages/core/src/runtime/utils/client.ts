@@ -422,6 +422,21 @@ export class FhirClient {
 		return this.fetchInternal<ValueSet>('GET', url.toString(), options);
 	}
 
+	postResource<K extends ResourceType>(resourceType: K, id?: string | null, body: any = {}, operation?: any, options?: FetchOptions<any>): AsyncData<any, any> | Promise<any> {
+		const params =  [ resourceType ] as string[];
+		if (id) {
+			params.push(id);
+		}
+		if (operation) {
+			params.push(operation);
+		}
+		const url = this.fhirUrl(...params);
+		return this.fetchInternal<any>('POST', url, {
+			body: JSON.stringify(body || {}),
+			...options
+		});
+	}
+
 	/**
 	 * Upsert a resource: update it in place if it exists, otherwise create it.  This is done in a single, transactional
 	 * request to guarantee data consistency.
@@ -432,11 +447,11 @@ export class FhirClient {
 	 */
 	upsertResource<T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>): AsyncData<T, any> | Promise<T> {
 		// remove clientIdStrategy from options if it exists
-		const { 
-			clientIdStrategy, 
-			forceOnMissingId = false, 
+		const {
+			clientIdStrategy,
+			forceOnMissingId = false,
 			...restOptions } = options || {};
-			
+
 		const path = [resource.resourceType] as string[];
 		if(clientIdStrategy && resource?.id){
 			// add clientIdStrategy to the paths

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<UCard>
 		<UForm
 			v-if="viewType == 'data'"
 			:state="resourceState"
@@ -25,10 +25,11 @@
 		<JsonEditorVue
 			v-else-if="viewType == 'json'"
 			v-model="dataRef"
+			:onChange="updateJsonEditor"
 			:main-menu-bar="false"
 			mode="tree"
 		/>
-	</div>
+	</UCard>
 </template>
 <script lang="ts" setup>
 	import { ref, useFhirResource, computed, watch, toRef } from '#imports'
@@ -63,11 +64,6 @@
 
 	const dataRef = toRef(resourceState)
 
-	watch(dataRef, (newValue) => {
-		const resource = generateResource(resourceDefintion, newValue)
-		emit('update:modelValue', resource)
-	}, { deep: true })
-
 	watch(viewType, (type) => {
 		if (type === 'data') {
 			resourceState = createResourceState(resourceDefintion?.element || [], dataRef.value || {})
@@ -77,8 +73,13 @@
 		}
 	})
 
+	const updateJsonEditor = (value: any) => {
+		const resource = generateResource(resourceDefintion, value.json)
+		emit('update:modelValue', resource)
+	}
+
 	const update = () => {
-		const resource = generateResource(resourceDefintion, resourceState)
+		const resource = generateResource(resourceDefintion, resourceState, props.modelValue)
 		emit('update:modelValue', resource)
 	}
 </script>

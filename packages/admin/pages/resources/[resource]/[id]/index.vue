@@ -6,6 +6,7 @@
 </template>
 <script setup lang="ts">
 	import type { ResourceType } from '@medplum/fhirtypes'
+	import { useFhirClient } from '#imports'
 
 	const props = defineProps<{
 		resourceId: string

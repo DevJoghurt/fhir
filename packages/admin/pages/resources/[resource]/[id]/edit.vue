@@ -1,19 +1,13 @@
 <template>
 	<div>
-		<div class="flex justify-between border-b border-gray-200 mx-auto px-8 py-2">
-			<div class="flex items-center">
-				<h1 class="text-md font-semibold">Edit {{ resourceType }}</h1>
-			</div>
-		</div>
 		<div class="p-8">
-			<UCard>
-				<FhirResourceForm v-model="resource" :resourceUrl="resourceUrl" :viewType="viewType" />
-				<template #footer>
-					<div class="flex justify-end">
-						<UButton :loading="loading" @click.prevent="onSubmit">Update</UButton>
-					</div>
-				</template>
-			</UCard>
+			<FhirResourceForm v-model="resource" :resourceUrl="resourceUrl" :viewType="viewType" />
+			<div class="h-18"></div>
+		</div>
+		<div class="fixed bottom-0 left-0 right-0 bg-neutral-50 border-t border-gray-200 py-2 px-12">
+			<div class="flex justify-end">
+				<UButton :loading="loading" @click.prevent="onSubmit">Update</UButton>
+			</div>
 		</div>
 	</div>
 </template>
@@ -38,7 +32,9 @@
 	const onSubmit = async () => {
 		const { data, status } = await updateResource<any>(resource.value)
 		if(status.value === 'success'){
-			navigateTo(`/resources/${props.resourceType}/${data.value.id}`)
+			navigateTo(`/resources/${props.resourceType}/${data.value.id}`, {
+				external: true,
+			})
 		}
 	}
 </script>

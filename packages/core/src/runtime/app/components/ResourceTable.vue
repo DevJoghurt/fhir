@@ -49,7 +49,8 @@
 
 				</template>
 			</UTable>
-			<div class="flex justify-between border-t border-(--ui-border) px-4 py-4">
+			<div class="h-10"></div>
+			<div class="fixed bottom-0 bg-neutral-50 w-full flex justify-between border-t border-(--ui-border) px-4 py-2">
 				<UPagination
 					:page="(table?.tableApi?.getState().pagination.pageIndex || 1)"
 					:default-page="(table?.tableApi?.getState().pagination.pageIndex || 1)"
@@ -91,7 +92,12 @@
 		pageSize: 20
 	})
 	const pageSize = computed(() => pagination.value.pageSize)
-	const offset = computed(() => pagination.value.pageIndex * pagination.value.pageSize)
+	const offset = computed(() => {
+		if(pagination.value.pageIndex === 0) {
+			return 0
+		}
+		return (pagination.value.pageIndex - 1) * pageSize.value
+	})
 
 	const setPagination = (pageIndex: number) => {
 		table.value?.tableApi?.setPageIndex(pageIndex)

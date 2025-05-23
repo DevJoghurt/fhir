@@ -133,6 +133,7 @@ export function useFhirClient(options: UseFhirOptions = {
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => AsyncData<Bundle, any>;
 	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<OperationOutcome, any>;
 	valueSetExpand: (params: ValueSetExpandParams, options?: FetchOptions<any>) => AsyncData<ValueSet, any>;
+	postResource: <K extends ResourceType>(resourceType: K, id?: string | null, body?: any, operation?: string, options?: FetchOptions<any>) => AsyncData<any, any>;
 	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => AsyncData<T, any>;
 	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => AsyncData<T, any>;
 	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => AsyncData<T, any>;
@@ -223,6 +224,7 @@ export function useFhirClient(options: UseFhirOptions = {
 		fhirUrl: client.fhirUrl.bind(client),
 		fhirSearchUrl: client.fhirSearchUrl.bind(client),
 		createUUID: client.createUUID.bind(client),
+		postResource: client.postResource.bind(client),
 		readResource: client.readResource.bind(client),
 		valueSetExpand: client.valueSetExpand.bind(client),
 		search: client.search.bind(client),

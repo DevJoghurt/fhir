@@ -2,7 +2,7 @@
 	<div>
 		<div class="flex border-b border-gray-200 mx-auto px-8 py-2">
 			<div class="flex justify-between w-full">
-				<div class="flex items-center space-x-4">
+				<div class="flex items-baseline space-x-4">
 					<div>
 						<div class="text-xs">Type</div>
 						<ULink :to="`/resources/${resourceType }`" class="text-sm">{{ resourceType }}</ULink>
@@ -28,6 +28,16 @@
 							icon: 'i-lucide:code',
 						}]"
 						size="xs" />
+					<UCheckbox
+						v-model="editMode"
+						indicator="start"
+						variant="card"
+						@change="toggleEditMode"
+						label="Edit"
+						:ui="{
+							root: 'p-1.5'
+						}"
+					/>
 					<UDropdownMenu
 						:items="items"
 						:content="{
@@ -46,15 +56,24 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { useRouter, useRoute, computed } from '#imports'
+	import { useRouter, useRoute, computed, useFhirClient } from '#imports'
+	import type { ResourceType } from '@medplum/fhirtypes'
 
 	const props = defineProps<{
 		resourceId: string
-		resourceType: string
+		resourceType: ResourceType
 	}>()
+
+	const { postResource } = useFhirClient()
 
 	const router = useRouter()
 	const route = useRoute()
+
+	const editMode = ref(route.fullPath.includes('edit'))
+
+	watch(route, (newRoute) => {
+		editMode.value = newRoute.fullPath.includes('edit')
+	})
 
 	const viewType = computed({
 		get() {
@@ -74,17 +93,41 @@
 		return `/resources/${props.resourceType}/${props.resourceId}/edit?${new URLSearchParams(route?.query).toString()}`
 	})
 
+	const toggleEditMode = () => {
+		if (editMode.value === true) {
+			router.push(generatedEditUrl.value)
+		} else {
+			router.push(generatedBaseUrl.value)
+		}
+	}
+
 	const generatedBaseUrl = computed(() => {
 		return `/resources/${props.resourceType}/${props.resourceId}?${new URLSearchParams(route?.query).toString()}`
 	})
 
-	const items = [{
-		label: 'Edit',
-		icon: 'i-heroicons-pencil',
-		to: generatedEditUrl,
-	}, {
+	const invalidateExpansion = async () => {
+		const { data, error } = await postResource(props.resourceType, props.resourceId, {
+			resourceType: props.resourceType
+		}, '$invalidate-expansion')
+		if (error) {
+			console.error('Error invalidating expansion:', error)
+			return
+		}
+	}
+
+	const items = []
+
+	if(props.resourceType === 'ValueSet'){
+		items.push({
+			label: 'Invalidate Expansion',
+			icon: 'i-heroicons-arrow-path',
+			onSelect: async () => await invalidateExpansion()
+		})
+	}
+
+	items.push({
 		label: 'Delete',
-		icon: 'i-heroicons-trash'
-	}]
+		icon: 'i-heroicons-trash',
+	})
 
 </script>

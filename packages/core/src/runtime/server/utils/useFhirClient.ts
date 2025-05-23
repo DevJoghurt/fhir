@@ -49,6 +49,7 @@ export function useFhirClient(options: UseFhirOptions = {
 	readStructureDefinition: (idOrUrl: string, operation?: '$snapshot' | '$meta', options?: FetchOptions<any>) => Promise<Bundle<ExtractResource<'StructureDefinition'>>>;
 	readPatientEverything: (id: string, options?: FetchOptions<any>) => Promise<Bundle>;
 	validateResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => Promise<OperationOutcome>;
+	postResource: <K extends ResourceType>(resourceType: K, id?: string | null, body?: any, operation?: string,  options?: FetchOptions<any>) => Promise<any>;
 	createResource: <T extends Resource>(resource: T, options?: FetchOptions<any>) => Promise<T>;
 	createResourceIfNoneExist: <T extends Resource>(resource: T, query: string, options?: FetchOptions<any>) => Promise<T>;
 	upsertResource: <T extends Resource>(resource: T, query: QueryTypes, options?: FetchOptions<any>) => Promise<T>;
@@ -110,6 +111,7 @@ export function useFhirClient(options: UseFhirOptions = {
 		createUUID: client.createUUID.bind(client),
 		readResource: client.readResource.bind(client),
 		search: client.search.bind(client),
+		postResource: client.postResource.bind(client),
 		readHistory: client.readHistory.bind(client),
 		readVersion: client.readVersion.bind(client),
 		readStructureDefinition: client.readStructureDefinition.bind(client),

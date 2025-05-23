@@ -13,6 +13,7 @@ import type {
 	Coding,
 	ElementDefinitionBinding
   } from '@medplum/fhirtypes';
+import defu from 'defu';
 
 export const supportedCodingTypes = [ 'id', 'unsignedInt', 'boolean', 'uri', 'string', 'Identifier', 'HumanName', 'code', 'Code', 'date', 'integer', 'BackboneElement' ] as const;
 export type SupportedCodingType = (typeof supportedCodingTypes)[number];
@@ -160,7 +161,11 @@ export function useFhirResource() {
 	 * 	@returns The resource state
 	 **/
 	const createResourceState = (elements: InternalSchemaElement[], defaultState: ElementState = {}): ElementState => {
-		const state: ElementState = reactive({ ...defaultState });
+		const state: ElementState = {};
+		state.resourceType = defaultState?.resourceType || elements[0]?.path?.split('.')[0] || null;
+		state.id = defaultState?.id || null;
+		state.meta = defaultState?.meta || { };
+
 		for (const element of elements) {
 			if (element.isArray) {
 				state[element.name] = state[element.name] || [];
@@ -168,17 +173,22 @@ export function useFhirResource() {
 				state[element.name] = state[element.name] || null;
 			}
 		}
-		if(!state.id){
-			state.id = null;
+		// handle currently not supported form elements
+		for (const dS in defaultState) {
+			if (defaultState.hasOwnProperty(dS)) {
+				if (state[dS] === undefined || state[dS] === null) {
+					state[dS] = defaultState[dS];
+				}
+				// if the state is an array and the default state is an empty array
+				else if (Array.isArray(state[dS]) && state[dS].length === 0) {
+					state[dS] = [...defaultState[dS]];
+				}
+			}
 		}
-		if(!state.resourceType){
-			state.resourceType = elements[0]?.path?.split('.')[0] || null;
-		}
-		return state;
+		return reactive(state);
 	}
 
-	const generateResource = (resourceDefinition: InternalTypeSchema | null, resourceState: ElementState): Resource | null => {
-
+	const generateResource = (resourceDefinition: InternalTypeSchema | null, resourceState: ElementState, originalState: ElementState = {}): Resource | null => {
 		if (!resourceDefinition) {
 			return null;
 		}
@@ -193,11 +203,14 @@ export function useFhirResource() {
 		if(resourceState.id){
 			resource.id = resourceState.id;
 		}
+		if(resourceState.meta){
+			resource.meta = defu(resourceState.meta, resource.meta);
+		}
 
-		const normalizedResource = normalizeResource(resourceDefinition.element, resourceState);
+		const normalizedResource = normalizeResource(resourceDefinition.element, resourceState, originalState);
 
 		// merge the resource state
-		resource = { ...resource, ...normalizedResource };
+		resource = { ...normalizedResource, ...resource };
 
 		return resource;
 	}
@@ -291,12 +304,12 @@ const transformElement = (elements: ElementDefinitionTree[]): InternalSchemaElem
 	return result;
 }
 
-export const normalizeResource = (elements: InternalSchemaElement[] | undefined, resourceState: ElementState = {}) => {
+export const normalizeResource = (elements: InternalSchemaElement[] | undefined, resourceState: ElementState = {}, originalState: ElementState = {}) => {
 	const resource = {} as Resource;
 	if (!elements) {
 		return resource;
 	}
-
+	// create internal schema state
 	for(const nE of elements || []) {
 		// array elements
 		if (nE.isArray) {
@@ -321,6 +334,19 @@ export const normalizeResource = (elements: InternalSchemaElement[] | undefined,
 			resource[nE.name] = resourceState[nE.name];
 		}
 	}
+
+	// handle currently not supported form elements
+	for(const oS in originalState) {
+		if (originalState.hasOwnProperty(oS)) {
+			if (resource[oS] === undefined) {
+				resource[oS] = originalState[oS];
+			} else if (Array.isArray(resource[oS]) && resource[oS].length === 0) {
+				// if the state is an array, merge the default state with the current state
+				resource[oS] = [...originalState[oS]];
+		}
+		}
+	}
+
 	return resource;
 }
 
