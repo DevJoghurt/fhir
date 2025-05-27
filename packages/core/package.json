@@ -33,7 +33,8 @@
 		"hookable": "^5.5.3",
 		"defu": "^6.1.4",
 		"uncrypto": "0.1.3",
-		"json-editor-vue": "^0.18.1"
+		"json-editor-vue": "^0.18.1",
+		"ufo": "^1.6.1"
 	},
 	"peerDependencies": {
 		"@nuxt/ui": "3.1.2"
