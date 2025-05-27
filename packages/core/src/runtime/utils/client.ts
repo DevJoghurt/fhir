@@ -167,15 +167,21 @@ export class FhirClient {
 	 * See the FHIR "read" operation for full details: https://www.hl7.org/fhir/http.html#read
 	 * @category Read
 	 * @param resourceType - The FHIR resource type.
-	 * @param id - The resource ID.
+	 * @param params - path params e.g. resource ID or history ID.
 	 * @param options - Optional fetch options.
 	 * @returns The resource if available.
 	 */
-	readResource<K extends ResourceType>(resourceType: K, id: string, options?: FetchOptions<any>): AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>> {
-		if (!id) {
-			throw new Error('The "id" parameter cannot be null, undefined, or an empty string.');
+	readResource<K extends ResourceType>(resourceType: K, params: string | string[], options?: FetchOptions<any>): AsyncData<ExtractResource<K>, any> | Promise<ExtractResource<K>> {
+		if (!params) {
+			throw new Error('The "params" parameter cannot be null, undefined, or an empty string.');
 		}
-		return this.fetchInternal<ExtractResource<K>>('GET', this.fhirUrl(resourceType, id), options);
+		const uri = [resourceType] as string[];
+		if (Array.isArray(params)) {
+			uri.push(...params);
+		} else {
+			uri.push(params);
+		}
+		return this.fetchInternal<ExtractResource<K>>('GET', this.fhirUrl(...uri), options);
 	}
 
 	/**

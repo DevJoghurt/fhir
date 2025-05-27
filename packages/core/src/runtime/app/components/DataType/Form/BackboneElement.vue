@@ -47,7 +47,6 @@
 	import type { InternalSchemaElement } from '../../../composables/useFhirResource'
 	import { normalizeResource } from '../../../composables/useFhirResource'
 	import { reactive } from '#imports'
-	import { FhirDataTypeFormBackboneElement, FhirDataTypeFormHelperArray, FhirDataTypeFormHelperMultiCode } from '#components'
 
 	const props = defineProps<{
 		modelValue?: any,

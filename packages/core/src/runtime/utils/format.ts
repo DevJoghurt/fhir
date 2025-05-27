@@ -39,7 +39,7 @@ export function isHumanName(input: unknown): input is HumanName {
  * @param options - Optional name format options.
  * @returns The formatted name string.
  */
-export function formatHumanName(name?: HumanName | HumanName[], options?: HumanNameFormatOptions): string {
+export function formatHumanName(name?: HumanName | HumanName[] | null, options?: HumanNameFormatOptions): string {
 	if (Array.isArray(name)) {
 	  return name.map(n => formatHumanName(n, options)).join(', ');
 	}

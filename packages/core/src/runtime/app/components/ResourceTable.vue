@@ -67,7 +67,6 @@
 	import { getPaginationRowModel } from '@tanstack/vue-table'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
-	import { UDropdownMenu, UButton } from '#components'
 
 	const props = defineProps<{
 		resourceType: ResourceType

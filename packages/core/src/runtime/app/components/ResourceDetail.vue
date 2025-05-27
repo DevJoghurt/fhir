@@ -1,7 +1,7 @@
 <template>
 	<div class="p-0">
 		<div>
-			<div v-if="viewType == 'data'" class="border border-gray-200 rounded-md">
+			<div v-if="viewType == 'data'" class="border border-gray-200">
 				<FhirDataTypeDisplayBackboneElement
 					:resource="resource"
 					:nestedElements="resourceDefintion?.element || []" />
@@ -22,7 +22,7 @@
 	import type { Resource } from '@medplum/fhirtypes'
 
 	const props = defineProps<{
-		resource: Resource
+		resource: Resource | null
 		viewType?: 'data' | 'json'
 	}>()
 
@@ -33,7 +33,7 @@
 	const { resolveProfile } = await useFhirCapatibilityStatement()
 	const { loadResourceDefinition } = useFhirResource()
 
-	const profileUrl = resolveProfile(props.resource)
+	const profileUrl = props?.resource ? resolveProfile(props.resource) : null
 
 	// TODO: remove force reload if implementation is ready
 	const resourceDefintion = await loadResourceDefinition(profileUrl, true)

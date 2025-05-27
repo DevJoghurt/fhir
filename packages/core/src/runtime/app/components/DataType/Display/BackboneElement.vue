@@ -20,6 +20,7 @@
 						:element="el" />
 				<!-- If the element is a simple element, render the appropriate form items -->
 				<component
+					class="text-xs"
 					v-else
 						:is="`FhirDataTypeDisplay-${el.type}`"
 						:value="resource[el.name] || null"

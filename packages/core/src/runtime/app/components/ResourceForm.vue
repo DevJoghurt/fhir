@@ -33,7 +33,6 @@
 </template>
 <script lang="ts" setup>
 	import { ref, useFhirResource, computed, watch, toRef } from '#imports'
-	import { FhirDataTypeFormBackboneElement, UForm, UFormField, UInput } from '#components'
 
 	/**
 	 * TODO: Refactor this component to use a class representation of the resource and provide and inject the class to the form items.
