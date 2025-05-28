@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/admin",
-	"version": "0.0.37",
+	"version": "0.0.38",
 	"description": "FHIR admin layer for nHealth",
 	"repository": {
 		"type": "git",
