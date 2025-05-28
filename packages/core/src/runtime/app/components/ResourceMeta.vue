@@ -47,6 +47,6 @@
 	import type { Resource } from '@medplum/fhirtypes'
 
 	defineProps<{
-		resource: Resource | null
+		resource?: Resource | null
 	}>()
 </script>

@@ -22,7 +22,7 @@
 	import type { Resource } from '@medplum/fhirtypes'
 
 	const props = defineProps<{
-		resource: Resource | null
+		resource?: Resource | null
 		viewType?: 'data' | 'json'
 	}>()
 
