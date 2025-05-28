@@ -3,7 +3,7 @@
 		<FhirOperationOutcomeAlert v-if="error" :issues="error?.data?.issue" />
 		<div class="flex flex-row gap-4">
 			<div class="flex-1">
-				<FhirResourceDetail v-if="resource" :key="uri" :view-type="viewType" :resource="resource"  />
+				<FhirResourceDetail :view-type="viewType" :resource="resource"  />
 			</div>
 			<div class="flex flex-col w-2/5 gap-2">
 				<FhirResourceMeta :resource="resource" />
@@ -14,29 +14,32 @@
 </template>
 <script setup lang="ts">
 	import type { ResourceType } from '@medplum/fhirtypes'
-	import { useFhirClient, useFetch, useRoute, computed, watch } from '#imports'
+	import { useFhirClient, useFetch, computed, watch } from '#imports'
 
 	const props = defineProps<{
 		resourceId: string
 		resourceType: ResourceType
 		viewType: 'data' | 'json'
+		history: string | null
 	}>()
 
 	const { getConfig } = useFhirClient()
-	const route = useRoute()
 
 	const uri = computed(() => {
 		const u = [props.resourceType || 'Basic', props?.resourceId || '']
-		if(route.query?.history) {
+		if(props.history) {
 			// If the history query parameter is present, append it to the resource ID
 			u.push('_history')
-			u.push(route.query?.history.toString())
+			u.push(props.history.toString())
 		}
-		return '/fhir/' + u.join('/')
+		return 'fhir/' + u.join('/')
 	})
 
 	const { data: resource, error} = await useFetch(uri, {
 		baseURL: getConfig().serverUrl,
-		watch: [uri]
+		deep: false,
+		immediate: true,
+		watch: [uri],
+
 	})
 </script>

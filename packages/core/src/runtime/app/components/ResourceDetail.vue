@@ -1,12 +1,12 @@
 <template>
 	<div class="p-0">
 		<div>
-			<div v-if="viewType == 'data'" class="border border-gray-200">
+			<div v-if="viewType == 'data' && resource" class="border border-gray-200">
 				<FhirDataTypeDisplayBackboneElement
 					:resource="resource"
 					:nestedElements="resourceDefintion?.element || []" />
 			</div>
-			<div v-else-if="viewType == 'json'">
+			<div v-else-if="viewType == 'json' && resourceRef">
               <JsonEditorVue
 				v-model="resourceRef"
                 :main-menu-bar="false"
@@ -26,7 +26,7 @@
 		viewType?: 'data' | 'json'
 	}>()
 
-	const resourceRef = ref(props.resource)
+	const resourceRef = computed(() => props.resource)
 
 	const viewType = computed(() => props.viewType || 'data')
 

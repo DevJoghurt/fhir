@@ -51,7 +51,7 @@
 			</div>
 		</div>
 		<div>
-			<NuxtPage :resource-type="resourceType" :resource-id="resourceId" :view-type="viewType"  />
+			<NuxtPage :resource-type="resourceType" :resource-id="resourceId" :view-type="viewType" :history="history"  />
 		</div>
 	</div>
 </template>
@@ -87,6 +87,10 @@
 				},
 			})
 		}
+	})
+
+	const history = computed(() => {
+		return route?.query?.history || null
 	})
 
 	const generatedEditUrl = computed(() => {
