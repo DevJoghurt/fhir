@@ -44,7 +44,8 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import type { StructureDefinition, ResourceType } from '@medplum/fhirtypes'
+	import type { StructureDefinition, ResourceType, Resource } from '@medplum/fhirtypes'
+	import type { Ref } from '#imports'
 	import { FhirResourceForm, UCard, USelectMenu, UButton } from '#components'
 
 	type Profile = Pick<StructureDefinition, 'name' | 'description' | 'publisher' | 'status' | 'url'> & { base: boolean }
@@ -54,7 +55,7 @@
 		profiles: Profile[]
 	}>()
 
-	const { createResource } = useFhirClient()
+	const { createResource, loading } = useFhirClient()
 
 
 	const profileItems = computed(() => {
@@ -68,14 +69,15 @@
 
 	const selectedProfileUrl = ref<string>(props?.profiles?.find(profile => profile.base)?.url || '')
 
-	const loading = ref(false)
-
-	const state = ref(null)
+	const state = ref(null) as Ref<Resource | null>
 
 	const onSubmit = async () => {
-		const { data, status } = await createResource<any>(state.value)
-		if(status.value === 'success'){
-			navigateTo(`/resources/${props.resourceType}/${data.value.id}`)
+		if (!state.value) {
+			return
+		}
+		const data = await createResource(state.value)
+		if(data?.id){
+			navigateTo(`/resources/${props.resourceType}/${data.id}`)
 		}
 	}
 </script>

@@ -25,7 +25,7 @@
 		if(!resource.id){
 			return
 		}
-		const { data } = await deleteResource(props.resourceType, resource.id)
+		const data = await deleteResource(props.resourceType, resource.id)
 		const issue = operationOutcomeToString(data?.value)
 		toast.add({
 			title: 'Delete',

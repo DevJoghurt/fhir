@@ -9,7 +9,7 @@
 				v-model:pagination="pagination"
 				:data="items || []"
 				:columns="columns || []"
-				:loading="status === 'pending'"
+				:loading="loading"
 				loading-color="primary"
 				:pagination-options="{
         			getPaginationRowModel: getPaginationRowModel(),
@@ -22,6 +22,16 @@
 				</template>
 				<template #name-cell="{ row }">
 					<ULink @click="emit('select', row.original)" class="cursor-pointer">{{ formatName(row.getValue('name')) }}</ULink>
+				</template>
+				<template #meta-cell="{ row }">
+					<NuxtTime
+						:datetime="row.getValue('meta')?.lastUpdated"
+						year="numeric"
+    					month="numeric"
+    					day="numeric"
+						hour="2-digit"
+    					minute="2-digit"
+						second="2-digit" />
 				</template>
 				<template #actions-cell="{ row }">
 					<UDropdownMenu
@@ -63,7 +73,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import { useFhirClient, computed, useTemplateRef, ref, h, formatHumanName, formatDateTime, isHumanName, useRoute, useRouter } from '#imports'
+	import { useFhirClient, computed, useTemplateRef, ref, formatHumanName, formatDateTime, isHumanName, useRoute, useRouter, useAsyncData } from '#imports'
 	import { getPaginationRowModel } from '@tanstack/vue-table'
 	import type { TableColumn } from '@nuxt/ui'
 	import type { HumanName, Meta, Identifier, Resource, ResourceType } from '@medplum/fhirtypes'
@@ -81,7 +91,7 @@
 
 	const resource = ref(props.resourceType)
 
-	const { search } = useFhirClient()
+	const { search, loading } = useFhirClient()
 
 	const route = useRoute()
 	const router = useRouter()
@@ -108,12 +118,16 @@
   		})
 	}
 
-	const { data, status } = await search(resource.value, {
-		_count: pageSize,
-		_offset: offset,
-		_total: "accurate"
+
+	const { data } = await useAsyncData('resource-table', () => {
+		return search(resource.value, {
+			_count: pageSize.value,
+			_offset: offset.value,
+			_total: "accurate"
+		})
 	}, {
-		watch: [pagination],
+		watch: [() => resource.value, () => pagination.value.pageIndex, () => pagination.value.pageSize],
+		immediate: true
 	})
 
 	const items = computed(() => data.value?.entry?.map((entry: any) => {

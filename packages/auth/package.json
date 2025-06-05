@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"nuxt": "*",
-		"@nuxt/module-builder": "0.8.4",
+		"@nuxt/module-builder": "^0.8.4",
 		"@nuxt/schema": "*",
 		"vue-tsc": "^2.2.10",
 		"typescript": "^5.8.3"

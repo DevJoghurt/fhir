@@ -59,7 +59,7 @@
 	</section>
 </template>
 <script setup lang="ts">
-	const { readCapabilityStatement, readHistory } = useFhirClient()
+	const { readCapabilityStatement, error } = useFhirClient()
 
 	const statusColorMapping = {
 		draft: 'neutral',
@@ -77,9 +77,11 @@
 		PATCH: 'neutral',
 	} as const
 
-	const { data: capabilityStatement, error } = await readCapabilityStatement()
+	const capabilityStatement = await readCapabilityStatement()
 
-	const { data: history } = await readHistory(null, null, {
+	const { readHistory } = useFhirClient()
+
+	const history = await readHistory(null, null, {
 		query: {
 			_limit: 10
 		}

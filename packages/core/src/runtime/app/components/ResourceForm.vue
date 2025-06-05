@@ -58,6 +58,7 @@
 
 	// TODO: remove force reload if implementation is ready
 	const resourceDefintion = await loadResourceDefinition(resourceUrl.value, true)
+
 	// END TODO
 	let resourceState = createResourceState(resourceDefintion?.element || [], props.modelValue || {})
 

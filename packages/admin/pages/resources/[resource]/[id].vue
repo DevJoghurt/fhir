@@ -64,7 +64,7 @@
 		resourceType: ResourceType
 	}>()
 
-	const { postResource } = useFhirClient()
+	const { postResource, error } = useFhirClient()
 
 	const router = useRouter()
 	const route = useRoute()
@@ -110,7 +110,7 @@
 	})
 
 	const invalidateExpansion = async () => {
-		const { data, error } = await postResource(props.resourceType, props.resourceId, {
+		const data = await postResource(props.resourceType, props.resourceId, {
 			resourceType: props.resourceType
 		}, '$invalidate-expansion')
 		if (error) {

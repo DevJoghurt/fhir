@@ -1,8 +1,14 @@
 <template>
-	<div>{{ formatDate(value || undefined) }}</div>
+	<NuxtTime
+		:datetime="value"
+		year="numeric"
+		month="numeric"
+		day="numeric"
+		hour="2-digit"
+		minute="2-digit"
+		second="2-digit" />
 </template>
 <script setup lang="ts">
-	import { formatDate } from '../../../../utils'
 	// This component is used to display a date value in a human-readable format.
 	// A FHIR date is a string in the format YYYY-MM-DD, and this component will format it to a local, more human-readable format.
 	defineProps<{

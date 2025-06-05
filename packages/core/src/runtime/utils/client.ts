@@ -280,7 +280,7 @@ export class FhirClient {
 	 */
 	readStructureDefinition(idOrUrl: string, operation?: '$snapshot' | '$meta', options?: FetchOptions<any>): AsyncData<Bundle<ExtractResource<'StructureDefinition'>>, any> | Promise<Bundle<ExtractResource<'StructureDefinition'>>> {
 		//check if the idOrUrl is a URL
-		const isUrl = idOrUrl.includes('http');
+		const isUrl = idOrUrl?.includes("http") || false;
 
 		const fhirUrl = isUrl ? this.fhirUrl('StructureDefinition', operation || '') : this.fhirUrl('StructureDefinition', idOrUrl, operation || '');
 		// if isUrl add the idOrUrl to the query

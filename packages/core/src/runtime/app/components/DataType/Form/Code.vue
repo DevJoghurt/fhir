@@ -4,7 +4,7 @@
 		valueKey="value"
 		:items="valueSets"
 		:multiple="element?.isArray"
-		:loading="status === 'pending'"
+		:loading="loading"
 		@change="update"
 		class="w-full"  />
 </template>
@@ -33,41 +33,39 @@
 			: props.modelValue?.value || ''
 		)
 
-	const { valueSetExpand } = useFhirClient()
+	const { valueSetExpand, loading } = useFhirClient()
 
 	// TODO: Cache data
-	const { data: valueSets, status } = await valueSetExpand({
+	const valueSetsResponse = await valueSetExpand({
 		url: props?.element.binding?.valueSet
-	}, {
-		key: props?.element.binding?.valueSet || '',
-		transform: (data: ValueSet) => {
-			// ValueSet expansions can have the data in compose.include or expansion.contains
-			// https://www.hl7.org/fhir/valueset-expansion.html#ValueSet.expansion
-
-			// first check if the data is in compose.include
-			if (data?.compose?.include && data?.compose?.include.length > 0) {
-				// check if there are concepts in the first include
-				if(data?.compose?.include[0]?.concept) {
-					// if there are data, return the concepts
-					return data?.compose?.include?.flatMap(include => include?.concept)?.map(valueSet => ({
-						label: valueSet?.display || valueSet?.code || '',
-						value: valueSet?.code || '',
-						system: valueSet?.system || ''
-					})) || []
-				}
-			}
-
-			// if not, check if the data is in expansion.contains
-			return data?.expansion?.contains?.map(valueSet => ({
-				label: valueSet?.display || valueSet?.code || '',
-				value: valueSet?.code || '',
-				system: valueSet?.system || ''
-			})) || []
-		},
-		// currently the v-model value is not set to the valueSet code, to the crrent value we set lazy to false
-		// TODO: check how to fix that
-		lazy: false
 	})
+	// ValueSet expansions can have the data in compose.include or expansion.contains
+	// https://www.hl7.org/fhir/valueset-expansion.html#ValueSet.expansion
+	const transform = (data: ValueSet) => {
+		// first check if the data is in compose.include
+		if (data?.compose?.include && data?.compose?.include.length > 0) {
+			// check if there are concepts in the first include
+			if(data?.compose?.include[0]?.concept) {
+				// if there are data, return the concepts
+				return data?.compose?.include?.flatMap(include => include?.concept)?.map(valueSet => ({
+					label: valueSet?.display || valueSet?.code || '',
+					value: valueSet?.code || '',
+					system: valueSet?.system || ''
+				})) || []
+			}
+		}
+
+		// if not, check if the data is in expansion.contains
+		return data?.expansion?.contains?.map(valueSet => ({
+			label: valueSet?.display || valueSet?.code || '',
+			value: valueSet?.code || '',
+			system: valueSet?.system || ''
+		})) || []
+	}
+
+	const valueSets = transform(valueSetsResponse as ValueSet)
+
+	console.log('ValueSets:', valueSets)
 
 	const update = () => {
 		let result = transformedValue.value as CodeType

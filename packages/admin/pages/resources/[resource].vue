@@ -60,5 +60,5 @@
 	// read CapabilityStatement and get profiles
 	const { loadProfiles } = await useFhirCapatibilityStatement()
 
-	const profiles = await loadProfiles(resourceType.value)
+	const profiles = await loadProfiles(resourceType?.value || 'Patient')
 </script>

@@ -14,9 +14,17 @@
 		</div>
 		<div v-else class="flex flex-col gap-2 text-xs">
 			<div
-				class="flex"
+				class="flex justify-between"
 				v-for="entry in history?.entry" :key="entry.resource?.id">
-				<FhirDateTime class="flex-1" :datetime="entry.resource?.meta?.lastUpdated" />
+				<NuxtTime
+					class="flex-1 text-xs font-bold"
+					:datetime="entry.resource?.meta?.lastUpdated"
+					year="numeric"
+					month="2-digit"
+					day="numeric"
+					hour="2-digit"
+					minute="2-digit"
+					second="2-digit" />
 				<NuxtLink :to="`/resources/${entry.resource?.resourceType}/${entry?.resource?.id}?${stringifyQuery({...route.query, history: entry.resource?.meta?.versionId || ''})}`">#Version {{ entry.resource?.meta?.versionId }}</NuxtLink>
 			</div>
 		</div>
@@ -32,9 +40,9 @@
 		resourceType?: ResourceType
 	}>()
 
-	const { readHistory } = useFhirClient()
+	const { readHistory, error } = useFhirClient()
 
-	const { data: history, error } = await readHistory(props?.resourceType, props?.id || '', {
+	const history = await readHistory(props?.resourceType, props?.id || '', {
 		query: {
 			_count: 20,
 			_elements: 'id'

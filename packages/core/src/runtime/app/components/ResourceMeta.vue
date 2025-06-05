@@ -12,7 +12,14 @@
 		<div v-else class="flex flex-col gap-2 text-xs">
 			<div class="flex">
 				<p class="flex-1 text-sm font-bold">Last Updated:</p>
-				<FhirDateTime :datetime="resource.meta?.lastUpdated" />
+				<NuxtTime
+					:datetime="resource?.meta?.lastUpdated"
+					year="numeric"
+					month="numeric"
+					day="numeric"
+					hour="2-digit"
+					minute="2-digit"
+					second="2-digit" />
 			</div>
 			<div class="flex">
 				<p class="flex-1 text-sm font-bold">Version ID:</p>

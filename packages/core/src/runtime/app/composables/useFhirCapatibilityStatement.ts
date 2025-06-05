@@ -41,11 +41,11 @@ export async function useFhirCapatibilityStatement() {
 		// load the capatibility statement
 		const { readCapabilityStatement } = useFhirClient()
 
-		const { data: capabilityStatement } = await readCapabilityStatement()
-		if (!capabilityStatement?.value) {
+		const capabilityStatement = await readCapabilityStatement()
+		if (!capabilityStatement) {
 			return false;
 		}
-		const rest = capabilityStatement.value?.rest || []
+		const rest = capabilityStatement.rest || []
 		const restResources = rest[0]?.resource || []
 		for (const resource of restResources) {
 			resources.value[resource.type as ResourceType] = {
@@ -102,15 +102,13 @@ export async function useFhirCapatibilityStatement() {
 		// load profiles from server
 		const { search } = useFhirClient()
 
-		const {
-			data
-		} = await search('StructureDefinition', {
+		const data = await search('StructureDefinition', {
 			url: rs?.profile?.supported.join(','),
 			_count: 100,
 			_elements: 'name,url,description,status,publisher'
 		})
 
-		const profiles = data.value?.entry?.map((entry) => ({
+		const profiles = data?.entry?.map((entry) => ({
 			name: entry?.resource?.name || '',
 			description: entry?.resource?.description || '',
 			publisher: entry?.resource?.publisher || '',

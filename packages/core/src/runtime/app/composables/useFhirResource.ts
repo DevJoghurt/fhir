@@ -116,18 +116,23 @@ interface ElementDefinitionTree extends ElementDefinition {
 export function useFhirResource() {
 	const resources: Ref<Record<string, InternalTypeSchema>> = useState('fhir:sd:resources', () => Object.create(null));
 
-	const loadResourceDefinition = async (resourceUrl: string, forceReload: boolean = false): Promise<InternalTypeSchema | null> => {
+	const loadResourceDefinition = async (resourceUrl: string | null, forceReload: boolean = false): Promise<InternalTypeSchema | null> => {
+		if (!resourceUrl) {
+			return null;
+		}
 
 		// return the resource if it is already loaded
-		if (!forceReload || resources.value[resourceUrl]) {
+		if (!forceReload && resources.value[resourceUrl]) {
 			return resources.value[resourceUrl];
 		}
 
-		const { readStructureDefinition } = useFhirClient()
+		const { search } = useFhirClient()
 
-		const { data } = await readStructureDefinition(resourceUrl)
+		const data = await search('StructureDefinition',{
+			url: resourceUrl
+		})
 
-		const sd = data.value?.entry && data.value.entry?.length > 0 ? data.value.entry[0].resource : null
+		const sd = data?.entry && data?.entry?.length > 0 ? data?.entry[0].resource : null
 
 		if (!sd) {
 			return null;
