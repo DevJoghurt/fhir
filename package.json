@@ -17,12 +17,12 @@
 		}
 	},
 	"scripts": {
-		"prepare": "pnpm dev:prepare && nuxi prepare playground/demo && nuxi prepare playground/profiling",
+		"prepare": "",
 		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:core": "pnpm --filter ./packages/core prepack",
 		"build:stub": "pnpm dev:prepare",
 		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/**/node_modules\" \"packages/**/.nuxt\" \"playground/**/.nuxt\" \"packages/**/.output\" \"playground/**/.output\" \"node_modules\"",
-		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub",
+		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub && nuxi prepare playground/demo",
 		"lint": "eslint . --cache",
 		"lint:fix": "eslint . --cache --fix",
 		"profiling:dev": "nuxi dev playground/profiling",
@@ -32,7 +32,8 @@
 		"demo:generate": "nuxi generate playground/demo",
 		"demo:preview": "nuxi preview playground/demo",
 		"typecheck": "tsc --noEmit",
-		"hapi": "docker-compose -f ./docker/docker-compose.hapi.yml up --force-recreate --build"
+		"docker:build": "docker compose -f docker-compose.yml up --build",
+		"docker:watch": "docker compose -f docker-compose.yml up --watch"
 	},
 	"resolutions": {
 		"nhealth-cli": "workspace:*",

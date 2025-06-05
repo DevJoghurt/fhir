@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=hapi
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./docker/postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf
+      - ./docker/postgres/:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
+    command: postgres -c config_file=/usr/local/etc/postgres/postgres.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d hapi -U hapi"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    expose:
+      - '5432'
+  hapi:
+    container_name: hapi
+    image: hapiproject/hapi:v7.6.0
+    ports:
+      - "8080:8080"
+    configs:
+      - source: hapi
+        target: /app/config/application.yaml
+    depends_on:
+      postgres:
+        condition: service_healthy
+  demoapp:
+    container_name: demoapp
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./docker/dev.Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app
+          ignore:
+            - ./.data
+            - ./.git
+            - ./.vscode
+            - ./docker
+            - ./node_modules
+    ports:
+      - "3000:3000"
+      - "24678:24678"
+    environment:
+      - NODE_ENV=development
+      - APP_FHIR_SERVER_URL=http://hapi:8080
+      - APP_FHIR_BROWSER_URL=http://localhost:8080
+    volumes:
+      - ./.data/app/data:/app/.data
+      - ./.data/app/packages:/tmp/nhealth_fhir_packages
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+configs:
+  hapi:
+    file: ./docker/hapi/application.yaml
+volumes:
+  pgdata:

@@ -1,0 +1,14 @@
+node_modules
+docker
+tmp
+.pnpm
+.data
+.vscode
+**/node_modules
+**/.pnpm
+**/dist
+**/.output
+**/.nuxt
+.dockerignore
+.git
+.gitignore
