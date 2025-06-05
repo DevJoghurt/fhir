@@ -17,8 +17,7 @@
 		}
 	},
 	"scripts": {
-		"prepare": "",
-		"build": "pnpm prepare && pnpm --filter \"./packages/**\" prepack",
+		"build": "pnpm --filter \"./packages/**\" prepack",
 		"build:core": "pnpm --filter ./packages/core prepack",
 		"build:stub": "pnpm dev:prepare",
 		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/**/node_modules\" \"packages/**/.nuxt\" \"playground/**/.nuxt\" \"packages/**/.output\" \"playground/**/.output\" \"node_modules\"",
