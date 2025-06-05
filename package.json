@@ -17,11 +17,11 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm --filter \"./packages/**\" prepack",
+		"build": "pnpm dev:prepare && pnpm --filter \"./packages/**\" prepack",
 		"build:core": "pnpm --filter ./packages/core prepack",
 		"build:stub": "pnpm dev:prepare",
 		"cleanup": "rimraf --glob \"packages/**/node_modules\" \"playground/**/node_modules\" \"packages/**/.nuxt\" \"playground/**/.nuxt\" \"packages/**/.output\" \"playground/**/.output\" \"node_modules\"",
-		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub && nuxi prepare playground/demo",
+		"dev:prepare": "pnpm --filter \"./packages/**\" prepack --stub && nuxi prepare playground/demo && nuxi prepare playground/profiling",
 		"lint": "eslint . --cache",
 		"lint:fix": "eslint . --cache --fix",
 		"profiling:dev": "nuxi dev playground/profiling",
