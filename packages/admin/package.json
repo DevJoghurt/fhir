@@ -1,6 +1,6 @@
 {
 	"name": "@nhealth/admin",
-	"version": "0.0.41",
+	"version": "0.0.42",
 	"description": "FHIR admin layer for nHealth",
 	"repository": {
 		"type": "git",
@@ -20,7 +20,7 @@
 		"@nhealth/fhir": "workspace:*",
 		"@nuxtjs/i18n": "9.5.4",
 		"@nuxt/image": "1.10.0",
-		"zod": "*",
+		"zod": "3.25.7",
 		"@nuxt/kit": "4.0.1",
 		"globby": "14.1.0",
 		"pathe": "2.0.3",
@@ -34,6 +34,6 @@
 		"@types/semver": "7.7.0"
 	},
 	"peerDependencies": {
-		"@nuxt/ui": "3.1.2"
+		"@nuxt/ui": "3.3.0"
 	}
 }
