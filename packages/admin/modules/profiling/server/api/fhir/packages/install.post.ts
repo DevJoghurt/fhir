@@ -4,7 +4,7 @@ import {
 	usePackageStore,
 	readValidatedBody,
 	setResponseStatus } from '#imports';
-import z from 'zod';
+import { z } from 'zod';
 
 const bodySchema = z.object({
 	package: z.string(),

@@ -37,7 +37,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import z from 'zod'
+	import { z } from 'zod'
 	import type { FormSubmitEvent } from '#ui/types'
 	import { useI18n, definePageMeta } from '#imports'
     import type { Ref } from '#imports'

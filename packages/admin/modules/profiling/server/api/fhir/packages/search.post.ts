@@ -1,5 +1,5 @@
 import { usePackageLoader, defineEventHandler } from '#imports'
-import z from 'zod'
+import { z } from 'zod'
 
 const SearchSchema = z.object({
     search: z.string(),

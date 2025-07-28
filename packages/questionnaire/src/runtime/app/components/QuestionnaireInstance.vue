@@ -41,7 +41,7 @@
 	</section>
 </template>
 <script lang="ts" setup>
-	import z from 'zod'
+	import { z } from 'zod'
 	import { reactive, useFhirClient } from '#imports'
 	import type { FormSubmitEvent } from '@nuxt/ui'
 

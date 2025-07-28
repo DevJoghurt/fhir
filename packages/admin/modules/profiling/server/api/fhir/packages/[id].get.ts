@@ -1,5 +1,5 @@
 import { defineEventHandler, usePackageStore, getValidatedQuery } from '#imports';
-import z from 'zod';
+import { z } from 'zod';
 
 const ColumnsSchema = z.enum(['identifier', 'status', 'meta', 'files'])
 

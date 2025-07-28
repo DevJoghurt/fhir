@@ -106,7 +106,7 @@
 	import { ref } from '#imports'
 	import type { FormSubmitEvent } from '@nuxt/ui'
 	import type { PackageStatus, PackageLoaderResponse, PackageSearchResponse } from '#fhirtypes/profiling'
-	import z from 'zod'
+	import { z } from 'zod'
 
 	const { data: packages, refresh } = await useFetch('/api/fhir/packages', {
 		query: {

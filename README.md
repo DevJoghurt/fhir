@@ -25,3 +25,7 @@ Each package and project is designed to work together, providing a comprehensive
 ## TODO
 - Test with Open Servers: https://confluence.hl7.org/spaces/FHIR/pages/35718859/Public+Test+Servers
 - Checkout Synthea: https://synthetichealth.github.io/synthea/
+
+## FHIR Server Test
+- https://atollee.com/de
+- https://www.health-samurai.io/

@@ -1,6 +1,6 @@
 import type { Package } from '#fhirtypes/profiling';
 import { useDatabase } from '#imports';
-import z, { set } from 'zod';
+import { z } from 'zod';
 
 const PROFILING_DB_VERSION = 1; // version of the database schema
 const PROFILING_DB_NAME = 'profiling'; // name of the database file
