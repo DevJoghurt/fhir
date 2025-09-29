@@ -1,5 +1,3 @@
-import { browser } from "node:process";
-
 export default defineNuxtConfig({
   extends: [
     "@nhealth/app",

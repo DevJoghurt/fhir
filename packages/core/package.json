@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"@nuxt/kit": "*",
+		"@smile-cdr/fhirts": "^2.3.0",
 		"@medplum/fhirtypes": "4.3.6",
 		"hookable": "^5.5.3",
 		"defu": "^6.1.4",
